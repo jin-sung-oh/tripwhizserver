@@ -18,7 +18,7 @@ public class AnswersEntity extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "qno",nullable = false)
-    private QuestionsEntity questionsEntity;
+    private QuestionsEntity questions;
 
     @Lob
     private String answers;
@@ -30,8 +30,7 @@ public class AnswersEntity extends BaseEntity {
     @Builder.Default
     private int viewCount = 0;
 
-
-
-
+    @Column(nullable = false)
+    private boolean isPublic = true;
 
 }
