@@ -13,8 +13,11 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @Log4j2
@@ -73,6 +76,38 @@ public class QnARepositoryTests {
                 .build();
         answersRepository.save(answers);
         log.info("Saved Answers: " + answers);
+    }
+
+    @Test
+    public void testFindAnswersByQuestion() {
+        // 1번 질문에 대한 답변 조회
+        QuestionsEntity question = questionRepository.findById(1L).orElseThrow();
+        List<AnswersEntity> answers = answersRepository.findByQuestions(question);
+
+        assertThat(answers).isNotEmpty();
+        log.info("Found Answers for Question 1: " + answers);
+    }
+
+    @Test
+    @Transactional
+    @Commit
+    public void testUpdateQuestion() {
+        //1번질문 제목과 상태 변경
+        QuestionsEntity question = questionRepository.findById(1L).orElse(null);
+
+        question.setTitle("업데이트된 질문 제목");
+
+        question.changeStatus(QnAStatus.답변완료);
+
+        questionRepository.save(question);
+
+        QuestionsEntity updatedQuestion = questionRepository.findById(1L).orElse(null);
+
+        assertThat(updatedQuestion.getTitle()).isEqualTo("업데이트된 질문 제목");
+
+        assertThat(updatedQuestion.getStatus()).isEqualTo(QnAStatus.답변완료);
+
+        log.info("Updated Question: " + updatedQuestion);
     }
 
 
