@@ -1,12 +1,46 @@
 spring:
   application:
     name: demo6
-
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
     url: jdbc:mariadb://localhost:13306/team4db
     username: team4dbuser
     password: team4dbuser
+
+    hikari:
+      minimum-idle: 2
+      maximum-pool-size: 5
+      connection-timeout: 5000
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+      dialect: org.hibernate.dialect.MariaDB103Dialect
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 20MB
+      location: upload
+      enabled: true
+
+org:
+  example:
+    accessTime: 60
+    refreshTime: 10080
+    alwaysNew: true
+    upload:
+      path: upload
+
+logging:
+  level:
+    org.springframework.security.web: TRACE
+
+
 
 
 
