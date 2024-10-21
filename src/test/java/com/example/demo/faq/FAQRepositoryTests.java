@@ -1,6 +1,7 @@
-package com.example.demo.faq.repository;
+package com.example.demo.faq;
 
 import com.example.demo.faq.domain.FAQEntity;
+import com.example.demo.faq.repository.FAQRepository;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
