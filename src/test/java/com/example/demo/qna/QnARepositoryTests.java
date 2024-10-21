@@ -1,5 +1,6 @@
 package com.example.demo.qna;
 
+import com.example.demo.qna.domain.AnswersEntity;
 import com.example.demo.qna.domain.QnAStatus;
 import com.example.demo.qna.domain.QuestionsEntity;
 import com.example.demo.qna.repository.AnswersRepository;
@@ -12,6 +13,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 @DataJpaTest
@@ -43,5 +45,38 @@ public class QnARepositoryTests {
             log.info("Saved Question: " + question);
         });
     }
-    
+
+    @Test
+    public void testRead(){
+        //상세보기
+        Long qno = 60L;
+
+        Optional<QuestionsEntity> result = questionRepository.findById(qno);
+
+        QuestionsEntity question = result.orElse(null);
+
+        log.info(question);
+    }
+
+    @Test
+    @Transactional
+    @Commit
+    public void testCreateAnswer(){
+        //1번 질문에 대한 답변 추가
+        QuestionsEntity questions = questionRepository.findById(1L).orElse(null);
+
+        AnswersEntity answers = AnswersEntity.builder()
+                .answers("이건 답이다")
+                .questions(questions)
+                .writer("카리나")
+                .isPublic(true)
+                .build();
+        answersRepository.save(answers);
+        log.info("Saved Answers: " + answers);
+    }
+
+
+
+
+
 }
