@@ -7,6 +7,6 @@ import java.util.Optional;
 
 public interface FAQRepository extends JpaRepository<FAQEntity, Long> {
 
-    Optional<FAQEntity> findAll(Long fno);
+
 
 }

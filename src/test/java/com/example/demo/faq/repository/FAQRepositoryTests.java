@@ -1,5 +1,6 @@
 package com.example.demo.faq.repository;
 
+import com.example.demo.faq.domain.FAQEntity;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +16,16 @@ public class FAQRepositoryTests {
     private FAQRepository faqRepository;
 
     @Test
-    public void testList() {
+    public void testInsert() {
 
-        faqRepository.findAll();
+        FAQEntity FAQ = FAQEntity.builder()
+                .fquestion("Test question")
+                .fanswer("Test answer")
+                .build();
+
+        faqRepository.save(FAQ);
 
     }
+
 
 }
