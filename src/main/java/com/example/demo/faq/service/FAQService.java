@@ -16,10 +16,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional
 @Log4j2
 @RequiredArgsConstructor
 public class FAQService {
@@ -42,6 +42,7 @@ public class FAQService {
             FAQListDTO dto = FAQListDTO.builder()
                     .fno(FAQEntity.getFno())
                     .question(FAQEntity.getQuestion())
+                    .answer(FAQEntity.getAnswer())
                     .viewCnt(FAQEntity.getViewCnt())
                     .delFlag(false)
                     .build();
@@ -59,8 +60,5 @@ public class FAQService {
                 .build();
 
     }
-
-    // details
-
 
 }

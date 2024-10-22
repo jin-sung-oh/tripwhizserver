@@ -15,6 +15,8 @@ public class FAQListDTO {
 
     private String question;
 
+    private String answer;
+
     private int viewCnt;
 
     private boolean delFlag;
