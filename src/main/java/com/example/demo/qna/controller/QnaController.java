@@ -2,9 +2,9 @@ package com.example.demo.qna.controller;
 
 import com.example.demo.common.dto.PageRequestDTO;
 import com.example.demo.common.dto.PageResponseDTO;
+import com.example.demo.qna.domain.QnAStatus;
 import com.example.demo.qna.dto.QuestionDTO;
 import com.example.demo.qna.service.QnAService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
@@ -13,14 +13,15 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
-@RequestMapping("/api/qna") // QnA 관련 API 요청 경로
+@RequestMapping("/api/qna")
 @Log4j2
-@RequiredArgsConstructor // final 필드를 생성자 주입 방식으로 처리하기 위한 어노테이션
+@RequiredArgsConstructor
 public class QnaController {
 
-    private final QnAService qnaService; // QnA 서비스 클래스 주입
+    private final QnAService qnaService;
 
     // QnA 목록을 페이징 처리하여 반환하는 메서드 (Read - List)
     @GetMapping("/list")
@@ -37,17 +38,23 @@ public class QnaController {
         return ResponseEntity.ok(questionDTO);
     }
 
+    // 새로운 QnA 항목을 추가하는 메서드 (Create)
     @PostMapping("/add")
-    public ResponseEntity<Long> createQuestion(@RequestPart("question") String questionData,
-                                               @RequestPart(value = "file", required = false) MultipartFile file) {
-        log.info("Creating new QnA: {}", questionData);
+    public ResponseEntity<Long> createQuestion(@RequestPart("title") String title,
+                                               @RequestPart("status") String status,
+                                               @RequestPart("writer") String writer,
+                                               @RequestPart("qcontent") String qcontent,
+                                               @RequestPart(value = "files", required = false) List<MultipartFile> files) {
+        log.info("Creating new QnA with title: {}, status: {}, writer: {}, qcontent: {}", title, status, writer, qcontent);
 
         try {
-            // JSON을 DTO로 변환
-            ObjectMapper objectMapper = new ObjectMapper();
-            QuestionDTO questionDTO = objectMapper.readValue(questionData, QuestionDTO.class);
+            QuestionDTO questionDTO = new QuestionDTO();
+            questionDTO.setTitle(title);
+            questionDTO.setStatus(QnAStatus.valueOf(status)); // Enum으로 처리
+            questionDTO.setWriter(writer);
+            questionDTO.setQcontent(qcontent);
 
-            Long qno = qnaService.createQuestionWithFile(questionDTO, file);
+            Long qno = qnaService.createQuestionWithFiles(questionDTO, files);
             return ResponseEntity.ok(qno);
         } catch (IOException e) {
             log.error("File upload failed", e);
@@ -55,13 +62,29 @@ public class QnaController {
         }
     }
 
-
     // QnA 항목을 수정하는 메서드 (Update)
     @PutMapping("/update/{qno}")
-    public ResponseEntity<String> updateQuestion(@PathVariable("qno") Long qno, @RequestBody QuestionDTO questionDTO) {
+    public ResponseEntity<String> updateQuestion(@PathVariable("qno") Long qno,
+                                                 @RequestPart("title") String title,
+                                                 @RequestPart("status") String status,
+                                                 @RequestPart("writer") String writer,
+                                                 @RequestPart("qcontent") String qcontent,
+                                                 @RequestPart(value = "files", required = false) List<MultipartFile> files) {
         log.info("Updating QnA with ID: {}", qno);
-        qnaService.updateQuestion(qno, questionDTO);
-        return ResponseEntity.ok("Question updated successfully.");
+
+        try {
+            QuestionDTO questionDTO = new QuestionDTO();
+            questionDTO.setTitle(title);
+            questionDTO.setStatus(QnAStatus.valueOf(status)); // Enum으로 처리
+            questionDTO.setWriter(writer);
+            questionDTO.setQcontent(qcontent);
+
+            qnaService.updateQuestionWithFiles(qno, questionDTO, files);
+            return ResponseEntity.ok("Question updated successfully.");
+        } catch (IOException e) {
+            log.error("File upload failed", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     // QnA 항목을 삭제하는 메서드 (Delete)
