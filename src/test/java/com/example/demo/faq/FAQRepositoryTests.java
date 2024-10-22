@@ -24,7 +24,7 @@ public class FAQRepositoryTests {
     public void testInsert() {
 
         FAQEntity FAQ = FAQEntity.builder()
-                .fquestion("Test question")
+                .fquestion("Test qcontent")
                 .fanswer("Test answer")
                 .build();
 
