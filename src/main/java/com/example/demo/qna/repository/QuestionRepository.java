@@ -8,5 +8,6 @@ import java.util.List;
 
 public interface QuestionRepository extends JpaRepository<QuestionsEntity,Long> {
 
+    //공개된 질문들만 보여줌
     List<QuestionsEntity> findByIsPublicTrue();
 }
