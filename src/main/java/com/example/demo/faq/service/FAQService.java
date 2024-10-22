@@ -1,7 +1,9 @@
 package com.example.demo.faq.service;
 
+import com.example.demo.common.domain.CategoryEntity;
 import com.example.demo.common.dto.PageRequestDTO;
 import com.example.demo.common.dto.PageResponseDTO;
+import com.example.demo.common.repository.CategoryRepository;
 import com.example.demo.faq.domain.FAQEntity;
 import com.example.demo.faq.dto.FAQListDTO;
 import com.example.demo.faq.repository.FAQRepository;
@@ -26,6 +28,9 @@ public class FAQService {
 
     @Autowired
     private final FAQRepository faqRepository;
+
+    @Autowired
+    private final CategoryRepository categoryRepository;
 
     // list
     @Transactional
@@ -58,6 +63,19 @@ public class FAQService {
                 .pageRequestDTO(pageRequestDTO)
                 .totalCount(total)
                 .build();
+
+    }
+
+    // delete
+    @Transactional
+    public void softDeleteFAQ(Long fno) {
+
+        int updatedRows = faqRepository.softDeleteByFno(fno);
+
+        // fno가 0일때 삭제 안되게 처리
+        if (updatedRows == 0) {
+            throw new IllegalArgumentException("FAQ not found with fno: " + fno);
+        }
 
     }
 

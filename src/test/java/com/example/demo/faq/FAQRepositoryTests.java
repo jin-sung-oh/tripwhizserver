@@ -5,11 +5,13 @@ import com.example.demo.common.domain.CategoryEntity;
 import com.example.demo.common.repository.CategoryRepository;
 import com.example.demo.faq.domain.FAQEntity;
 import com.example.demo.faq.repository.FAQRepository;
+import com.example.demo.faq.service.FAQService;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -20,7 +22,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 @Log4j2
-@DataJpaTest
+@SpringBootTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class FAQRepositoryTests {
 
@@ -28,6 +30,9 @@ public class FAQRepositoryTests {
     private FAQRepository faqRepository;
     @Autowired
     private CategoryRepository categoryRepository;
+
+    @Autowired
+    private FAQService faqService;
 
     @Test
     @Commit
@@ -43,6 +48,7 @@ public class FAQRepositoryTests {
 
     }
 
+    // 더미 데이터 생성
     @Test
     @Transactional
     @Commit
@@ -68,12 +74,24 @@ public class FAQRepositoryTests {
         });
     }
 
+    // 리스트 조회
     @Test
     public void testList() {
 
         Pageable pageable = PageRequest.of(0, 10, Sort.by("fno").descending());
 
         faqRepository.findAll(pageable);
+//        faqService.list(pageable);
+
+    }
+
+    // 삭제
+    @Test
+    public void testSoftDelete() {
+
+        Long fno = 100L;
+
+        faqService.softDeleteFAQ(fno);
 
     }
 
