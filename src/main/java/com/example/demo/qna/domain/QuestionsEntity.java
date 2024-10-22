@@ -29,10 +29,8 @@ public class QuestionsEntity {
     private QnAStatus status = QnAStatus.답변대기;
 
     @Column(nullable = true)
-    private String img1;
+    private String images;
 
-    @Column(nullable = true)
-    private String img2;
 
     private boolean delFlag;
 
@@ -44,12 +42,10 @@ public class QuestionsEntity {
     private int viewCount = 0;
 
 
-    public void changeImg1(String img1) {
-        this.img1 = img1;
+    public void changeImages(String newImages) {
+        this.images = newImages;
     }
-    public void changeImg2(String img2) {
-        this.img2 = img2;
-    }
+
 
     public void changeStatus(QnAStatus newStatus) {
         this.status = newStatus;
