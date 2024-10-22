@@ -4,6 +4,9 @@ package com.example.demo.qna.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @Setter
@@ -18,7 +21,7 @@ public class QuestionsEntity {
     private Long qno;
 
     @Lob
-    private String question;
+    private String qcontent;
 
     @Column(nullable = false, length = 100)
     private String title;
@@ -28,11 +31,11 @@ public class QuestionsEntity {
     @Builder.Default
     private QnAStatus status = QnAStatus.답변대기;
 
-    @Column(nullable = true)
-    private String img1;
+    @ElementCollection // 컬렉션을 매핑하기 위해 사용
+    @CollectionTable(name = "question_images", joinColumns = @JoinColumn(name = "question_qno"))
+    @Column(name = "images", nullable = true)
+    private List<String> images = new ArrayList<>();
 
-    @Column(nullable = true)
-    private String img2;
 
     private boolean delFlag;
 
@@ -44,12 +47,10 @@ public class QuestionsEntity {
     private int viewCount = 0;
 
 
-    public void changeImg1(String img1) {
-        this.img1 = img1;
+    public void changeImages(List<String> newImages) {
+        this.images = newImages;
     }
-    public void changeImg2(String img2) {
-        this.img2 = img2;
-    }
+
 
     public void changeStatus(QnAStatus newStatus) {
         this.status = newStatus;
