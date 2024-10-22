@@ -1,8 +1,8 @@
 package com.example.demo.faq.service;
 
-import com.example.demo.common.domain.CategoryEntity;
 import com.example.demo.common.dto.PageRequestDTO;
 import com.example.demo.common.dto.PageResponseDTO;
+import com.example.demo.common.repository.CategoryRepository;
 import com.example.demo.faq.domain.FAQEntity;
 import com.example.demo.faq.dto.FAQListDTO;
 import com.example.demo.faq.dto.FAQModifyDTO;
@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,6 +29,9 @@ public class FAQService {
 
     @Autowired
     private final FAQRepository faqRepository;
+
+    @Autowired
+    private final CategoryRepository categoryRepository;
 
     // list
     @Transactional
@@ -44,6 +48,7 @@ public class FAQService {
             FAQListDTO dto = FAQListDTO.builder()
                     .fno(FAQEntity.getFno())
                     .question(FAQEntity.getQuestion())
+                    .answer(FAQEntity.getAnswer())
                     .viewCnt(FAQEntity.getViewCnt())
                     .delFlag(false)
                     .build();
@@ -59,6 +64,16 @@ public class FAQService {
                 .pageRequestDTO(pageRequestDTO)
                 .totalCount(total)
                 .build();
+
+    }
+
+    // add
+    @Transactional
+    public FAQEntity addFaq(FAQEntity faq) {
+
+        // FAQ 저장
+        FAQEntity savedFaq = faqRepository.save(faq);
+        return savedFaq; // 저장된 FAQ 반환
 
     }
 
@@ -78,6 +93,20 @@ public class FAQService {
                 faqEntity.getFno(), faqEntity.getCategory(), faqEntity.getQuestion(), faqEntity.getAnswer());
 
         return true;
+
+    }
+
+    // delete
+    @Transactional
+    public void softDeleteFAQ(Long fno) {
+
+        int updatedRows = faqRepository.softDeleteByFno(fno);
+
+        // fno가 0일때 삭제 안되게 처리
+        if (updatedRows == 0) {
+            throw new IllegalArgumentException("FAQ not found with fno: " + fno);
+        }
+
     }
 
 }

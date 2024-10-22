@@ -20,9 +20,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 @Log4j2
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -30,8 +27,12 @@ public class FAQRepositoryTests {
 
     @Autowired
     private FAQRepository faqRepository;
+
     @Autowired
     private CategoryRepository categoryRepository;
+
+    @Autowired
+    private FAQService faqService;
 
     @Test
     @Commit
@@ -47,6 +48,7 @@ public class FAQRepositoryTests {
 
     }
 
+    // 더미 데이터 생성
     @Test
     @Transactional
     @Commit
@@ -72,12 +74,43 @@ public class FAQRepositoryTests {
         });
     }
 
+    // 리스트 조회
     @Test
     public void testList() {
 
         Pageable pageable = PageRequest.of(0, 10, Sort.by("fno").descending());
 
         faqRepository.findAll(pageable);
+//        faqService.list(pageable);
+
+    }
+
+    // 추가
+    @Test
+    public void testAddFaq() {
+
+        Optional<CategoryEntity> categoryOpt = categoryRepository.findById(1);
+        CategoryEntity category = categoryOpt.get();
+
+        FAQEntity faq = FAQEntity.builder()
+                .question("test")
+                .answer("test")
+                .category(category)
+                .build();
+
+        FAQEntity savedFaq = faqService.addFaq(faq);
+
+        log.info("Saved FAQ: " + savedFaq);
+
+    }
+
+    // 삭제
+    @Test
+    public void testSoftDelete() {
+
+        Long fno = 100L;
+
+        faqService.softDeleteFAQ(fno);
 
     }
 
@@ -108,10 +141,6 @@ public class FAQRepositoryTests {
         assertEquals(updatedAnswer, modifiedFAQ.get().getAnswer(), "답변이 수정되지 않았습니다.");
     }
 }
-
-
-
-
 
 
 

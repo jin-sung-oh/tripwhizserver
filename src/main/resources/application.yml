@@ -28,7 +28,7 @@ spring:
       location: upload
       enabled: true
 
-org:
+com:
   example:
     accessTime: 60
     refreshTime: 10080
