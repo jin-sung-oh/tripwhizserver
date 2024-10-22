@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.annotation.Commit;
+import org.springframework.transaction.annotation.Transactional;
 
 @Log4j2
 @DataJpaTest
@@ -17,6 +19,8 @@ public class FAQRepositoryTests {
     private FAQRepository faqRepository;
 
     @Test
+    @Transactional
+    @Commit
     public void testInsert() {
 
         FAQEntity FAQ = FAQEntity.builder()
