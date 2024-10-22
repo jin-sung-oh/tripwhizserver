@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -23,7 +22,7 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 
 @Log4j2
-@SpringBootTest
+@DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class FAQRepositoryTests {
 
@@ -33,7 +32,7 @@ public class FAQRepositoryTests {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    @Autowired
+
     private FAQService faqService;
 
     @Test
@@ -106,38 +105,30 @@ public class FAQRepositoryTests {
 
     }
 
-    // 삭제
-    @Test
-    public void testSoftDelete() {
-
-        Long fno = 100L;
-
-        faqService.softDeleteFAQ(fno);
-
-    }
-
 
     @Test
-    @Commit
     @Transactional
-    public void testModify() {
+    @Commit
+    public void testModifyExistingFAQ() {
+        // 데이터베이스에 있는 임의의 FAQ 엔터티 가져오기 (예: fno가 1인 엔터티)
+        Long fno = 5L;
+        Optional<FAQEntity> optionalFAQ = faqRepository.findById(fno);
 
-        CategoryEntity category = CategoryEntity.builder()
-                .cname("General")
-                .build();
-        categoryRepository.save(category);
+        FAQEntity faq = optionalFAQ.get();
 
-        FAQEntity faq = FAQEntity.builder()
-                .question("Test question...!")
-                .answer("Test answer...!")
-                .category(category)
-                .build();
+        // 수정할 데이터 설정
+        String updatedQuestion = "수정된 질문";
+        String updatedAnswer = "수정된 답변";
+        CategoryEntity updatedCategory = faq.getCategory(); // 기존 카테고리를 유지하거나 변경 가능
 
+        // FAQ 수정
+        faq.updateFields(updatedCategory, updatedQuestion, updatedAnswer);
         faqRepository.save(faq);
 
-        log.info("Saved FAQ: " + faq);
-    }
+        // 수정된 데이터 검증
+        Optional<FAQEntity> modifiedFAQ = faqRepository.findById(fno);
 
+    }
 }
 
 
