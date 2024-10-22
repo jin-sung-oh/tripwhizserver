@@ -1,4 +1,4 @@
-package com.example.demo.faq.domain;
+package com.example.demo.common.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -14,8 +14,8 @@ public class CategoryEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long cqno;
+    private Long cno;
 
-    private String cqname;
+    private String cname;
 
 }
