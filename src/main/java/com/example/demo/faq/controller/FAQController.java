@@ -38,12 +38,6 @@ public class FAQController {
 
     }
 
-    // 삭제
-    @DeleteMapping("/{fno}")
-    public ResponseEntity<Void> softDeleteFAQ(@PathVariable Long fno) {
-        faqService.softDeleteFAQ(fno);
-        return ResponseEntity.ok().build();
-    }
 
 
 }

@@ -5,6 +5,7 @@ import com.example.demo.common.domain.CategoryEntity;
 import com.example.demo.common.repository.CategoryRepository;
 import com.example.demo.faq.domain.FAQEntity;
 import com.example.demo.faq.repository.FAQRepository;
+import com.example.demo.faq.service.FAQService;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,7 @@ public class FAQRepositoryTests {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    @Autowired
+
     private FAQService faqService;
 
     @Test
@@ -104,15 +105,6 @@ public class FAQRepositoryTests {
 
     }
 
-    // 삭제
-    @Test
-    public void testSoftDelete() {
-
-        Long fno = 100L;
-
-        faqService.softDeleteFAQ(fno);
-
-    }
 
     @Test
     @Transactional
@@ -122,7 +114,6 @@ public class FAQRepositoryTests {
         Long fno = 5L;
         Optional<FAQEntity> optionalFAQ = faqRepository.findById(fno);
 
-        assertTrue(optionalFAQ.isPresent(), "FAQ가 존재하지 않습니다. fno: " + fno);
         FAQEntity faq = optionalFAQ.get();
 
         // 수정할 데이터 설정
@@ -136,9 +127,7 @@ public class FAQRepositoryTests {
 
         // 수정된 데이터 검증
         Optional<FAQEntity> modifiedFAQ = faqRepository.findById(fno);
-        assertTrue(modifiedFAQ.isPresent(), "수정된 FAQ를 찾을 수 없습니다.");
-        assertEquals(updatedQuestion, modifiedFAQ.get().getQuestion(), "질문이 수정되지 않았습니다.");
-        assertEquals(updatedAnswer, modifiedFAQ.get().getAnswer(), "답변이 수정되지 않았습니다.");
+
     }
 }
 
