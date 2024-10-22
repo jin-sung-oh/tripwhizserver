@@ -1,9 +1,11 @@
 package com.example.demo.faq.service;
 
+import com.example.demo.common.domain.CategoryEntity;
 import com.example.demo.common.dto.PageRequestDTO;
 import com.example.demo.common.dto.PageResponseDTO;
 import com.example.demo.faq.domain.FAQEntity;
 import com.example.demo.faq.dto.FAQListDTO;
+import com.example.demo.faq.dto.FAQModifyDTO;
 import com.example.demo.faq.repository.FAQRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -31,7 +33,7 @@ public class FAQService {
     @Transactional
     public PageResponseDTO<FAQListDTO> list(PageRequestDTO pageRequestDTO) {
 
-        Pageable pageable = PageRequest.of(pageRequestDTO.getPage() -1,
+        Pageable pageable = PageRequest.of(pageRequestDTO.getPage() - 1,
                 pageRequestDTO.getSize(),
                 Sort.by("fno").descending());
 
@@ -60,7 +62,27 @@ public class FAQService {
 
     }
 
-    // details
+    // modify
+    @Transactional
+    public boolean modify(Long fno, FAQModifyDTO modifyDTO) {
+        FAQEntity faqEntity = faqRepository.findById(fno)
+                .orElseThrow(() -> new IllegalArgumentException("해당 FAQ가 존재하지 않습니다. fno: " + fno));
 
+
+        FAQEntity updatedFaqEntity = FAQEntity.builder()
+                .fno(faqEntity.getFno())
+                .category(modifyDTO.getCategory())
+                .question(modifyDTO.getQuestion())
+                .answer(modifyDTO.getAnswer())
+                .viewCnt(faqEntity.getViewCnt())
+                .build();
+
+        faqRepository.save(updatedFaqEntity);
+
+        log.info("FAQ 수정 완료: fno={}, category={}, question={}, answer={}",
+                updatedFaqEntity.getFno(), modifyDTO.getCategory(), modifyDTO.getQuestion(), modifyDTO.getAnswer());
+
+        return true;
+    }
 
 }
