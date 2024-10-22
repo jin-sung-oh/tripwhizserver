@@ -1,5 +1,8 @@
 package com.example.demo.faq;
 
+import com.example.demo.common.domain.CategoryEntity;
+
+import com.example.demo.common.repository.CategoryRepository;
 import com.example.demo.faq.domain.FAQEntity;
 import com.example.demo.faq.repository.FAQRepository;
 import lombok.extern.log4j.Log4j2;
@@ -7,8 +10,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.IntStream;
 
 @Log4j2
 @DataJpaTest
@@ -17,18 +26,54 @@ public class FAQRepositoryTests {
 
     @Autowired
     private FAQRepository faqRepository;
+    @Autowired
+    private CategoryRepository categoryRepository;
+
+    @Test
+    @Commit
+    @Transactional
+    public void testInsert() {
+
+        FAQEntity FAQ = FAQEntity.builder()
+                .question("Test question")
+                .answer("Test answer")
+                .build();
+
+        faqRepository.save(FAQ);
+
+    }
 
     @Test
     @Transactional
     @Commit
-    public void testInsert() {
+    public void insertDummies() {
 
-        FAQEntity FAQ = FAQEntity.builder()
-                .fquestion("Test question")
-                .fanswer("Test answer")
-                .build();
+        List<CategoryEntity> categories = categoryRepository.findAll();
 
-        faqRepository.save(FAQ);
+        // 100개의 질문을 DB에 저장
+        IntStream.rangeClosed(1, 100).forEach(i -> {
+
+            CategoryEntity category = categories.get((i - 1) % categories.size());
+
+            FAQEntity faq = FAQEntity.builder()
+                    .question("Question " + i)
+                    .answer("Answer " + i)
+                    .viewCnt(0)
+                    .delFlag(false)
+                    .category(category)
+                    .build();
+            faqRepository.save(faq);
+
+            log.info("Saved FAQ: " + faq);
+        });
+    }
+
+    @Test
+    public void testList() {
+
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("fno").descending());
+
+        faqRepository.findAll(pageable);
 
     }
 

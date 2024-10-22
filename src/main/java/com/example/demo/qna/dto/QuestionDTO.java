@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
-//QuestionDTO
 public class QuestionDTO {
 
     private Long qno;
