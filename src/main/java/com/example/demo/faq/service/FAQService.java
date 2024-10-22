@@ -2,8 +2,10 @@ package com.example.demo.faq.service;
 
 import com.example.demo.common.dto.PageRequestDTO;
 import com.example.demo.common.dto.PageResponseDTO;
+import com.example.demo.common.repository.CategoryRepository;
 import com.example.demo.faq.domain.FAQEntity;
 import com.example.demo.faq.dto.FAQListDTO;
+import com.example.demo.faq.dto.FAQModifyDTO;
 import com.example.demo.faq.repository.FAQRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -83,14 +85,17 @@ public class FAQService {
 
         log.info("FAQ 수정 완료: fno={}, category={}, question={}, answer={}",
                 updatedFaqEntity.getFno(), modifyDTO.getCategory(), modifyDTO.getQuestion(), modifyDTO.getAnswer());
+
+        return true;
+
+    }
+
     // delete
     @Transactional
     public void softDeleteFAQ(Long fno) {
 
         int updatedRows = faqRepository.softDeleteByFno(fno);
 
-        return true;
-    }
         // fno가 0일때 삭제 안되게 처리
         if (updatedRows == 0) {
             throw new IllegalArgumentException("FAQ not found with fno: " + fno);
