@@ -38,9 +38,9 @@ public class FAQService {
 
             FAQListDTO dto = FAQListDTO.builder()
                     .fno(FAQEntity.getFno())
-                    .question(FAQEntity.getQuestion())
-                    .viewCnt(FAQEntity.getViewCnt())
-                    .delFlag(false)
+                    //.question(FAQEntity.getQuestion())
+                    //.viewCnt(FAQEntity.getViewCnt())
+                    //.delFlag(false)
                     .build();
 
             return dto;
