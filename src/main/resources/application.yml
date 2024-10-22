@@ -28,7 +28,7 @@ spring:
       location: upload
       enabled: true
 
-org:
+com:
   example:
     accessTime: 60
     refreshTime: 10080
@@ -38,7 +38,7 @@ org:
 
 logging:
   level:
-    org.springframework.security.web: info
+    org.springframework.security.web: TRACE
 
 
 

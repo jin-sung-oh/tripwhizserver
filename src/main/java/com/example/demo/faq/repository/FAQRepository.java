@@ -9,8 +9,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.Optional;
-
 public interface FAQRepository extends JpaRepository<FAQEntity, Long> {
 
     Page<FAQEntity> findByFno(Long fno, Pageable pageable);

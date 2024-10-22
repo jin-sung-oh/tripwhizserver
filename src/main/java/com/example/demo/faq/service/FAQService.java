@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -63,6 +64,16 @@ public class FAQService {
                 .pageRequestDTO(pageRequestDTO)
                 .totalCount(total)
                 .build();
+
+    }
+
+    // add
+    @Transactional
+    public FAQEntity addFaq(FAQEntity faq) {
+
+        // FAQ 저장
+        FAQEntity savedFaq = faqRepository.save(faq);
+        return savedFaq; // 저장된 FAQ 반환
 
     }
 

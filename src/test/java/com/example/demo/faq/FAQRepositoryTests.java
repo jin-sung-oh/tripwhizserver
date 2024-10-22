@@ -19,6 +19,7 @@ import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 @Log4j2
@@ -28,6 +29,7 @@ public class FAQRepositoryTests {
 
     @Autowired
     private FAQRepository faqRepository;
+
     @Autowired
     private CategoryRepository categoryRepository;
 
@@ -85,6 +87,25 @@ public class FAQRepositoryTests {
 
     }
 
+    // 추가
+    @Test
+    public void testAddFaq() {
+
+        Optional<CategoryEntity> categoryOpt = categoryRepository.findById(1);
+        CategoryEntity category = categoryOpt.get();
+
+        FAQEntity faq = FAQEntity.builder()
+                .question("test")
+                .answer("test")
+                .category(category)
+                .build();
+
+        FAQEntity savedFaq = faqService.addFaq(faq);
+
+        log.info("Saved FAQ: " + savedFaq);
+
+    }
+
     // 삭제
     @Test
     public void testSoftDelete() {
@@ -96,26 +117,28 @@ public class FAQRepositoryTests {
     }
 
 
-        @Test
-        @Commit
-        @Transactional
-        public void testModify() {
-            CategoryEntity category = CategoryEntity.builder()
-                    .cname("General")
-                    .build();
-            categoryRepository.save(category);
+    @Test
+    @Commit
+    @Transactional
+    public void testModify() {
 
-            FAQEntity faq = FAQEntity.builder()
-                    .question("Test question")
-                    .answer("Test answer")
-                    .category(category)
-                    .build();
+        CategoryEntity category = CategoryEntity.builder()
+                .cname("General")
+                .build();
+        categoryRepository.save(category);
 
-            faqRepository.save(faq);
+        FAQEntity faq = FAQEntity.builder()
+                .question("Test question...!")
+                .answer("Test answer...!")
+                .category(category)
+                .build();
 
-            log.info("Saved FAQ: " + faq);
-        }
+        faqRepository.save(faq);
+
+        log.info("Saved FAQ: " + faq);
     }
+
+}
 
 
 
