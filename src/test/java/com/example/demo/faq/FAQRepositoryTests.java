@@ -78,4 +78,27 @@ public class FAQRepositoryTests {
     }
 
 
-}
+        @Test
+        @Commit
+        @Transactional
+        public void testModify() {
+            CategoryEntity category = CategoryEntity.builder()
+                    .cname("General")
+                    .build();
+            categoryRepository.save(category);
+
+            FAQEntity faq = FAQEntity.builder()
+                    .question("Test question")
+                    .answer("Test answer")
+                    .category(category)
+                    .build();
+
+            faqRepository.save(faq);
+
+            log.info("Saved FAQ: " + faq);
+        }
+    }
+
+
+
+
