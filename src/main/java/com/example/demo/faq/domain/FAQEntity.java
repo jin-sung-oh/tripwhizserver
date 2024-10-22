@@ -1,5 +1,6 @@
 package com.example.demo.faq.domain;
 
+import com.example.demo.common.domain.CategoryEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
