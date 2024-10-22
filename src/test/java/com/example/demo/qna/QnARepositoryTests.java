@@ -10,6 +10,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,7 +42,7 @@ public class QnARepositoryTests {
         IntStream.rangeClosed(1, 100).forEach(i -> {
             QuestionsEntity question = QuestionsEntity.builder()
                     .title("심플 질문 " + i)
-                    .question("슈슈슈슈퍼노바 내용 " + i)
+                    .qcontent("슈슈슈슈퍼노바 내용 " + i)
                     .writer("작성자 " + i)
                     .isPublic(true)
                     .status(QnAStatus.답변대기)
@@ -109,6 +113,43 @@ public class QnARepositoryTests {
 
         log.info("Updated Question: " + updatedQuestion);
     }
+
+    @Test
+    @Transactional
+    @Commit
+    public void testQuestionSearch1() {
+
+        int page = 0;
+        int size = 10;
+
+        Pageable pageable =
+                PageRequest.of(page,size, Sort.by("qno").descending());
+
+        String keyword = "2";
+
+        Page<QuestionsEntity> result = questionRepository.findByTitleContaining(keyword, pageable);
+
+        result.get().forEach(questionsEntity -> log.info(questionsEntity));
+    }
+
+    @Test
+    @Transactional
+    @Commit
+    public void testQuestionSearch2() {
+
+        int page = 0;
+        int size = 10;
+
+        Pageable pageable =
+                PageRequest.of(page,size, Sort.by("qno").descending());
+
+        String keyword = "5";
+
+        Page<QuestionsEntity> result = questionRepository.findByQcontentContaining(keyword, pageable);
+
+        result.get().forEach(questionsEntity -> log.info(questionsEntity));
+    }
+
 
 
 
