@@ -34,11 +34,12 @@ public class FAQEntity {
     @JoinColumn(name = "cno", nullable = false)
     private CategoryEntity category;
 
-    public void updateDetails(CategoryEntity category, String question, String answer, boolean delFlag) {
+    public void updateFields(CategoryEntity category, String question, String answer) {
         this.category = category;
         this.question = question;
         this.answer = answer;
-        this.delFlag = delFlag;
     }
+
+
 
 }

@@ -68,19 +68,14 @@ public class FAQService {
         FAQEntity faqEntity = faqRepository.findById(fno)
                 .orElseThrow(() -> new IllegalArgumentException("해당 FAQ가 존재하지 않습니다. fno: " + fno));
 
+        // 엔터티 객체의 필드를 this를 통해 업데이트
+        faqEntity.updateFields(modifyDTO.getCategory(), modifyDTO.getQuestion(), modifyDTO.getAnswer());
 
-        FAQEntity updatedFaqEntity = FAQEntity.builder()
-                .fno(faqEntity.getFno())
-                .category(modifyDTO.getCategory())
-                .question(modifyDTO.getQuestion())
-                .answer(modifyDTO.getAnswer())
-                .viewCnt(faqEntity.getViewCnt())
-                .build();
-
-        faqRepository.save(updatedFaqEntity);
+        // 변경된 엔터티를 저장
+        faqRepository.save(faqEntity);
 
         log.info("FAQ 수정 완료: fno={}, category={}, question={}, answer={}",
-                updatedFaqEntity.getFno(), modifyDTO.getCategory(), modifyDTO.getQuestion(), modifyDTO.getAnswer());
+                faqEntity.getFno(), faqEntity.getCategory(), faqEntity.getQuestion(), faqEntity.getAnswer());
 
         return true;
     }

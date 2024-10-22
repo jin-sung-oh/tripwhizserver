@@ -17,7 +17,11 @@ import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.IntStream;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Log4j2
 @DataJpaTest
@@ -77,27 +81,37 @@ public class FAQRepositoryTests {
 
     }
 
+    @Test
+    @Transactional
+    @Commit
+    public void testModifyExistingFAQ() {
+        // 데이터베이스에 있는 임의의 FAQ 엔터티 가져오기 (예: fno가 1인 엔터티)
+        Long fno = 5L;
+        Optional<FAQEntity> optionalFAQ = faqRepository.findById(fno);
 
-        @Test
-        @Commit
-        @Transactional
-        public void testModify() {
-            CategoryEntity category = CategoryEntity.builder()
-                    .cname("General")
-                    .build();
-            categoryRepository.save(category);
+        assertTrue(optionalFAQ.isPresent(), "FAQ가 존재하지 않습니다. fno: " + fno);
+        FAQEntity faq = optionalFAQ.get();
 
-            FAQEntity faq = FAQEntity.builder()
-                    .question("Test question")
-                    .answer("Test answer")
-                    .category(category)
-                    .build();
+        // 수정할 데이터 설정
+        String updatedQuestion = "수정된 질문";
+        String updatedAnswer = "수정된 답변";
+        CategoryEntity updatedCategory = faq.getCategory(); // 기존 카테고리를 유지하거나 변경 가능
 
-            faqRepository.save(faq);
+        // FAQ 수정
+        faq.updateFields(updatedCategory, updatedQuestion, updatedAnswer);
+        faqRepository.save(faq);
 
-            log.info("Saved FAQ: " + faq);
-        }
+        // 수정된 데이터 검증
+        Optional<FAQEntity> modifiedFAQ = faqRepository.findById(fno);
+        assertTrue(modifiedFAQ.isPresent(), "수정된 FAQ를 찾을 수 없습니다.");
+        assertEquals(updatedQuestion, modifiedFAQ.get().getQuestion(), "질문이 수정되지 않았습니다.");
+        assertEquals(updatedAnswer, modifiedFAQ.get().getAnswer(), "답변이 수정되지 않았습니다.");
     }
+}
+
+
+
+
 
 
 
