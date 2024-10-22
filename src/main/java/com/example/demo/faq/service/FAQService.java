@@ -7,6 +7,7 @@ import com.example.demo.faq.dto.FAQListDTO;
 import com.example.demo.faq.repository.FAQRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,8 +24,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FAQService {
 
+    @Autowired
     private final FAQRepository faqRepository;
 
+    // list
     @Transactional
     public PageResponseDTO<FAQListDTO> list(PageRequestDTO pageRequestDTO) {
 
@@ -56,5 +59,8 @@ public class FAQService {
                 .build();
 
     }
+
+    // details
+
 
 }

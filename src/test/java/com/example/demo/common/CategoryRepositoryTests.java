@@ -3,7 +3,6 @@ package com.example.demo.common;
 import com.example.demo.common.domain.CategoryEntity;
 import com.example.demo.common.repository.CategoryRepository;
 import lombok.extern.log4j.Log4j2;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -22,11 +21,10 @@ public class CategoryRepositoryTests {
     @Test
     @Transactional
     @Commit
-    @Disabled
     public void testInsert() {
 
         CategoryEntity category = CategoryEntity.builder()
-                .cname("Other")
+                .cname("영수증")
                 .build();
 
         categoryRepository.save(category);
