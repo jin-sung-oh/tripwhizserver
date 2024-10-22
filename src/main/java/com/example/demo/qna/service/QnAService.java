@@ -1,14 +1,22 @@
 package com.example.demo.qna.service;
 
+import com.example.demo.common.dto.PageRequestDTO;
+import com.example.demo.common.dto.PageResponseDTO;
 import com.example.demo.qna.domain.AnswersEntity;
 import com.example.demo.qna.domain.QuestionsEntity;
+import com.example.demo.qna.dto.QuestionDTO;
 import com.example.demo.qna.repository.AnswersRepository;
 import com.example.demo.qna.repository.QuestionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -48,5 +56,72 @@ public class QnAService {
         } else {
             return answersRepository.findByQuestionsAndIsPublicTrue(questionsEntity);  // 필드명에 맞춘 수정
         }
+    }
+
+    // 질문 목록을 페이징 처리하여 반환하는 메서드
+    public PageResponseDTO<QuestionDTO> getList(PageRequestDTO pageRequestDTO) {
+        // PageRequestDTO를 Pageable 객체로 변환
+        Pageable pageable = PageRequest.of(pageRequestDTO.getPage() - 1,
+                pageRequestDTO.getSize(),
+                Sort.by("qno").descending());
+
+        // 모든 질문을 페이징 처리하여 조회
+        Page<QuestionsEntity> result = questionRepository.findAll(pageable);
+
+        // QuestionsEntity를 QuestionDTO로 변환
+        List<QuestionDTO> dtoList = result.stream()
+                .map(questionsEntity -> new QuestionDTO(questionsEntity))
+                .collect(Collectors.toList());
+
+        // PageResponseDTO로 결과 반환
+        return PageResponseDTO.<QuestionDTO>withAll()
+                .totalCount((int) result.getTotalElements())
+                .pageRequestDTO(pageRequestDTO)
+                .dtoList(dtoList)
+                .build();
+    }
+
+    // 제목에 특정 키워드가 포함된 질문을 페이징 처리하여 반환
+    public PageResponseDTO<QuestionDTO> searchByTitle(String keyword, PageRequestDTO pageRequestDTO) {
+        Pageable pageable = PageRequest.of(pageRequestDTO.getPage() - 1,
+                pageRequestDTO.getSize(),
+                Sort.by("qno").descending());
+
+        // 제목에 키워드가 포함된 질문 조회
+        Page<QuestionsEntity> result = questionRepository.findByTitleContaining(keyword, pageable);
+
+        // QuestionsEntity를 QuestionDTO로 변환
+        List<QuestionDTO> dtoList = result.stream()
+                .map(questionsEntity -> new QuestionDTO(questionsEntity))
+                .collect(Collectors.toList());
+
+        // PageResponseDTO로 결과 반환
+        return PageResponseDTO.<QuestionDTO>withAll()
+                .totalCount((int) result.getTotalElements())
+                .pageRequestDTO(pageRequestDTO)
+                .dtoList(dtoList)
+                .build();
+    }
+
+    // 내용에 특정 키워드가 포함된 질문을 페이징 처리하여 반환
+    public PageResponseDTO<QuestionDTO> searchByContent(String keyword, PageRequestDTO pageRequestDTO) {
+        Pageable pageable = PageRequest.of(pageRequestDTO.getPage() - 1,
+                pageRequestDTO.getSize(),
+                Sort.by("qno").descending());
+
+        // 내용에 키워드가 포함된 질문 조회
+        Page<QuestionsEntity> result = questionRepository.findByQcontentContaining(keyword, pageable);
+
+        // QuestionsEntity를 QuestionDTO로 변환
+        List<QuestionDTO> dtoList = result.stream()
+                .map(questionsEntity -> new QuestionDTO())
+                .collect(Collectors.toList());
+
+        // PageResponseDTO로 결과 반환
+        return PageResponseDTO.<QuestionDTO>withAll()
+                .totalCount((int) result.getTotalElements())
+                .pageRequestDTO(pageRequestDTO)
+                .dtoList(dtoList)
+                .build();
     }
 }

@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @ToString(callSuper = true)
 @Table(name = "questions")
-public class QuestionsEntity {
+public class QuestionsEntity extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long qno;
