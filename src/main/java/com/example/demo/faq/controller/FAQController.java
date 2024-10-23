@@ -49,6 +49,10 @@ public class FAQController {
         faqService.modify(fno, modifyDTO);
         return ResponseEntity.ok().build();
     }
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Void> handleNotFound(IllegalArgumentException e) {
+        return ResponseEntity.notFound().build();
+    }
 
     // 삭제
     @DeleteMapping("/{fno}")
