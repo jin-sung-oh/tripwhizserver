@@ -20,4 +20,12 @@ public interface FAQRepository extends JpaRepository<FAQEntity, Long>, FAQFilter
     @Query("UPDATE FAQEntity f set f.delFlag = true where f.fno = :fno")
     int softDeleteByFno(@Param("fno") Long fno);
 
+    //수정
+    @Modifying
+    @Query("UPDATE FAQEntity f SET f.category = :category, f.question = :question, f.answer = :answer WHERE f.fno = :fno")
+    int updateFaq(@Param("fno") Long fno,
+                  @Param("category") String category,
+                  @Param("question") String question,
+                  @Param("answer") String answer);
+
 }
