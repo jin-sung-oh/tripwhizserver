@@ -106,6 +106,7 @@ public class FAQRepositoryTests {
     }
 
 
+    // 수정
     @Test
     @Transactional
     @Commit
@@ -129,6 +130,17 @@ public class FAQRepositoryTests {
         Optional<FAQEntity> modifiedFAQ = faqRepository.findById(fno);
 
     }
+
+    // 삭제
+    @Test
+    public void testSoftDelete() {
+
+        Long fno = 100L;
+
+        faqService.softDeleteFAQ(fno);
+
+    }
+
 }
 
 
