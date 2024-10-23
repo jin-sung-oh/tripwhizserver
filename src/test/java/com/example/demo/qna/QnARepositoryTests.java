@@ -73,7 +73,7 @@ public class QnARepositoryTests {
         QuestionsEntity questions = questionRepository.findById(1L).orElse(null);
 
         AnswersEntity answers = AnswersEntity.builder()
-                .answers("이건 답이다")
+                .acontent("이건 답이다")
                 .questions(questions)
                 .writer("카리나")
                 .isPublic(true)

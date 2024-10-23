@@ -17,11 +17,14 @@ public class AnswersEntity extends BaseEntity {
     private Long ano;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "qno",nullable = false)
+    @JoinColumn(name = "qno", nullable = false)
     private QuestionsEntity questions;
 
     @Lob
-    private String answers;
+    private String acontent;  // acontent 필드
+
+    @Enumerated(EnumType.STRING)
+    private QnAStatus status;  // QnAStatus 필드
 
     @Column(nullable = false)
     private String writer;
@@ -33,4 +36,12 @@ public class AnswersEntity extends BaseEntity {
     @Column(nullable = false)
     private boolean isPublic = true;
 
+    // 상태 변경 메서드
+    public void setStatus(QnAStatus status) {
+        this.status = status;
+    }
+
+    public void setAcontent(String acontent) {
+        this.acontent = acontent;
+    }
 }

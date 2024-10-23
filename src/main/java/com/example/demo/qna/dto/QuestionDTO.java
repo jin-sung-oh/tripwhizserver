@@ -16,17 +16,17 @@ public class QuestionDTO {
     private QnAStatus status;
     private String writer;
     private String qcontent;
-    private LocalDateTime createdDate;  // BaseEntity에서 상속된 필드
+    private LocalDateTime createdDate;
     private int viewCount;
 
-    // QuestionsEntity 객체를 인자로 받는 생성자 추가
+    // QuestionsEntity 객체를 인자로 받는 생성자
     public QuestionDTO(QuestionsEntity questionsEntity) {
         this.qno = questionsEntity.getQno();
         this.title = questionsEntity.getTitle();
         this.status = questionsEntity.getStatus();
         this.writer = questionsEntity.getWriter();
         this.qcontent = questionsEntity.getQcontent();
-        this.createdDate = questionsEntity.getCreatedDate();  // BaseEntity에서 상속된 필드 사용
+        this.createdDate = questionsEntity.getCreatedDate();
         this.viewCount = questionsEntity.getViewCount();
     }
 
