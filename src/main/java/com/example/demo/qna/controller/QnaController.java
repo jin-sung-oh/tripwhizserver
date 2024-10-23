@@ -19,6 +19,7 @@ import java.util.List;
 @RequestMapping("/api/qna")
 @Log4j2
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class QnaController {
 
     private final QnAService qnaService;
