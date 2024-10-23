@@ -1,6 +1,5 @@
 package com.example.demo.faq.service;
 
-import com.example.demo.common.domain.CategoryEntity;
 import com.example.demo.common.dto.PageRequestDTO;
 import com.example.demo.common.dto.PageResponseDTO;
 import com.example.demo.common.repository.CategoryRepository;
@@ -10,6 +9,7 @@ import com.example.demo.faq.dto.FAQModifyDTO;
 import com.example.demo.faq.repository.FAQRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -76,6 +77,20 @@ public class FAQService {
 
 
 
+    // modify
+    @Transactional
+    public boolean modify(Long fno, CategoryEntity category, String question, String answer) {
+        // 업데이트 실행
+        int updatedRows = faqRepository.updateFaq(fno, category.getCno(), question, answer);
+
+        // 업데이트된 행이 없으면 예외 발생
+        if (updatedRows == 0) {
+            throw new IllegalArgumentException("해당 FAQ가 존재하지 않습니다. fno: " + fno);
+        }
+
+        return true;
+    }
+
     // delete
     @Transactional
     public void softDeleteFAQ(Long fno) {
@@ -94,4 +109,6 @@ public class FAQService {
     public boolean existsById(Long fno) {
         return faqRepository.existsById(fno);
     }
+
+
 }

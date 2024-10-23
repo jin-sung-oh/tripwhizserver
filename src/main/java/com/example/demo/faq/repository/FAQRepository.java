@@ -1,6 +1,5 @@
 package com.example.demo.faq.repository;
 
-import com.example.demo.common.domain.CategoryEntity;
 import com.example.demo.faq.domain.FAQEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,11 +20,11 @@ public interface FAQRepository extends JpaRepository<FAQEntity, Long>, FAQFilter
     @Query("UPDATE FAQEntity f set f.delFlag = true where f.fno = :fno")
     int softDeleteByFno(@Param("fno") Long fno);
 
-
-    @Modifying(clearAutomatically = true)
-    @Query("UPDATE FAQEntity f SET f.category = :category, f.question = :question, f.answer = :answer WHERE f.fno = :fno")
+    //수정
+    @Modifying
+    @Query("UPDATE FAQEntity f SET f.category.cno = :cno, f.question = :question, f.answer = :answer WHERE f.fno = :fno")
     int updateFaq(@Param("fno") Long fno,
-                  @Param("category") CategoryEntity category,
+                  @Param("cno") Long cno,
                   @Param("question") String question,
                   @Param("answer") String answer);
 
