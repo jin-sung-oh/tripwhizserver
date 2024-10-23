@@ -2,6 +2,10 @@ package com.example.demo.qna.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "answers")
@@ -10,7 +14,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AnswersEntity extends BaseEntity {
+public class AnswersEntity  {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,6 +40,12 @@ public class AnswersEntity extends BaseEntity {
     @Column(nullable = false)
     private boolean isPublic = true;
 
+    @CreatedDate // 생성 시간 자동 기록
+    private LocalDateTime createdDate;
+
+    @LastModifiedDate // 수정 시간 자동 기록
+    private LocalDateTime updatedDate;
+
     // 상태 변경 메서드
     public void setStatus(QnAStatus status) {
         this.status = status;
@@ -43,5 +53,8 @@ public class AnswersEntity extends BaseEntity {
 
     public void setAcontent(String acontent) {
         this.acontent = acontent;
+    }
+
+    public void setCreatedDate(LocalDateTime createdDate) {
     }
 }
