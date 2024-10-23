@@ -2,6 +2,8 @@ package com.example.demo.qna.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
 
@@ -12,7 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AnswersEntity extends BaseEntity {
+public class AnswersEntity  {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,8 +27,9 @@ public class AnswersEntity extends BaseEntity {
     @Lob
     private String acontent;  // acontent 필드
 
-    @Enumerated(EnumType.STRING)
-    private QnAStatus status;  // QnAStatus 필드
+
+    @Builder.Default
+    private QnAStatus status = QnAStatus.답변대기;  // QnAStatus 필드
 
     @Column(nullable = false)
     private String writer;
@@ -37,6 +40,12 @@ public class AnswersEntity extends BaseEntity {
 
     @Column(nullable = false)
     private boolean isPublic = true;
+
+    @CreatedDate // 생성 시간 자동 기록
+    private LocalDateTime createdDate;
+
+    @LastModifiedDate // 수정 시간 자동 기록
+    private LocalDateTime updatedDate;
 
     // 상태 변경 메서드
     public void setStatus(QnAStatus status) {
