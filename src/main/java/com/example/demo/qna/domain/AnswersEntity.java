@@ -3,6 +3,8 @@ package com.example.demo.qna.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "answers")
 @Getter
@@ -43,5 +45,8 @@ public class AnswersEntity extends BaseEntity {
 
     public void setAcontent(String acontent) {
         this.acontent = acontent;
+    }
+
+    public void setCreatedDate(LocalDateTime createdDate) {
     }
 }
