@@ -1,5 +1,6 @@
 package com.example.demo.faq.service;
 
+import com.example.demo.common.domain.CategoryEntity;
 import com.example.demo.common.dto.PageRequestDTO;
 import com.example.demo.common.dto.PageResponseDTO;
 import com.example.demo.common.repository.CategoryRepository;
@@ -9,7 +10,6 @@ import com.example.demo.faq.dto.FAQModifyDTO;
 import com.example.demo.faq.repository.FAQRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -75,24 +74,7 @@ public class FAQService {
 
     }
 
-    // modify
-    @Transactional
-    public boolean modify(Long fno, FAQModifyDTO modifyDTO) {
-        FAQEntity faqEntity = faqRepository.findById(fno)
-                .orElseThrow(() -> new IllegalArgumentException("해당 FAQ가 존재하지 않습니다. fno: " + fno));
 
-        // 엔터티 객체의 필드를 this를 통해 업데이트
-        faqEntity.updateFields(modifyDTO.getCategory(), modifyDTO.getQuestion(), modifyDTO.getAnswer());
-
-        // 변경된 엔터티를 저장
-        faqRepository.save(faqEntity);
-
-        log.info("FAQ 수정 완료: fno={}, category={}, question={}, answer={}",
-                faqEntity.getFno(), faqEntity.getCategory(), faqEntity.getQuestion(), faqEntity.getAnswer());
-
-        return true;
-
-    }
 
     // delete
     @Transactional
@@ -112,6 +94,4 @@ public class FAQService {
     public boolean existsById(Long fno) {
         return faqRepository.existsById(fno);
     }
-
-
 }
