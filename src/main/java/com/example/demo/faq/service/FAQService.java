@@ -27,10 +27,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FAQService {
 
-    @Autowired
     private final FAQRepository faqRepository;
 
-    @Autowired
     private final CategoryRepository categoryRepository;
 
     // list

@@ -4,9 +4,11 @@ import com.example.demo.common.dto.PageRequestDTO;
 import com.example.demo.common.dto.PageResponseDTO;
 import com.example.demo.faq.domain.FAQEntity;
 import com.example.demo.faq.dto.FAQListDTO;
+import com.example.demo.faq.dto.FAQModifyDTO;
 import com.example.demo.faq.service.FAQService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -37,6 +39,21 @@ public class FAQController {
 
     }
 
+    //수정
+    @PutMapping("/modify/{fno}")
+    public ResponseEntity<Void> modifyFaq(
+            @PathVariable("fno") Long fno,
+            @RequestBody FAQModifyDTO modifyDTO) {
+
+
+        faqService.modify(fno, modifyDTO);
+        return ResponseEntity.ok().build();
+    }
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Void> handleNotFound(IllegalArgumentException e) {
+        return ResponseEntity.notFound().build();
+    }
+
     // 삭제
     @DeleteMapping("/{fno}")
     public ResponseEntity<Void> softDeleteFAQ(@PathVariable Long fno) {
@@ -50,6 +67,4 @@ public class FAQController {
         return ResponseEntity.ok().build();
 
     }
-
-
 }
