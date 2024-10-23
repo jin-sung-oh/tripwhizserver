@@ -22,9 +22,9 @@ public interface FAQRepository extends JpaRepository<FAQEntity, Long>, FAQFilter
 
     //수정
     @Modifying
-    @Query("UPDATE FAQEntity f SET f.category = :category, f.question = :question, f.answer = :answer WHERE f.fno = :fno")
+    @Query("UPDATE FAQEntity f SET f.category.cno = :cno, f.question = :question, f.answer = :answer WHERE f.fno = :fno")
     int updateFaq(@Param("fno") Long fno,
-                  @Param("category") String category,
+                  @Param("cno") Long cno,
                   @Param("question") String question,
                   @Param("answer") String answer);
 
