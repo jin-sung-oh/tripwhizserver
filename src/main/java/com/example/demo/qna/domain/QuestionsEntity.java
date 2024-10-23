@@ -3,7 +3,10 @@ package com.example.demo.qna.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @ToString(callSuper = true)
 @Table(name = "questions")
-public class QuestionsEntity extends BaseEntity {
+public class QuestionsEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long qno;
@@ -45,6 +48,12 @@ public class QuestionsEntity extends BaseEntity {
     @Column(nullable = false)
     @Builder.Default
     private int viewCount = 0;
+
+    @CreatedDate // 생성 시간 자동 기록
+    private LocalDateTime createdDate;
+
+    @LastModifiedDate // 수정 시간 자동 기록
+    private LocalDateTime updatedDate;
 
 
     public void changeImages(List<String> newImages) {

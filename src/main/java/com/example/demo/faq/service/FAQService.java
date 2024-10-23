@@ -107,5 +107,11 @@ public class FAQService {
 
     }
 
+    // existsById 추가
+    @Transactional(readOnly = true)
+    public boolean existsById(Long fno) {
+        return faqRepository.existsById(fno);
+    }
+
 
 }

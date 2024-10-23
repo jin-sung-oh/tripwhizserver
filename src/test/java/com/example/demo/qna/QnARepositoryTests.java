@@ -17,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
@@ -46,6 +47,7 @@ public class QnARepositoryTests {
                     .writer("작성자 " + i)
                     .isPublic(true)
                     .status(QnAStatus.답변대기)
+                    .createdDate(LocalDateTime.now())
                     .build();
             questionRepository.save(question);
 

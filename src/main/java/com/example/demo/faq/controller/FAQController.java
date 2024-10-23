@@ -54,6 +54,11 @@ public class FAQController {
     @DeleteMapping("/{fno}")
     public ResponseEntity<Void> softDeleteFAQ(@PathVariable Long fno) {
 
+        // fno가 존재하지 않으면 에러 반환
+        if (!faqService.existsById(fno)) {
+            return ResponseEntity.notFound().build();
+        }
+
         faqService.softDeleteFAQ(fno);
         return ResponseEntity.ok().build();
 
