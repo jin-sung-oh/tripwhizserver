@@ -27,8 +27,9 @@ public class AnswersEntity  {
     @Lob
     private String acontent;  // acontent 필드
 
-    @Enumerated(EnumType.STRING)
-    private QnAStatus status;  // QnAStatus 필드
+
+    @Builder.Default
+    private QnAStatus status = QnAStatus.답변대기;  // QnAStatus 필드
 
     @Column(nullable = false)
     private String writer;
