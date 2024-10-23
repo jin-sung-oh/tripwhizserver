@@ -4,6 +4,7 @@ import com.example.demo.common.dto.PageRequestDTO;
 import com.example.demo.common.dto.PageResponseDTO;
 import com.example.demo.faq.domain.FAQEntity;
 import com.example.demo.faq.dto.FAQListDTO;
+import com.example.demo.faq.dto.FAQModifyDTO;
 import com.example.demo.faq.service.FAQService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -38,6 +39,13 @@ public class FAQController {
 
     }
 
+    //수정
+    @PutMapping("/modify/{fno}")
+    public ResponseEntity<Void> modifyFaq(
+            @PathVariable("fno") Long fno,
+            @RequestBody FAQModifyDTO modifyDTO) {
 
-
+        faqService.modify(fno, modifyDTO); // 수정 로직 호출
+        return ResponseEntity.ok().build(); // 성공 시 200 OK 응답
+    }
 }
