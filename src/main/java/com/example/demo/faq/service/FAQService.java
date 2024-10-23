@@ -96,5 +96,18 @@ public class FAQService {
 
     }
 
+    // delete
+    @Transactional
+    public void softDeleteFAQ(Long fno) {
+
+        int updatedRows = faqRepository.softDeleteByFno(fno);
+
+        // fno가 0일때 삭제 안되게 처리
+        if (updatedRows == 0) {
+            throw new IllegalArgumentException("FAQ not found with fno: " + fno);
+        }
+
+    }
+
 
 }
