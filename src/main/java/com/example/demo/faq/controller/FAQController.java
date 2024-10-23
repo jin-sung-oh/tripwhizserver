@@ -28,7 +28,7 @@ public class FAQController {
     }
 
     // 추가
-    @PostMapping("")
+    @PostMapping("/add")
     public ResponseEntity<Long> addFaq(@RequestBody FAQEntity faq) {
 
         FAQEntity savedFaq = faqService.addFaq(faq);
@@ -40,6 +40,11 @@ public class FAQController {
     // 삭제
     @DeleteMapping("/{fno}")
     public ResponseEntity<Void> softDeleteFAQ(@PathVariable Long fno) {
+
+        // fno가 존재하지 않으면 에러 반환
+        if (!faqService.existsById(fno)) {
+            return ResponseEntity.notFound().build();
+        }
 
         faqService.softDeleteFAQ(fno);
         return ResponseEntity.ok().build();
