@@ -112,7 +112,7 @@ public class FAQRepositoryTests {
     @Commit
     public void testModifyExistingFAQ() {
         // 데이터베이스에 있는 임의의 FAQ 엔터티 가져오기 (예: fno가 1인 엔터티)
-        Long fno = 5L;
+        Long fno = 10L;
         Optional<FAQEntity> optionalFAQ = faqRepository.findById(fno);
 
         FAQEntity faq = optionalFAQ.get();
