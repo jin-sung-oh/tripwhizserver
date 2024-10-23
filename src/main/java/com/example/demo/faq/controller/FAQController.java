@@ -1,14 +1,15 @@
 package com.example.demo.faq.controller;
 
+import com.example.demo.common.domain.CategoryEntity;
 import com.example.demo.common.dto.PageRequestDTO;
 import com.example.demo.common.dto.PageResponseDTO;
+import com.example.demo.common.repository.CategoryRepository;
 import com.example.demo.faq.domain.FAQEntity;
 import com.example.demo.faq.dto.FAQListDTO;
 import com.example.demo.faq.dto.FAQModifyDTO;
 import com.example.demo.faq.service.FAQService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +21,8 @@ import org.springframework.web.bind.annotation.*;
 public class FAQController {
 
     private final FAQService faqService;
+
+    private final CategoryRepository categoryRepository;
 
     // 리스트 조회
     @GetMapping("/list")
@@ -39,19 +42,34 @@ public class FAQController {
 
     }
 
-    //수정
-    @PutMapping("/modify/{fno}")
+//    // 수정
+//    @PutMapping("/{fno}")
+//    public ResponseEntity<Void> modifyFaq(
+//            @PathVariable("fno") Long fno,
+//            @RequestBody FAQModifyDTO modifyDTO) {
+//
+//        // 수정 로직 호출
+//        faqService.modify(fno, modifyDTO.getQuestion(), modifyDTO.getAnswer());
+////        log.info("Modify faq" + ResponseEntity.class);
+//        return ResponseEntity.ok().build();
+//    }
+//
+//    @ExceptionHandler(IllegalArgumentException.class)
+//    public ResponseEntity<Void> handleNotFound(IllegalArgumentException e) {
+//        return ResponseEntity.notFound().build();
+//    }
+
+    @PutMapping("/{fno}")
     public ResponseEntity<Void> modifyFaq(
             @PathVariable("fno") Long fno,
             @RequestBody FAQModifyDTO modifyDTO) {
 
+        // CategoryEntity를 조회하고, FAQ 수정
+        CategoryEntity category = categoryRepository.findById(modifyDTO.getCategory().getCno())
+                .orElseThrow(() -> new IllegalArgumentException("해당 카테고리가 존재하지 않습니다. categoryId: " + modifyDTO.getCategory().getCno()));
 
-        faqService.modify(fno, modifyDTO);
+        faqService.modify(fno, category, modifyDTO.getQuestion(), modifyDTO.getAnswer());
         return ResponseEntity.ok().build();
-    }
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Void> handleNotFound(IllegalArgumentException e) {
-        return ResponseEntity.notFound().build();
     }
 
     // 삭제

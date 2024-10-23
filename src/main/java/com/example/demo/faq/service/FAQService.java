@@ -1,5 +1,6 @@
 package com.example.demo.faq.service;
 
+import com.example.demo.common.domain.CategoryEntity;
 import com.example.demo.common.dto.PageRequestDTO;
 import com.example.demo.common.dto.PageResponseDTO;
 import com.example.demo.common.repository.CategoryRepository;
@@ -75,24 +76,38 @@ public class FAQService {
 
     }
 
-    // modify
+//    // modify
+//    @Transactional
+//    public boolean modify(Long fno, String question, String answer) {
+//        FAQEntity faqEntity = faqRepository.findById(fno)
+//                .orElseThrow(() -> new IllegalArgumentException("해당 FAQ가 존재하지 않습니다. fno: " + fno));
+//
+//        // 엔터티의 필드를 직접 업데이트
+//        faqEntity.updateFields(faqEntity.getCategory(), question, answer);
+//
+//        // 변경된 엔터티를 저장
+//        faqRepository.save(faqEntity);
+//
+//        log.info("FAQ 수정 완료: fno={}, question={}, answer={}",
+//                faqEntity.getFno(), faqEntity.getQuestion(), faqEntity.getAnswer());
+//
+//        return true;
+//    }
+
+    // 수정 메서드
     @Transactional
-    public boolean modify(Long fno, FAQModifyDTO modifyDTO) {
-        FAQEntity faqEntity = faqRepository.findById(fno)
-                .orElseThrow(() -> new IllegalArgumentException("해당 FAQ가 존재하지 않습니다. fno: " + fno));
+    public boolean modify(Long fno, CategoryEntity category, String question, String answer) {
+        // 업데이트 실행
+        int updatedRows = faqRepository.updateFaq(fno, category.getCname(), question, answer);
 
-        // 엔터티 객체의 필드를 this를 통해 업데이트
-        faqEntity.updateFields(modifyDTO.getCategory(), modifyDTO.getQuestion(), modifyDTO.getAnswer());
-
-        // 변경된 엔터티를 저장
-        faqRepository.save(faqEntity);
-
-        log.info("FAQ 수정 완료: fno={}, category={}, question={}, answer={}",
-                faqEntity.getFno(), faqEntity.getCategory(), faqEntity.getQuestion(), faqEntity.getAnswer());
+        // 업데이트된 행이 없으면 예외 발생
+        if (updatedRows == 0) {
+            throw new IllegalArgumentException("해당 FAQ가 존재하지 않습니다. fno: " + fno);
+        }
 
         return true;
-
     }
+
 
     // delete
     @Transactional
