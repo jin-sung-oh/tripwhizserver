@@ -1,6 +1,5 @@
 package com.example.demo.qna.service;
 
-
 import com.example.demo.qna.domain.AnswersEntity;
 import com.example.demo.qna.domain.QnAStatus;
 import com.example.demo.qna.domain.QuestionsEntity;
@@ -32,8 +31,9 @@ public class AnswersService {
                 .orElseThrow(() -> new IllegalArgumentException("질문을 찾을 수 없습니다."));
 
         AnswersEntity answersEntity = answerDTO.toEntity();
-        answersEntity.setQuestions(questionEntity);
-        answersEntity.setStatus(QnAStatus.답변대기); // 기본 상태를 "답변 대기"로 설정
+        answersEntity.setQuestions(questionEntity);  // 질문 설정
+        answersEntity.setStatus(answerDTO.getStatus());  // 상태 설정
+        answersEntity.setWriter(answerDTO.getWriter());  // 작성자 설정
 
         answersRepository.save(answersEntity);
         return answersEntity.getAno();
@@ -46,6 +46,7 @@ public class AnswersService {
 
         answersEntity.setAcontent(answerDTO.getAcontent());
         answersEntity.setStatus(answerDTO.getStatus());
+        answersEntity.setWriter(answerDTO.getWriter());
 
         answersRepository.save(answersEntity);
     }
@@ -54,16 +55,15 @@ public class AnswersService {
     public void deleteAnswer(Long ano) {
         AnswersEntity answersEntity = answersRepository.findById(ano)
                 .orElseThrow(() -> new IllegalArgumentException("답변을 찾을 수 없습니다."));
-
         answersRepository.delete(answersEntity);
     }
 
-    // 답변 상태 변경 (전체, 답변 완료, 답변 대기)
+    // 답변 상태 변경
     public void updateAnswerStatus(Long ano, QnAStatus status) {
         AnswersEntity answersEntity = answersRepository.findById(ano)
                 .orElseThrow(() -> new IllegalArgumentException("답변을 찾을 수 없습니다."));
 
-        answersEntity.setStatus(status); // 상태 변경
+        answersEntity.setStatus(status);  // 상태 변경
         answersRepository.save(answersEntity);
     }
 }

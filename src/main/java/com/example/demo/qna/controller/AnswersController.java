@@ -17,6 +17,10 @@ public class AnswersController {
     // 답변 등록
     @PostMapping("/add/{qno}")
     public ResponseEntity<Long> createAnswer(@PathVariable Long qno, @RequestBody AnswerDTO answerDTO) {
+//        if (answerDTO.getWriter() == null || answerDTO.getWriter().isEmpty()) {
+//            throw new IllegalArgumentException("작성자는 필수 입력 항목입니다.");
+//        }
+
         Long answerId = answersService.createAnswer(qno, answerDTO);
         return ResponseEntity.ok(answerId);
     }
@@ -35,11 +39,10 @@ public class AnswersController {
         return ResponseEntity.ok().build();
     }
 
-    // 답변 상태 변경 (전체, 답변 완료, 답변 대기)
+    // 답변 상태 변경
     @PutMapping("/status/{ano}")
     public ResponseEntity<Void> updateAnswerStatus(@PathVariable Long ano, @RequestBody QnAStatus status) {
         answersService.updateAnswerStatus(ano, status);
         return ResponseEntity.ok().build();
     }
-
 }
