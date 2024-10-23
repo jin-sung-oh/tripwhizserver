@@ -33,7 +33,7 @@ public class FAQController {
     }
 
     // 추가
-    @PostMapping("/add")
+    @PostMapping("/")
     public ResponseEntity<Long> addFaq(@RequestBody FAQEntity faq) {
 
         FAQEntity savedFaq = faqService.addFaq(faq);
@@ -42,27 +42,16 @@ public class FAQController {
 
     }
 
-//    // 수정
-//    @PutMapping("/{fno}")
-//    public ResponseEntity<Void> modifyFaq(
-//            @PathVariable("fno") Long fno,
-//            @RequestBody FAQModifyDTO modifyDTO) {
-//
-//        // 수정 로직 호출
-//        faqService.modify(fno, modifyDTO.getQuestion(), modifyDTO.getAnswer());
-////        log.info("Modify faq" + ResponseEntity.class);
-//        return ResponseEntity.ok().build();
-//    }
-//
-//    @ExceptionHandler(IllegalArgumentException.class)
-//    public ResponseEntity<Void> handleNotFound(IllegalArgumentException e) {
-//        return ResponseEntity.notFound().build();
-//    }
-
+    // 수정
     @PutMapping("/{fno}")
     public ResponseEntity<Void> modifyFaq(
             @PathVariable("fno") Long fno,
             @RequestBody FAQModifyDTO modifyDTO) {
+
+
+        log.info("-----------------------------------");
+        log.info("fno: " + fno);
+        log.info("modifyDTO: " + modifyDTO);
 
         // CategoryEntity를 조회하고, FAQ 수정
         CategoryEntity category = categoryRepository.findById(modifyDTO.getCategory().getCno())
