@@ -6,6 +6,7 @@ import com.example.demo.faq.domain.FAQEntity;
 import com.example.demo.faq.domain.FaqCategory;
 import com.example.demo.faq.dto.FAQListDTO;
 import com.example.demo.faq.dto.FAQModifyDTO;
+import com.example.demo.faq.dto.FAQReadDTO;
 import com.example.demo.faq.service.FAQService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -27,6 +28,24 @@ public class FAQController {
     public PageResponseDTO<FAQListDTO> list(PageRequestDTO pageRequestDTO) {
 
         return faqService.list(pageRequestDTO);
+
+    }
+
+    // 조회
+    @GetMapping("/read/{fno}")
+    public ResponseEntity<FAQReadDTO> read(@PathVariable Long fno) {
+
+        log.info(fno);
+
+        FAQReadDTO faqReadDTO = faqService.read(fno);
+
+        log.info(faqReadDTO);
+
+        if (faqReadDTO == null) {
+            return ResponseEntity.notFound().build(); // FAQ가 없으면 404 Not Found 반환
+        }
+
+        return ResponseEntity.ok(faqReadDTO);
 
     }
 
