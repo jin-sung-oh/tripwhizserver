@@ -16,10 +16,10 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/qna")
+@RequestMapping("/api/que")
 @Log4j2
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://10.10.10.190:3000")
+
 public class QnaController {
 
     private final QnAService qnaService;
@@ -32,7 +32,7 @@ public class QnaController {
     }
 
     // 특정 QnA 항목을 조회하는 메서드 (Read - Get)
-    @GetMapping("/{qno}")
+    @GetMapping("/read/{qno}")
     public ResponseEntity<QuestionDTO> getQuestion(@PathVariable("qno") Long qno) {
         log.info("Fetching QnA with ID: {}", qno);
         QuestionDTO questionDTO = qnaService.getQuestion(qno);

@@ -42,14 +42,14 @@ public class BoardController {
     }
 
     //게시글 수정
-    @PutMapping("/{bno}")
+    @PutMapping("/update/{bno}")
     public ResponseEntity<Long> updateBoard(@PathVariable Long bno, @RequestBody BoardDTO boardDTO){
         boardService.updateBoard(bno, boardDTO);
         return ResponseEntity.ok(bno);
     }
 
     //게시글 삭제
-    @DeleteMapping("/{bno}")
+    @DeleteMapping("/delete/{bno}")
     public ResponseEntity<Long> deleteBoard(@PathVariable Long bno){
         boardService.deleteBoard(bno);
         return ResponseEntity.ok(bno);
