@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Log4j2
 @RestController
-@RequestMapping("/api/faqs")
+@RequestMapping("/api/faq")
 @RequiredArgsConstructor
 public class FAQController {
 
@@ -33,7 +33,7 @@ public class FAQController {
     }
 
     // 추가
-    @PostMapping("/")
+    @PostMapping("/add")
     public ResponseEntity<Long> addFaq(@RequestBody FAQEntity faq) {
 
         FAQEntity savedFaq = faqService.addFaq(faq);
@@ -43,7 +43,7 @@ public class FAQController {
     }
 
     // 수정
-    @PutMapping("/{fno}")
+    @PutMapping("/update/{fno}")
     public ResponseEntity<Void> modifyFaq(
             @PathVariable("fno") Long fno,
             @RequestBody FAQModifyDTO modifyDTO) {
@@ -62,7 +62,7 @@ public class FAQController {
     }
 
     // 삭제
-    @DeleteMapping("/{fno}")
+    @DeleteMapping("/delete/{fno}")
     public ResponseEntity<Void> softDeleteFAQ(@PathVariable Long fno) {
 
         // fno가 존재하지 않으면 에러 반환
