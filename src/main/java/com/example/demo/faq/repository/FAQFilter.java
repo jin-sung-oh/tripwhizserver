@@ -8,5 +8,5 @@ public interface FAQFilter {
 
     Page<FAQEntity> list(Pageable pageable);
 
-    Page<FAQEntity> listByCategory(Long cno, Pageable pageable);
+//    Page<FAQEntity> listByCategory( Pageable pageable);
 }

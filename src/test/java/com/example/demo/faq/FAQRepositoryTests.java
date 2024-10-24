@@ -1,8 +1,5 @@
 package com.example.demo.faq;
 
-import com.example.demo.common.domain.CategoryEntity;
-
-import com.example.demo.common.repository.CategoryRepository;
 import com.example.demo.faq.domain.FAQEntity;
 import com.example.demo.faq.repository.FAQRepository;
 import com.example.demo.faq.service.FAQService;
