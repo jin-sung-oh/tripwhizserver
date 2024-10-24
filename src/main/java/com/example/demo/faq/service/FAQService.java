@@ -1,10 +1,9 @@
 package com.example.demo.faq.service;
 
-import com.example.demo.common.domain.CategoryEntity;
 import com.example.demo.common.dto.PageRequestDTO;
 import com.example.demo.common.dto.PageResponseDTO;
-import com.example.demo.common.repository.CategoryRepository;
 import com.example.demo.faq.domain.FAQEntity;
+import com.example.demo.faq.domain.FaqCategory;
 import com.example.demo.faq.dto.FAQListDTO;
 import com.example.demo.faq.repository.FAQRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +26,6 @@ public class FAQService {
 
     private final FAQRepository faqRepository;
 
-    private final CategoryRepository categoryRepository;
 
     // list
     @Transactional
@@ -77,9 +75,9 @@ public class FAQService {
 
     // modify
     @Transactional
-    public boolean modify(Long fno, CategoryEntity category, String question, String answer) {
+    public boolean modify(Long fno, FaqCategory category, String question, String answer) {
         // 업데이트 실행
-        int updatedRows = faqRepository.updateFaq(fno, category.getCno(), question, answer);
+        int updatedRows = faqRepository.updateFaq(fno, question, answer);
 
         // 업데이트된 행이 없으면 예외 발생
         if (updatedRows == 0) {

@@ -1,6 +1,5 @@
 package com.example.demo.faq.domain;
 
-import com.example.demo.common.domain.CategoryEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -30,12 +29,13 @@ public class FAQEntity {
     @Column(nullable = false)
     private boolean delFlag = false;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cno", nullable = false)
-    private CategoryEntity category;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)  // 이 필드는 null 값이 아니어야 함
+    private FaqCategory category;
 
-    public void updateFields(CategoryEntity category, String question, String answer) {
-        this.category = category;
+
+    public void updateFields( String question, String answer) {
+
         this.question = question;
         this.answer = answer;
     }

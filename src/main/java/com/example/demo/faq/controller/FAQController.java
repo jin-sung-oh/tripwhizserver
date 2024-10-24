@@ -22,7 +22,6 @@ public class FAQController {
 
     private final FAQService faqService;
 
-    private final CategoryRepository cQategoryRepository;
 
     // 리스트 조회
     @GetMapping("/list")
@@ -33,7 +32,7 @@ public class FAQController {
     }
 
     // 추가
-    @PostMapping("/")
+    @PostMapping("/add")
     public ResponseEntity<Long> addFaq(@RequestBody FAQEntity faq) {
 
         FAQEntity savedFaq = faqService.addFaq(faq);
@@ -43,7 +42,7 @@ public class FAQController {
     }
 
     // 수정
-    @PutMapping("/{fno}")
+    @PutMapping("/update/{fno}")
     public ResponseEntity<Void> modifyFaq(
             @PathVariable("fno") Long fno,
             @RequestBody FAQModifyDTO modifyDTO) {
@@ -53,16 +52,15 @@ public class FAQController {
         log.info("fno: " + fno);
         log.info("modifyDTO: " + modifyDTO);
 
-        // CategoryEntity를 조회하고, FAQ 수정
-        CategoryEntity category = categoryRepository.findById(modifyDTO.getCategory().getCno())
-                .orElseThrow(() -> new IllegalArgumentException("해당 카테고리가 존재하지 않습니다. categoryId: " + modifyDTO.getCategory().getCno()));
+        // FAQ 수정 시 카테고리 정보를 FaqCategory enum으로 처리
+        FaqCategory category = modifyDTO.getCategory();
 
         faqService.modify(fno, category, modifyDTO.getQuestion(), modifyDTO.getAnswer());
         return ResponseEntity.ok().build();
     }
 
     // 삭제
-    @DeleteMapping("/{fno}")
+    @DeleteMapping("/delete/{fno}")
     public ResponseEntity<Void> softDeleteFAQ(@PathVariable Long fno) {
 
         // fno가 존재하지 않으면 에러 반환
