@@ -90,7 +90,7 @@ public class FAQRepositoryTests {
     @Test
     public void testAddFaq() {
 
-        Optional<CategoryEntity> categoryOpt = categoryRepository.findById(1);
+        Optional<CategoryEntity> categoryOpt = categoryRepository.findById(1L);
         CategoryEntity category = categoryOpt.get();
 
         FAQEntity faq = FAQEntity.builder()
