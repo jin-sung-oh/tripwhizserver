@@ -1,6 +1,6 @@
 package com.example.demo.faq.dto;
 
-import com.example.demo.common.domain.CategoryEntity;
+import com.example.demo.faq.domain.FaqCategory;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +14,7 @@ public class FAQModifyDTO {
 
     private Long fno;
 
-    private CategoryEntity category;
+    private FaqCategory category;
 
     private String question;
 
