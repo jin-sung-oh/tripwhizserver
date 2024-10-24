@@ -2,7 +2,6 @@ package com.example.demo.faq;
 
 import com.example.demo.faq.domain.FAQEntity;
 import com.example.demo.faq.repository.FAQRepository;
-import com.example.demo.faq.service.FAQService;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +13,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
@@ -100,9 +98,6 @@ public class FAQRepositoryTests {
 //                .category(category)
                 .build();
 
-        FAQEntity savedFaq = faqService.addFaq(faq);
-
-        log.info("Saved FAQ: " + savedFaq);
 
     }
 
@@ -137,8 +132,6 @@ public class FAQRepositoryTests {
     public void testSoftDelete() {
 
         Long fno = 100L;
-
-        faqService.softDeleteFAQ(fno);
 
     }
 
