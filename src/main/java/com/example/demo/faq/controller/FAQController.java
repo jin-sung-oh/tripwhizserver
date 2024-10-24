@@ -1,10 +1,9 @@
 package com.example.demo.faq.controller;
 
-import com.example.demo.common.domain.CategoryEntity;
 import com.example.demo.common.dto.PageRequestDTO;
 import com.example.demo.common.dto.PageResponseDTO;
-import com.example.demo.common.repository.CategoryRepository;
 import com.example.demo.faq.domain.FAQEntity;
+import com.example.demo.faq.domain.FaqCategory;
 import com.example.demo.faq.dto.FAQListDTO;
 import com.example.demo.faq.dto.FAQModifyDTO;
 import com.example.demo.faq.service.FAQService;
@@ -22,7 +21,6 @@ public class FAQController {
 
     private final FAQService faqService;
 
-    private final CategoryRepository categoryRepository;
 
     // 리스트 조회
     @GetMapping("/list")
@@ -53,9 +51,8 @@ public class FAQController {
         log.info("fno: " + fno);
         log.info("modifyDTO: " + modifyDTO);
 
-        // CategoryEntity를 조회하고, FAQ 수정
-        CategoryEntity category = categoryRepository.findById(modifyDTO.getCategory().getCno())
-                .orElseThrow(() -> new IllegalArgumentException("해당 카테고리가 존재하지 않습니다. categoryId: " + modifyDTO.getCategory().getCno()));
+        // FAQ 수정 시 카테고리 정보를 FaqCategory enum으로 처리
+        FaqCategory category = modifyDTO.getCategory();
 
         faqService.modify(fno, category, modifyDTO.getQuestion(), modifyDTO.getAnswer());
         return ResponseEntity.ok().build();

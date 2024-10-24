@@ -1,7 +1,5 @@
 package com.example.demo.common;
 
-import com.example.demo.common.domain.CategoryEntity;
-import com.example.demo.common.repository.CategoryRepository;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
