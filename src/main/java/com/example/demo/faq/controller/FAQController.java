@@ -16,13 +16,13 @@ import org.springframework.web.bind.annotation.*;
 
 @Log4j2
 @RestController
-@RequestMapping("/api/faqs")
+@RequestMapping("/api/faq")
 @RequiredArgsConstructor
 public class FAQController {
 
     private final FAQService faqService;
 
-    private final CategoryRepository categoryRepository;
+    private final CategoryRepository cQategoryRepository;
 
     // 리스트 조회
     @GetMapping("/list")
