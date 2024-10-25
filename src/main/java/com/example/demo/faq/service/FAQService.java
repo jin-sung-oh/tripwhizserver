@@ -28,7 +28,6 @@ public class FAQService {
 
     private final FAQRepository faqRepository;
 
-
     // list
     @Transactional
     public PageResponseDTO<FAQListDTO> list(PageRequestDTO pageRequestDTO) {
@@ -89,8 +88,6 @@ public class FAQService {
         return savedFaq; // 저장된 FAQ 반환
 
     }
-
-
 
     // modify
     @Transactional

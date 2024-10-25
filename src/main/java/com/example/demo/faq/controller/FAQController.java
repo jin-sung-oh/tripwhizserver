@@ -80,7 +80,7 @@ public class FAQController {
 
     // 삭제
     @DeleteMapping("/delete/{fno}")
-    public ResponseEntity<Void> softDeleteFAQ(@PathVariable Long fno) {
+    public ResponseEntity<String> softDeleteFAQ(@PathVariable Long fno) {
 
         // fno가 존재하지 않으면 에러 반환
         if (!faqService.existsById(fno)) {
@@ -88,7 +88,7 @@ public class FAQController {
         }
 
         faqService.softDeleteFAQ(fno);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("success");
 
     }
 }
