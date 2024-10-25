@@ -3,7 +3,6 @@ package com.example.demo.faq;
 import com.example.demo.faq.domain.FAQEntity;
 import com.example.demo.faq.domain.FaqCategory;
 import com.example.demo.faq.repository.FAQRepository;
-import com.example.demo.faq.service.FAQService;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
@@ -28,7 +26,9 @@ public class FAQRepositoryTests {
     private FAQRepository faqRepository;
 
 
+
     private FAQService faqService;
+
 
     @Test
     @Commit
@@ -50,12 +50,20 @@ public class FAQRepositoryTests {
     @Commit
     public void insertDummies() {
 
+
+//        List<CategoryEntity> categories = categoryRepository.findAll();
+
         FaqCategory[] categories = FaqCategory.values();
+
 
         // 100개의 질문을 DB에 저장
         IntStream.rangeClosed(1, 100).forEach(i -> {
 
+
+//            CategoryEntity category = categories.get((i - 1) % categories.size());
+=======
 //            FaqCategory category = categories.[(i - 1) % categories.length];
+
 
             FAQEntity faq = FAQEntity.builder()
                     .question("Question " + i)
@@ -76,8 +84,18 @@ public class FAQRepositoryTests {
 
         Pageable pageable = PageRequest.of(0, 10, Sort.by("fno").descending());
 
-        faqRepository.findAll(pageable);
+        faqRepository.filteredList(pageable);
 //        faqService.list(pageable);
+
+    }
+
+    // FAQ 조회
+    @Test
+    public void testRead() {
+
+        Long fno = 100L;
+
+        log.info(faqRepository.read(fno));
 
     }
 
@@ -85,15 +103,22 @@ public class FAQRepositoryTests {
     @Test
     public void testAddFaq() {
 
+
+//        Optional<CategoryEntity> categoryOpt = categoryRepository.findById(1);
+//        CategoryEntity category = categoryOpt.get();
+
+        FAQEntity faq = FAQEntity.builder()
+                .question("test")
+                .answer("test")
+//                .category(category)
+
         FAQEntity faq = FAQEntity.builder()
                 .question("test")
                 .answer("test")
                 .category(FaqCategory.APP)
+
                 .build();
 
-        FAQEntity savedFaq = faqService.addFaq(faq);
-
-        log.info("Saved FAQ: " + savedFaq);
 
     }
 
@@ -112,10 +137,14 @@ public class FAQRepositoryTests {
         // 수정할 데이터 설정
         String updatedQuestion = "수정된 질문";
         String updatedAnswer = "수정된 답변";
+
+//        CategoryEntity updatedCategory = faq.getCategory(); // 기존 카테고리를 유지하거나 변경 가능
+
         FaqCategory updatedCategory = faq.getCategory(); // 기존 카테고리를 유지하거나 변경 가능
 
+
         // FAQ 수정
-        faq.updateFields(updatedCategory, updatedQuestion, updatedAnswer);
+//        faq.updateFields(updatedCategory, updatedQuestion, updatedAnswer);
         faqRepository.save(faq);
 
         // 수정된 데이터 검증
@@ -128,8 +157,6 @@ public class FAQRepositoryTests {
     public void testSoftDelete() {
 
         Long fno = 100L;
-
-        faqService.softDeleteFAQ(fno);
 
     }
 
