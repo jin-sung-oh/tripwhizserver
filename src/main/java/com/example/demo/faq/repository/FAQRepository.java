@@ -13,12 +13,14 @@ import java.util.Optional;
 
 public interface FAQRepository extends JpaRepository<FAQEntity, Long>, FAQFilter {
 
-    Page<FAQEntity> findByFno(Long fno, Pageable pageable);
+    // delFlag가 false인 것만 조회
+    @Query("SELECT f FROM FAQEntity f WHERE f.delFlag = false")
+    Page<FAQEntity> filteredList(Pageable pageable);
 
     // 아이디가 존재하는지 확인하는 로직
     boolean existsById(Long fno);
 
-    //조회
+    // 조회
     @Query("select " +
             "new com.example.demo.faq.dto.FAQReadDTO(f.fno,f.category,f.question,f.answer) " +
             "from FAQEntity f where f.fno = :fno")

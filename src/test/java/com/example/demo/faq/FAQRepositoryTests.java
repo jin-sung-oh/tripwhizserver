@@ -70,7 +70,7 @@ public class FAQRepositoryTests {
 
         Pageable pageable = PageRequest.of(0, 10, Sort.by("fno").descending());
 
-        faqRepository.findAll(pageable);
+        faqRepository.filteredList(pageable);
 //        faqService.list(pageable);
 
     }

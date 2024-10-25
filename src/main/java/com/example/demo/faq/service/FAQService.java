@@ -28,7 +28,6 @@ public class FAQService {
 
     private final FAQRepository faqRepository;
 
-
     // list
     @Transactional
     public PageResponseDTO<FAQListDTO> list(PageRequestDTO pageRequestDTO) {
@@ -37,7 +36,7 @@ public class FAQService {
                 pageRequestDTO.getSize(),
                 Sort.by("fno").descending());
 
-        Page<FAQEntity> result = faqRepository.findAll(pageable);
+        Page<FAQEntity> result = faqRepository.filteredList(pageable);
 
         List<FAQListDTO> dtoList = result.get().map(FAQEntity -> {
 
@@ -89,8 +88,6 @@ public class FAQService {
         return savedFaq; // 저장된 FAQ 반환
 
     }
-
-
 
     // modify
     @Transactional
