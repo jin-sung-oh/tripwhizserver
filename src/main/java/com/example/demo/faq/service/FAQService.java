@@ -5,6 +5,7 @@ import com.example.demo.common.dto.PageResponseDTO;
 import com.example.demo.faq.domain.FAQEntity;
 import com.example.demo.faq.domain.FaqCategory;
 import com.example.demo.faq.dto.FAQListDTO;
+import com.example.demo.faq.dto.FAQReadDTO;
 import com.example.demo.faq.repository.FAQRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,7 +37,7 @@ public class FAQService {
                 pageRequestDTO.getSize(),
                 Sort.by("fno").descending());
 
-        Page<FAQEntity> result = faqRepository.findAll(pageable);
+        Page<FAQEntity> result = faqRepository.filteredList(pageable);
 
         List<FAQListDTO> dtoList = result.get().map(FAQEntity -> {
 
@@ -58,6 +60,23 @@ public class FAQService {
                 .pageRequestDTO(pageRequestDTO)
                 .totalCount(total)
                 .build();
+
+    }
+
+    // read
+    @Transactional
+    public FAQReadDTO read(Long fno) {
+
+        Optional<FAQReadDTO> result = faqRepository.read(fno);
+
+        if (result.isEmpty()) {
+
+            log.info(result);
+            return null;
+
+        }
+
+        return result.get();
 
     }
 
