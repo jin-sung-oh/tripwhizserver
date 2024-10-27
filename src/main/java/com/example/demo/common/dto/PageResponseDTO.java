@@ -4,35 +4,22 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Data
 public class PageResponseDTO<E> {
     private List<E> dtoList;
-    private List<Integer> pageNumList;
     private PageRequestDTO pageRequestDTO;
-    private boolean prev, next;
-    private int totalCount, prevPage, nextPage, totalPage, current;
+    private boolean prev, next; // 이전 및 다음 버튼 상태
+    private int totalCount, totalPage, current;
 
     @Builder(builderMethodName = "withAll")
-    public PageResponseDTO(List<E> dtoList, PageRequestDTO pageRequestDTO, long totalCount) {
+    public PageResponseDTO(List<E> dtoList, PageRequestDTO pageRequestDTO, long totalCount, int totalPage, boolean prev, boolean next) {
         this.dtoList = dtoList;
         this.pageRequestDTO = pageRequestDTO;
-        this.totalCount = (int)totalCount;
-        int end = (int)(Math.ceil( pageRequestDTO.getPage() / 10.0 )) * 10;
-        int start = end - 9;
-        int last = (int)(Math.ceil((totalCount/(double)pageRequestDTO.getSize())));
-        end = end > last ? last: end;
-        this.prev = start > 1;
-        this.next = totalCount > end * pageRequestDTO.getSize();
-        this.pageNumList = IntStream.rangeClosed(start,end).boxed().collect(Collectors.toList());
-        if(prev)
-            this.prevPage = start -1;
-        if(next)
-            this.nextPage = end + 1;
-        this.totalPage = this.pageNumList.size();
+        this.totalCount = (int) totalCount;
+        this.totalPage = totalPage;
         this.current = pageRequestDTO.getPage();
+        this.prev = prev; // 이전 버튼 여부
+        this.next = next; // 다음 버튼 여부
     }
 }
-
