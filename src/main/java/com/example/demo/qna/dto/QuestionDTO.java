@@ -1,6 +1,7 @@
 package com.example.demo.qna.dto;
 
 import com.example.demo.qna.domain.QnAStatus;
+import com.example.demo.qna.domain.QnaCategory;
 import com.example.demo.qna.domain.QuestionsEntity;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,6 +15,7 @@ public class QuestionDTO {
     private Long qno;
     private String title;
     private QnAStatus status;
+    private QnaCategory category;
     private String writer;
     private String qcontent;
     private LocalDateTime createdDate;
@@ -24,6 +26,7 @@ public class QuestionDTO {
         this.qno = questionsEntity.getQno();
         this.title = questionsEntity.getTitle();
         this.status = questionsEntity.getStatus();
+        this.category = questionsEntity.getCategory();
         this.writer = questionsEntity.getWriter();
         this.qcontent = questionsEntity.getQcontent();
         this.createdDate = questionsEntity.getCreatedDate();
@@ -36,6 +39,7 @@ public class QuestionDTO {
                 .qno(this.qno)
                 .title(this.title)
                 .status(this.status)
+                .category(this.category)
                 .writer(this.writer)
                 .qcontent(this.qcontent)
                 .viewCount(this.viewCount)
