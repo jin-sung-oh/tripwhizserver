@@ -1,5 +1,7 @@
 package com.example.demo.faq.dto;
 
+import com.example.demo.faq.domain.FaqCategory;
+import com.example.demo.qna.domain.QnaCategory;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,7 +17,7 @@ public class FAQListDTO {
 
     private String question;
 
-    private
+    private FaqCategory category;
 
     private String answer;
 
