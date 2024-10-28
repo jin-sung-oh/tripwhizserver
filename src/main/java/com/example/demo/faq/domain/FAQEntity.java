@@ -30,16 +30,12 @@ public class FAQEntity {
     private boolean delFlag = false;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)  // 이 필드는 null 값이 아니어야 함
-    private FaqCategory category;
+    @Column(nullable = false)
+    private FaqCategory category = FaqCategory.APP;
 
-
-    public void updateFields( String question, String answer) {
-
+    public void updateFields(FaqCategory updatedCategory, String question, String answer) {
+        this.category = updatedCategory;
         this.question = question;
         this.answer = answer;
     }
-
-
-
 }

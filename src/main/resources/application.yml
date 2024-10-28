@@ -25,8 +25,6 @@ spring:
     multipart:
       max-file-size: 5MB
       max-request-size: 20MB
-
-
       location: upload
       enabled: true
 
@@ -41,6 +39,14 @@ com:
 logging:
   level:
     org.springframework.security.web: TRACE
+
+  spring:
+    mvc:
+      throw-exception-if-no-handler-found: true
+    web:
+      resources:
+        add-mappings: false
+
 
 
 

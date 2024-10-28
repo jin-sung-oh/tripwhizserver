@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class FAQListDTO {
+public class FAQReadDTO {
 
     private Long fno;
 
@@ -18,12 +18,6 @@ public class FAQListDTO {
 
     private String question;
 
-    private FaqCategory category;
-
     private String answer;
-
-    private int viewCnt;
-
-    private boolean delFlag;
 
 }

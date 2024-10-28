@@ -34,9 +34,11 @@ public class QuestionsEntity {
     @Builder.Default
     private QnAStatus status = QnAStatus.답변대기;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)  // 이 필드는 null 값이 아니어야 함
-    private QnaCategory category;
+//    @Enumerated(EnumType.STRING)
+//    @Column(nullable = false)  // 이 필드는 null 값이 아니어야 함
+//    private QnaCategory category;
+    @Builder.Default
+    private QnaCategory category = QnaCategory.APP;
 
     @ElementCollection // 컬렉션을 매핑하기 위해 사용
     @CollectionTable(name = "question_images", joinColumns = @JoinColumn(name = "question_qno"))

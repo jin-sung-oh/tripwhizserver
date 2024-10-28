@@ -2,6 +2,7 @@ package com.example.demo.qna;
 
 import com.example.demo.qna.domain.AnswersEntity;
 import com.example.demo.qna.domain.QnAStatus;
+import com.example.demo.qna.domain.QnaCategory;
 import com.example.demo.qna.domain.QuestionsEntity;
 import com.example.demo.qna.repository.AnswersRepository;
 import com.example.demo.qna.repository.QuestionRepository;
@@ -47,6 +48,7 @@ public class QnARepositoryTests {
                     .writer("작성자 " + i)
                     .isPublic(true)
                     .status(QnAStatus.답변대기)
+                    .category(QnaCategory.환불)
                     .createdDate(LocalDateTime.now())
                     .build();
             questionRepository.save(question);

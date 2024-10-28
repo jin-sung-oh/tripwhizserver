@@ -21,14 +21,28 @@ public class FAQController {
 
     private final FAQService faqService;
 
-
     // 리스트 조회
     @GetMapping("/list")
-    public PageResponseDTO<FAQListDTO> list(PageRequestDTO pageRequestDTO) {
-
-        return faqService.list(pageRequestDTO);
-
+    public PageResponseDTO<FAQListDTO> list(PageRequestDTO pageRequestDTO,
+                                            @RequestParam(required = false) FaqCategory category) {
+        // 카테고리가 null인 경우 모든 FAQ를 조회
+        log.info("Fetching FAQ list for category: {}", category);
+        return faqService.list(pageRequestDTO, category); // 카테고리 정보를 함께 전달
     }
+
+
+
+    // 조회
+    @GetMapping("/read/{fno}")
+    public ResponseEntity<FAQReadDTO> read(@PathVariable Long fno) {
+        log.info(fno);
+        FAQReadDTO faqReadDTO = faqService.read(fno);
+        log.info(faqReadDTO);
+        if (faqReadDTO == null) {
+            return ResponseEntity.notFound().build(); // FAQ가 없으면 404 Not Found 반환
+        }
+
+        return ResponseEntity.ok(faqReadDTO);
 
     // 추가
     @PostMapping("/add")
@@ -61,7 +75,6 @@ public class FAQController {
     // 삭제
     @DeleteMapping("/delete/{fno}")
     public ResponseEntity<String> softDeleteFAQ(@PathVariable Long fno) {
-
         // fno가 존재하지 않으면 에러 반환
         if (!faqService.existsById(fno)) {
             return ResponseEntity.notFound().build();
@@ -69,6 +82,5 @@ public class FAQController {
 
         faqService.softDeleteFAQ(fno);
         return ResponseEntity.ok("success");
-
     }
 }
