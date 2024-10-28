@@ -48,7 +48,7 @@ public class QnARepositoryTests {
                     .writer("작성자 " + i)
                     .isPublic(true)
                     .status(QnAStatus.답변대기)
-                    .category(QnaCategory.APP)
+                    .category(QnaCategory.환불)
                     .createdDate(LocalDateTime.now())
                     .build();
             questionRepository.save(question);

@@ -31,6 +31,7 @@ public class FAQController {
 
     }
 
+
     // 조회
     @GetMapping("/read/{fno}")
     public ResponseEntity<FAQReadDTO> read(@PathVariable Long fno) {
