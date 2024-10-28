@@ -28,6 +28,7 @@ public class FAQRepositoryTests {
     @Autowired
     private FAQService faqService;
 
+
     // 데이터 삽입
     @Test
     @Commit
@@ -42,7 +43,6 @@ public class FAQRepositoryTests {
         log.info("Inserted FAQ: " + faq);
     }
 
-    // 더미 데이터 생성
     @Test
     @Commit
     public void insertDummies() {
@@ -59,7 +59,6 @@ public class FAQRepositoryTests {
         });
     }
 
-    // 리스트 조회
     @Test
     public void testList() {
         Pageable pageable = PageRequest.of(0, 10, Sort.by("fno").descending());
@@ -105,6 +104,7 @@ public class FAQRepositoryTests {
             log.warn("FAQ not found with ID: " + fno);
         }
     }
+
 
     // 데이터 삭제
     @Test

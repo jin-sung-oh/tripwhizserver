@@ -31,6 +31,7 @@ public class FAQController {
         return faqService.list(pageRequestDTO, category); // 카테고리 정보를 함께 전달
     }
 
+
     // 조회
     @GetMapping("/read/{fno}")
     public ResponseEntity<FAQReadDTO> read(@PathVariable Long fno) {

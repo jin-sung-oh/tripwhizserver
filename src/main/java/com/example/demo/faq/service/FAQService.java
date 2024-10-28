@@ -28,12 +28,14 @@ public class FAQService {
 
     private final FAQRepository faqRepository;
 
+
     // 카테고리별 FAQ 리스트 조회 (페이지네이션 포함)
     @Transactional
     public PageResponseDTO<FAQListDTO> list(PageRequestDTO pageRequestDTO, FaqCategory category) {
         Pageable pageable = PageRequest.of(pageRequestDTO.getPage() - 1,
                 pageRequestDTO.getSize(),
                 Sort.by("fno").descending());
+
 
         // 필터링된 FAQ 리스트를 페이지네이션과 함께 가져옴
         Page<FAQEntity> result = faqRepository.filteredList(pageable, category);

@@ -18,6 +18,8 @@ public class FAQListDTO {
 
     private String question;
 
+    private FaqCategory category;
+
     private String answer;
 
     private int viewCnt;
