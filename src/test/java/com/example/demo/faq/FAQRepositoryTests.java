@@ -4,7 +4,6 @@ import com.example.demo.faq.domain.FAQEntity;
 import com.example.demo.faq.domain.FaqCategory;
 import com.example.demo.faq.repository.FAQRepository;
 import com.example.demo.faq.service.FAQService;
-import com.example.demo.qna.domain.QuestionsEntity;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +28,8 @@ public class FAQRepositoryTests {
     @Autowired
     private FAQService faqService;
 
+
+    // 데이터 삽입
     @Test
     @Commit
     public void testInsert() {
@@ -64,6 +65,30 @@ public class FAQRepositoryTests {
         faqRepository.findAll(pageable).forEach(faq -> log.info(faq));
     }
 
+    // FAQ 조회
+    @Test
+    public void testRead() {
+
+        Long fno = 100L;
+
+        log.info(faqRepository.read(fno));
+
+    }
+
+    // 데이터 추가
+    @Test
+    public void testAddFaq() {
+
+
+        FAQEntity faq = FAQEntity.builder()
+                .question("test")
+                .answer("test")
+                .category(FaqCategory.APP)
+                .build();
+
+    }
+
+    // 데이터 수정
     @Test
     @Commit
     public void testModifyExistingFAQ() {
@@ -80,6 +105,8 @@ public class FAQRepositoryTests {
         }
     }
 
+
+    // 데이터 삭제
     @Test
     public void testSoftDelete() {
         Long fno = 100L;

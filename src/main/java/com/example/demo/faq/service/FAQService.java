@@ -28,31 +28,42 @@ public class FAQService {
 
     private final FAQRepository faqRepository;
 
-    // FAQ 리스트 조회
+
+    // 카테고리별 FAQ 리스트 조회 (페이지네이션 포함)
     @Transactional
-    public PageResponseDTO<FAQListDTO> list(PageRequestDTO pageRequestDTO) {
+    public PageResponseDTO<FAQListDTO> list(PageRequestDTO pageRequestDTO, FaqCategory category) {
         Pageable pageable = PageRequest.of(pageRequestDTO.getPage() - 1,
                 pageRequestDTO.getSize(),
                 Sort.by("fno").descending());
 
-        // 필터링된 FAQ 리스트를 가져옴
-        Page<FAQEntity> result = faqRepository.filteredList(pageable);
 
-        List<FAQListDTO> dtoList = result.get().map(faqEntity -> FAQListDTO.builder()
-                .fno(faqEntity.getFno())
-                .question(faqEntity.getQuestion())
-                .answer(faqEntity.getAnswer())
-                .viewCnt(faqEntity.getViewCnt())
-                .delFlag(faqEntity.isDelFlag()) // delFlag 값을 가져옴
-                .category(faqEntity.getCategory()) // 카테고리 추가
-                .build()).collect(Collectors.toUnmodifiableList());
+        // 필터링된 FAQ 리스트를 페이지네이션과 함께 가져옴
+        Page<FAQEntity> result = faqRepository.filteredList(pageable, category);
 
-        long total = result.getTotalElements();
+        // DTO 리스트 생성
+        List<FAQListDTO> dtoList = result.getContent().stream()
+                .map(faqEntity -> FAQListDTO.builder()
+                        .fno(faqEntity.getFno())
+                        .question(faqEntity.getQuestion())
+                        .answer(faqEntity.getAnswer())
+                        .viewCnt(faqEntity.getViewCnt())
+                        .delFlag(faqEntity.isDelFlag())
+                        .category(faqEntity.getCategory())
+                        .build())
+                .collect(Collectors.toList());
+
+        long totalCount = faqRepository.countByCategory(category); // 카테고리별 총 개수 계산
+
+        // 총 페이지 수 계산
+        int totalPages = (int) Math.ceil((double) totalCount / pageRequestDTO.getSize());
 
         return PageResponseDTO.<FAQListDTO>withAll()
                 .dtoList(dtoList)
                 .pageRequestDTO(pageRequestDTO)
-                .totalCount(total)
+                .totalCount(totalCount)
+                .totalPage(totalPages) // 총 페이지 수 설정
+                .prev(pageRequestDTO.getPage() > 1) // 이전 버튼 여부
+                .next(pageRequestDTO.getPage() < totalPages) // 다음 버튼 여부
                 .build();
     }
 
@@ -60,7 +71,6 @@ public class FAQService {
     @Transactional
     public FAQReadDTO read(Long fno) {
         Optional<FAQReadDTO> result = faqRepository.read(fno);
-
         return result.orElse(null); // 결과가 없으면 null 반환
     }
 
