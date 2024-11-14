@@ -6,6 +6,7 @@ import com.example.demo.faq.domain.FAQEntity;
 import com.example.demo.faq.domain.FaqCategory;
 import com.example.demo.faq.dto.FAQListDTO;
 import com.example.demo.faq.dto.FAQModifyDTO;
+import com.example.demo.faq.dto.FAQReadDTO;
 import com.example.demo.faq.service.FAQService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -30,28 +31,26 @@ public class FAQController {
         return faqService.list(pageRequestDTO, category); // 카테고리 정보를 함께 전달
     }
 
-
-
     // 조회
     @GetMapping("/read/{fno}")
     public ResponseEntity<FAQReadDTO> read(@PathVariable Long fno) {
         log.info(fno);
         FAQReadDTO faqReadDTO = faqService.read(fno);
         log.info(faqReadDTO);
+
         if (faqReadDTO == null) {
             return ResponseEntity.notFound().build(); // FAQ가 없으면 404 Not Found 반환
         }
 
         return ResponseEntity.ok(faqReadDTO);
+    }
 
     // 추가
     @PostMapping("/add")
     public ResponseEntity<Long> addFaq(@RequestBody FAQEntity faq) {
-
         FAQEntity savedFaq = faqService.addFaq(faq);
         Long fno = savedFaq.getFno(); // 저장된 FAQ의 fno 값 추출
         return ResponseEntity.status(HttpStatus.CREATED).body(fno); // fno 값을 반환
-
     }
 
     // 수정
@@ -59,7 +58,6 @@ public class FAQController {
     public ResponseEntity<Void> modifyFaq(
             @PathVariable("fno") Long fno,
             @RequestBody FAQModifyDTO modifyDTO) {
-
 
         log.info("-----------------------------------");
         log.info("fno: " + fno);

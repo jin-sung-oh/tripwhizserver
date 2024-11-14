@@ -16,8 +16,8 @@ public class BoardDTO {
     private String bcontent;
     private String writer;
     private int viewCount;
-    private LocalDateTime createdDate;
-    private LocalDateTime updatedDate;
+    private LocalDateTime createdDate = LocalDateTime.now();
+    private LocalDateTime updatedDate = LocalDateTime.now();
     private boolean delFlag;
 
     @Builder
