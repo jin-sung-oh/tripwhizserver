@@ -3,11 +3,14 @@ package com.example.demo.product.dto;
 import com.example.demo.category.domain.Category;
 import com.example.demo.category.domain.SubCategory;
 import com.example.demo.category.domain.ThemeCategory;
+import com.example.demo.product.domain.Image;
 import com.example.demo.product.domain.Product;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @Builder
@@ -15,15 +18,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ProductListDTO {
 
-    private Long pno;             // 상품 번호
-    private String pname;          // 상품 이름
+    private Long pno;
+    private String pname;
     private int price;
-    private Long categoryCno;      // 상위 카테고리 ID
-    private Long subCategoryScno;  // 하위 카테고리 ID
-    private ThemeCategory themeCategory; // 테마 카테고리
-    private String fileUrl;
+    private Long categoryCno;
+    private Long subCategoryScno;
+    private ThemeCategory themeCategory;
+    private List<Image> images;
 
-    // DTO를 엔티티로 변환하는 메서드
     public Product toEntity(Category category, SubCategory subCategory) {
         return Product.builder()
                 .pname(this.pname)
@@ -31,6 +33,7 @@ public class ProductListDTO {
                 .category(category)
                 .subCategory(subCategory)
                 .themeCategory(this.themeCategory)
+                .images(this.images)
                 .build();
     }
 }
