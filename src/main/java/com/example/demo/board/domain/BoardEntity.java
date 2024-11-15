@@ -27,17 +27,17 @@ public class BoardEntity {
     @Lob
     private String bcontent;
 
-    private String writer;
+    private String writer = "관리자";
 
     @Column(nullable = false)
     @Builder.Default
     private int viewCount = 0;
 
     @CreatedDate // 생성 시간 자동 기록
-    private LocalDateTime createdDate;
+    private LocalDateTime createdDate = LocalDateTime.now();
 
     @LastModifiedDate // 수정 시간 자동 기록
-    private LocalDateTime updatedDate;
+    private LocalDateTime updatedDate = LocalDateTime.now();
 
     private boolean delFlag;
 

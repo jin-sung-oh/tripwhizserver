@@ -14,10 +14,10 @@ public class BoardDTO {
     private Long bno;
     private String title;
     private String bcontent;
-    private String writer;
+    private String writer = "관리자";
     private int viewCount;
-    private LocalDateTime createdDate;
-    private LocalDateTime updatedDate;
+    private LocalDateTime createdDate = LocalDateTime.now();
+    private LocalDateTime updatedDate = LocalDateTime.now();
     private boolean delFlag;
 
     @Builder
@@ -25,10 +25,10 @@ public class BoardDTO {
         this.bno = bno;
         this.title = title;
         this.bcontent = bcontent;
-        this.writer = writer;
+        this.writer = writer = "관리자";
         this.viewCount = viewCount;
-        this.createdDate = createdDate;
-        this.updatedDate = updatedDate;
+        this.createdDate = createdDate == null ? LocalDateTime.now() : createdDate;
+        this.updatedDate = updatedDate == null ? LocalDateTime.now() : updatedDate;
         this.delFlag = delFlag;
     }
 
