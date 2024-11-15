@@ -36,9 +36,9 @@ public class BoardRepositoryTests {
     public void insertDummies() {
         IntStream.rangeClosed(1, 100).forEach(i -> {
             BoardEntity board = BoardEntity.builder()
-                    .title("제목 " + i)
-                    .bcontent("내용 " + i)
-                    .writer("작성자 " + i)
+                    .title("집가고싶다 " + i)
+                    .bcontent("저녁메뉴추천받습니다 " + i)
+                    .writer("최설아 " + i)
                     .viewCount(0)
                     .delFlag(false)
                     .createdDate(LocalDateTime.now())

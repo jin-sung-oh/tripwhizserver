@@ -14,7 +14,10 @@ public class SampleController {
     public String[] hello() {
 
         log.info("-------------");
+        log.info("-----------------");
         log.info("hello");
+
+        log.info("===================");
 
         return new String[]{"hello", "world"};
 

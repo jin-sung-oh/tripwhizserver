@@ -7,8 +7,7 @@ import com.example.demo.faq.service.FAQService;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -19,8 +18,8 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 
 @Log4j2
-@DataJpaTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@SpringBootTest
+@Transactional
 public class FAQRepositoryTests {
 
     @Autowired
@@ -29,14 +28,14 @@ public class FAQRepositoryTests {
     @Autowired
     private FAQService faqService;
 
+    // 데이터 삽입
     @Test
     @Commit
-    @Transactional
     public void testInsert() {
         FAQEntity faq = FAQEntity.builder()
                 .question("Test question")
                 .answer("Test answer")
-                .category(FaqCategory.APP) // FaqCategory enum 사용
+                .category(FaqCategory.APP)
                 .build();
 
         faqRepository.save(faq);
@@ -45,19 +44,15 @@ public class FAQRepositoryTests {
 
     // 더미 데이터 생성
     @Test
-    @Transactional
     @Commit
     public void insertDummies() {
-        // 100개의 질문을 DB에 저장
         IntStream.rangeClosed(1, 100).forEach(i -> {
-            FaqCategory category = FaqCategory.values()[i % FaqCategory.values().length]; // 카테고리 순환
-
             FAQEntity faq = FAQEntity.builder()
                     .question("Question " + i)
                     .answer("Answer " + i)
                     .viewCnt(0)
                     .delFlag(false)
-                    .category(category)
+                    .category(FaqCategory.매장)
                     .build();
             faqRepository.save(faq);
             log.info("Saved FAQ: " + faq);
@@ -71,24 +66,31 @@ public class FAQRepositoryTests {
         faqRepository.findAll(pageable).forEach(faq -> log.info(faq));
     }
 
-    // FAQ 추가
+    // FAQ 조회
     @Test
-    public void testAddFaq() {
-        FaqCategory category = FaqCategory.환불; // 예시로 '환불' 카테고리 사용
+    public void testRead() {
 
-        FAQEntity faq = FAQEntity.builder()
-                .question("Test question")
-                .answer("Test answer")
-                .category(category)
-                .build();
+        Long fno = 100L;
 
-        FAQEntity savedFaq = faqService.addFaq(faq);
-        log.info("Saved FAQ: " + savedFaq);
+        log.info(faqRepository.read(fno));
+
     }
 
-    // FAQ 수정
+    // 데이터 추가
     @Test
-    @Transactional
+    public void testAddFaq() {
+
+
+        FAQEntity faq = FAQEntity.builder()
+                .question("test")
+                .answer("test")
+                .category(FaqCategory.APP)
+                .build();
+
+    }
+
+    // 데이터 수정
+    @Test
     @Commit
     public void testModifyExistingFAQ() {
         Long fno = 15L;
@@ -96,11 +98,7 @@ public class FAQRepositoryTests {
 
         if (optionalFAQ.isPresent()) {
             FAQEntity faq = optionalFAQ.get();
-            String updatedQuestion = "Updated question";
-            String updatedAnswer = "Updated answer";
-            FaqCategory updatedCategory = FaqCategory.픽업; // 예시로 '픽업' 카테고리 사용
-
-            faq.updateFields(updatedCategory, updatedQuestion, updatedAnswer);
+            faq.updateFields(FaqCategory.픽업, "Updated question", "Updated answer");
             faqRepository.save(faq);
             log.info("Updated FAQ: " + faq);
         } else {
@@ -108,7 +106,7 @@ public class FAQRepositoryTests {
         }
     }
 
-    // FAQ 소프트 삭제
+    // 데이터 삭제
     @Test
     public void testSoftDelete() {
         Long fno = 100L;
