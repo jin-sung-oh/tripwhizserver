@@ -5,11 +5,13 @@ import com.example.demo.common.dto.PageResponseDTO;
 import com.example.demo.product.dto.ProductListDTO;
 import com.example.demo.product.dto.ProductReadDTO;
 import com.example.demo.product.service.ProductService;
+import com.example.demo.util.CustomFileUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
@@ -20,17 +22,37 @@ import java.util.Optional;
 public class ProductController {
 
     private final ProductService productService;
+    private final CustomFileUtil customFileUtil; // UploadController 대신 CustomFileUtil 사용
 
     // 상품 생성
     @PostMapping("/add")
-    public ResponseEntity<Long> createProduct(@RequestBody ProductListDTO productListDTO) {
+    public ResponseEntity<Long> createProduct(
+            @RequestPart ProductListDTO productListDTO,
+            @RequestPart(required = false) MultipartFile file) {
+
+        if (file != null) {
+            // CustomFileUtil을 사용하여 파일 저장
+            String uploadedFileName = customFileUtil.saveFile(file);
+            productListDTO.setFileUrl("http://localhost/uploads/" + uploadedFileName); // 업로드된 이미지 파일명을 DTO에 설정
+        }
+
         Long pno = productService.createProduct(productListDTO);
         return ResponseEntity.ok(pno);
     }
 
     // 상품 수정
     @PutMapping("/update/{pno}")
-    public ResponseEntity<Long> updateProduct(@PathVariable Long pno, @RequestBody ProductListDTO productListDTO) {
+    public ResponseEntity<Long> updateProduct(
+            @PathVariable Long pno,
+            @RequestPart ProductListDTO productListDTO,
+            @RequestPart(required = false) MultipartFile file) {
+
+        if (file != null) {
+            // CustomFileUtil을 사용하여 파일 저장
+            String uploadedFileName = customFileUtil.saveFile(file);
+            productListDTO.setFileUrl("http://localhost/uploads/" + uploadedFileName); // 업로드된 이미지 파일명을 DTO에 설정
+        }
+
         productService.updateProduct(pno, productListDTO);
         return ResponseEntity.ok(pno);
     }
@@ -59,6 +81,13 @@ public class ProductController {
         log.info("Fetching product with ID: {}", pno);
 
         Optional<ProductReadDTO> productObj = productService.getProductById(pno);
+
+        // 이미지 URL 생성 및 설정
+        productObj.ifPresent(productReadDTO -> {
+            String fileUrl = "http://localhost/uploads/" + productReadDTO.getFileUrl();
+            productReadDTO.setFileUrl(fileUrl);
+        });
+
         return productObj.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
