@@ -35,6 +35,9 @@ com:
     alwaysNew: true
     upload:
       path: upload
+    user:
+      api:
+        url: http://localhost:8080  # User API의 URL
 
 logging:
   level:
@@ -46,8 +49,3 @@ logging:
     web:
       resources:
         add-mappings: false
-
-
-
-
-
