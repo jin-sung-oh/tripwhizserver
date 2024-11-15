@@ -29,7 +29,7 @@ public class ProductServiceForUser {
     private final RestTemplate restTemplate;
 
     // application.yml 파일에서 User API URL을 불러와 변수에 저장
-    @Value("${user.api.url}")
+    @Value("${com.example.user.api.url}")
     private String userApiUrl;
 
     /**
