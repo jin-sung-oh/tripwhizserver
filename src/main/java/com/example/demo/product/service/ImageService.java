@@ -1,6 +1,5 @@
 package com.example.demo.product.service;
 
-
 import com.example.demo.product.domain.Product;
 import com.example.demo.product.repository.ProductRepository;
 import org.slf4j.Logger;
@@ -24,6 +23,7 @@ public class ImageService {
     public void saveImagesWithUrl(String directoryPath, Long pno) {
         logger.info("Starting to save images for product ID: {} from directory: {}", pno, directoryPath);
 
+        // 상품 조회
         Product product = productRepository.findById(pno)
                 .orElseThrow(() -> new RuntimeException("Product not found with ID: " + pno));
 
@@ -37,14 +37,13 @@ public class ImageService {
                         .filter(File::isFile)
                         .forEach(file -> {
                             String fileName = file.getName();
-                            String fileUrl = fileName;
 
-                            // Product에 Image 추가
-                            product.addImage(fileName, fileUrl);
-                            logger.info("Added image to product - Filename: {}, URL: {}", fileName, fileUrl);
+                            // Product의 images 리스트에 Image 추가
+                            product.addImage(fileName);
+                            logger.info("Added image to product - Filename: {}", fileName);
                         });
 
-                // Product와 이미지를 함께 저장
+                // Product와 images를 함께 저장
                 productRepository.save(product);
                 logger.info("Product and images saved successfully.");
             } else {

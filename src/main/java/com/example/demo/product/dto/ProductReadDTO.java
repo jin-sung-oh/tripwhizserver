@@ -1,24 +1,25 @@
 package com.example.demo.product.dto;
 
+import com.example.demo.product.domain.Image;
+import lombok.Getter;
+import lombok.Setter;
 
-import com.example.demo.category.domain.ThemeCategory;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.util.List;
 
-@Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
+@Getter
+@Setter
 public class ProductReadDTO {
+    private Long pno;
+    private String pname;
+    private String pdesc;
+    private int price;
+    private List<Image> images; // images 리스트로 통일
 
-    private Long pno;               // 상품 번호
-    private String pname;            // 상품 이름
-    private String pdesc;            // 상품 설명
-    private int price;               // 상품 가격
-    private String fileUrl;          // 외부 파일 URL
-    private Long categoryCno;        // 상위 카테고리 ID
-    private Long subCategoryScno;    // 하위 카테고리 ID
-    private ThemeCategory themeCategory; // 테마 카테고리
+    public ProductReadDTO(Long pno, String pname, String pdesc, int price, List<Image> images) {
+        this.pno = pno;
+        this.pname = pname;
+        this.pdesc = pdesc;
+        this.price = price;
+        this.images = images;
+    }
 }

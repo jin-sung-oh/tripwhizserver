@@ -32,6 +32,7 @@ public class ProductServiceForUser {
     @Value("${com.example.user.api.url}")
     private String userApiUrl;
 
+
     /**
      * 상품을 생성하고 User API로 데이터를 전송하는 메서드
      * @param productListDTO 상품 데이터 DTO

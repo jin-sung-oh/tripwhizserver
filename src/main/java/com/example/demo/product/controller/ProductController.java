@@ -64,18 +64,16 @@ public class ProductController {
         return ResponseEntity.ok(pno);
     }
 
-    // 기본 상품 목록 조회 엔드포인트
+    // 기본 상품 목록 조회
     @GetMapping("/list")
     public ResponseEntity<PageResponseDTO<ProductListDTO>> list(@Validated PageRequestDTO requestDTO) {
         log.info("Fetching product list");
-
         PageResponseDTO<ProductListDTO> response = productService.list(requestDTO);
         log.info("Product list response: {}", response);
-
         return ResponseEntity.ok(response);
     }
 
-    // 특정 상품 ID로 조회 엔드포인트
+    // 특정 상품 ID로 조회
     @GetMapping("/read/{pno}")
     public ResponseEntity<ProductReadDTO> getProduct(@PathVariable Long pno) {
         log.info("Fetching product with ID: {}", pno);
@@ -91,20 +89,18 @@ public class ProductController {
         return productObj.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // 상위 카테고리(cno)로 상품 목록 조회 엔드포인트
+    // 상위 카테고리(cno)로 상품 목록 조회
     @GetMapping("/list/category")
     public ResponseEntity<PageResponseDTO<ProductListDTO>> listByCategory(@RequestParam Long cno, @Validated PageRequestDTO requestDTO) {
         log.info("Fetching product list by category ID (cno): {}", cno);
-
-        // 요청된 카테고리 ID를 PageRequestDTO에 설정
-        requestDTO.setCategoryCno(cno);  // 카테고리 ID 설정 추가
+        requestDTO.setCategoryCno(cno);
         PageResponseDTO<ProductListDTO> response = productService.listByCategory(cno, requestDTO);
         log.info("Product list by category response: {}", response);
 
         return ResponseEntity.ok(response);
     }
 
-    // 하위 카테고리(scno)로 상품 목록 조회 엔드포인트
+    // 하위 카테고리(scno)로 상품 목록 조회
     @GetMapping("/list/subcategory")
     public ResponseEntity<PageResponseDTO<ProductListDTO>> listBySubCategory(@RequestParam Long scno, @Validated PageRequestDTO requestDTO) {
         log.info("Fetching product list by sub-category ID (scno): {}", scno);
@@ -115,7 +111,7 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
-    // 테마 카테고리로 상품 목록 조회 엔드포인트
+    // 테마 카테고리로 상품 목록 조회
     @GetMapping("/list/theme")
     public ResponseEntity<PageResponseDTO<ProductListDTO>> listByTheme(@RequestParam String themeCategory, @Validated PageRequestDTO requestDTO) {
         log.info("Fetching product list by theme category: {}", themeCategory);

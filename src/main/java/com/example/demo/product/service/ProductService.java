@@ -63,9 +63,10 @@ public class ProductService {
         Optional<ProductReadDTO> productOptional = productRepository.read(pno);
 
         return productOptional.map(product -> {
-            if (product.getFileUrl() != null) {
-                customFileUtil.getFile(product.getFileUrl());
-                log.info("Image retrieved for product: {}", product.getFileUrl());
+            if (product.getImages() != null && !product.getImages().isEmpty()) {
+                String firstImageFileName = product.getImages().get(0).getFileName();
+                customFileUtil.getFile(firstImageFileName);
+                log.info("Image retrieved for product: {}", firstImageFileName);
             }
             return product;
         });

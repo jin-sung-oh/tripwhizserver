@@ -16,10 +16,9 @@ public interface ProductRepository extends JpaRepository<Product, Long>, Product
 
     // 특정 상품을 ProductReadDTO 형태로 조회
     @Query("select " +
-            "new com.example.demo.product.dto.ProductReadDTO(p.pno, p.pname, p.pdesc, p.price, i.fileUrl, " +
-            "p.category.cno, p.subCategory.scno, p.themeCategory) " +
+            "new com.example.demo.product.dto.ProductReadDTO(p.pno, p.pname, p.pdesc, p.price, p.images) " +
             "from Product p " +
-            "left join p.images i on i.ord = 0 " +
+            "left join p.images i " +
             "where p.pno = :pno")
     Optional<ProductReadDTO> read(@Param("pno") Long pno);
 
