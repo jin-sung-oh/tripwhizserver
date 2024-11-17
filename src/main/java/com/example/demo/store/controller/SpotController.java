@@ -1,14 +1,15 @@
 package com.example.demo.store.controller;
 
+import com.example.demo.common.dto.PageRequestDTO;
+import com.example.demo.common.dto.PageResponseDTO;
 import com.example.demo.store.domain.Spot;
+import com.example.demo.store.dto.SpotDTO.SpotListDTO;
 import com.example.demo.store.dto.SpotDTO.SpotModifyDTO;
 import com.example.demo.store.service.SpotService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Log4j2
 @RestController
@@ -24,8 +25,10 @@ public class SpotController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<List<Spot>> list() {
-        return ResponseEntity.ok(spotService.list());
+    public ResponseEntity<PageResponseDTO<SpotListDTO>> list(PageRequestDTO pageRequestDTO) {
+        log.info("Fetching Spot List: {}", pageRequestDTO);
+        PageResponseDTO<SpotListDTO> responseDTO = spotService.list(pageRequestDTO);
+        return ResponseEntity.ok(responseDTO);
     }
 
     @PostMapping("/add")
