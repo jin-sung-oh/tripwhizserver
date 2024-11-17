@@ -12,4 +12,5 @@ public interface StockRepository extends JpaRepository<Stock, Long> {
     // 상품 ID로 재고 조회
     @Query("select s from Stock s where s.product.pno = :productId")
     Optional<Stock> findByProductId(@Param("productId") Long productId);
+
 }

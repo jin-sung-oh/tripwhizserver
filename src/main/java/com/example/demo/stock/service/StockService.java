@@ -7,18 +7,33 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class StockService {
 
     private final StockRepository stockRepository;
 
-    // 상품 ID로 재고를 DTO 형태로 조회
-    @Transactional(readOnly = true)
+
+        // 모든 상품 재고 조회
+    public List<StockDTO> getAllStocks() {
+        return stockRepository.findAll()
+                .stream()
+                .map(stock -> new StockDTO(
+                        stock.getProduct().getPno(),
+                        stock.getProduct().getPname(),
+                        stock.getQuantity(),
+                        stock.getProduct().getPrice()))
+                .collect(Collectors.toList());
+    }
+
+    // 단일 상품 재고 조회
     public StockDTO getStockDTO(Long pno) {
-        Stock stock = stockRepository.findByProductId(pno)
-                .orElseThrow(() -> new IllegalArgumentException("해당 상품의 재고를 찾을 수 없습니다: " + pno));
-        return StockDTO.fromEntity(stock);
+        return stockRepository.findById(pno)
+                .map(stock -> new StockDTO(stock.getProduct().getPno(), stock.getProduct().getPname(), stock.getQuantity(), stock.getProduct().getPrice()))
+                .orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다: " + pno));
     }
 
     // 재고 업데이트

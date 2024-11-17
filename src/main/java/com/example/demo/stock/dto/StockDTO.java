@@ -11,8 +11,10 @@ import lombok.Data;
 public class StockDTO {
 
     private Long pno;
+    private String pname;
     private Integer quantity;
-    private String pname; // 필요한 경우 상품 이름도 포함
+    private Integer price;
+
 
     // 재고를 엔티티에서 DTO로 변환하는 메서드
     public static StockDTO fromEntity(Stock stock) {

@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/stock")
 @RequiredArgsConstructor
@@ -13,7 +15,14 @@ public class StockController {
 
     private final StockService stockService;
 
-    // 상품 재고 조회
+    // 모든 상품 재고 조회
+    @GetMapping
+    public ResponseEntity<List<StockDTO>> getAllStocks() {
+        List<StockDTO> stockList = stockService.getAllStocks();
+        return ResponseEntity.ok(stockList);
+    }
+
+    // 상품 재고 조회 (단일 상품)
     @GetMapping("/{pno}")
     public ResponseEntity<StockDTO> getStockQuantity(@PathVariable Long pno) {
         StockDTO stockDTO = stockService.getStockDTO(pno);
@@ -41,8 +50,4 @@ public class StockController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping
-    public String testStockAPI() {
-        return "Hello, Stock API!";
-    }
 }
