@@ -34,6 +34,7 @@ public class ProductService {
     }
 
     //     상품 ID로 단일 상품 조회
+
     public Optional<ProductReadDTO> getProductById(Long pno) {
         return productRepository.read(pno);
     }
