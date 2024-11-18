@@ -10,7 +10,6 @@ import com.example.demo.category.domain.Category;
 import com.example.demo.category.domain.SubCategory;
 import com.example.demo.category.repository.CategoryRepository;
 import com.example.demo.category.repository.SubCategoryRepository;
-import com.example.demo.util.CustomFileUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -27,7 +26,6 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final SubCategoryRepository subCategoryRepository;
-    private final CustomFileUtil customFileUtil;
 
     // 기본 상품 목록 조회
     public PageResponseDTO<ProductListDTO> list(PageRequestDTO pageRequestDTO) {
@@ -35,7 +33,7 @@ public class ProductService {
         return productRepository.listByCno(pageRequestDTO);
     }
 
-    // 상품 ID로 단일 상품 조회
+//     상품 ID로 단일 상품 조회
     public Optional<ProductReadDTO> getProductById(Long pno) {
         return productRepository.read(pno);
     }
@@ -56,20 +54,6 @@ public class ProductService {
     public PageResponseDTO<ProductListDTO> listByTheme(String themeCategory, PageRequestDTO pageRequestDTO) {
         log.info("Fetching product list by theme category: {}", themeCategory);
         return productRepository.listByTheme(themeCategory, pageRequestDTO);
-    }
-
-    // 상품 정보와 이미지를 함께 조회
-    public Optional<ProductReadDTO> getProductWithImage(Long pno) {
-        Optional<ProductReadDTO> productOptional = productRepository.read(pno);
-
-        return productOptional.map(product -> {
-            if (product.getImages() != null && !product.getImages().isEmpty()) {
-                String firstImageFileName = product.getImages().get(0).getFileName();
-                customFileUtil.getFile(firstImageFileName);
-                log.info("Image retrieved for product: {}", firstImageFileName);
-            }
-            return product;
-        });
     }
 
     // 상품 생성

@@ -7,9 +7,6 @@ import com.example.demo.product.dto.ProductListDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Entity
 @Builder
 @AllArgsConstructor
@@ -33,49 +30,45 @@ public class Product {
 
     private boolean delFlag;
 
-    @ElementCollection
-    @CollectionTable(name = "product_images", joinColumns = @JoinColumn(name = "product_id"))
-    private List<Image> images = new ArrayList<>();
-
+    // 상위 카테고리와의 관계 설정
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cno")
+    @JoinColumn(name = "cno") // 외래 키 이름을 지정 (상위 카테고리 ID와 연결)
     private Category category;
 
+    // 하위 카테고리와의 관계 설정
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "scno")
+    @JoinColumn(name = "scno") // 외래 키 이름을 지정 (하위 카테고리 ID와 연결)
     private SubCategory subCategory;
 
-    @Enumerated(EnumType.STRING)
+    // 테마 카테고리 설정 (예: 휴양, 힐링 등)
+    @Enumerated(EnumType.STRING) // Enum 값을 데이터베이스에 문자열로 저장
     private ThemeCategory themeCategory;
 
+    // 삭제 상태 변경 메서드
     public void changeDelFlag(boolean newDelFlag) {
         this.delFlag = newDelFlag;
     }
 
-    public void addImage(String filename) {
-        images.add(new Image(images.size(), filename));
-    }
-
-    public void clearImages() {
-        images.clear();
-    }
-
+    // 상위 카테고리 설정 메서드
     public void setCategory(Category category) {
         this.category = category;
     }
 
+    // 하위 카테고리 설정 메서드
     public void setSubCategory(SubCategory subCategory) {
         this.subCategory = subCategory;
     }
 
+    // 테마 카테고리 설정 메서드
     public void setThemeCategory(ThemeCategory themeCategory) {
         this.themeCategory = themeCategory;
     }
 
+    // DTO의 값으로 엔티티 필드를 업데이트하는 메서드
     public void updateFromDTO(ProductListDTO productListDTO) {
         this.pname = productListDTO.getPname();
         this.price = productListDTO.getPrice();
         this.themeCategory = productListDTO.getThemeCategory();
-        this.images = productListDTO.getImages();
+        // 필요한 필드들을 업데이트
     }
 }
