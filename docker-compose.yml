@@ -12,21 +12,13 @@ services:
 
   upload_container:
     image: eggzuxi/product_img:latest
-    depends_on:
-      nginx:
-        condition: service_healthy
-
-    container_name: product_img_container
+    container_name: upload_container
     ports:
       - 8080:8080
     environment:
-      - com.example.upload=C:\\upload
-      - spring.multipart.location=C:\\upload
-    networks:
-      - uploadnet
+      - com.example.upload.path=/app/upload
+      - spring.multipart.location=/app/upload
+      - spring.datasource.url=jdbc:mariadb://10.10.10.217:13306/tripwhiz
+
     volumes:
-      - C:/upload/:C:\\upload
-
-
-networks:
-  uploadnet: {}     
+      - C:\\upload:/app/upload
