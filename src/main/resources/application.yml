@@ -3,9 +3,9 @@ spring:
     name: demo6
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
-    url: jdbc:mariadb://localhost:13306/team4db
-    username: team4dbuser
-    password: team4dbuser
+    url: jdbc:mariadb://localhost:13306/team
+    username: team
+    password: team
 
     hikari:
       minimum-idle: 2

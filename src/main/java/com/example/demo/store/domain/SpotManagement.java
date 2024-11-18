@@ -17,7 +17,7 @@ public class SpotManagement {
     @JoinColumn(name = "sp_no", nullable = false)
     private Spot spot; // 관리 대상 지점
 
-    @ManyToOne
-    @JoinColumn(name = "s_no", nullable = false)
-    private StoreOwner storeowner; // 점주
+//    @ManyToOne
+//    @JoinColumn(name = "s_no", nullable = false)
+//    private StoreOwner storeowner; // 점주
 }

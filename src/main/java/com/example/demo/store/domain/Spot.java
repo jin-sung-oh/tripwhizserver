@@ -15,8 +15,8 @@ public class Spot {
     private String tel;
 
     private boolean delFlag;
-
-    @ManyToOne
-    @JoinColumn(name = "s_no", nullable = false)
-    private StoreOwner storeowner;
+//
+//    @ManyToOne
+//    @JoinColumn(name = "s_no", nullable = false)
+//    private StoreOwner storeowner;
 }

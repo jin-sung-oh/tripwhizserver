@@ -31,10 +31,10 @@ public class SpotController {
         return ResponseEntity.ok(responseDTO);
     }
 
-    @PostMapping("/add")
-    public ResponseEntity<Spot> add(@RequestBody Spot spot) {
-        return ResponseEntity.ok(spotService.add(spot));
-    }
+//    @PostMapping("/add")
+//    public ResponseEntity<Spot> add(@RequestBody Spot spot) {
+//        return ResponseEntity.ok(spotService.add(spot));
+//    }
 
     @PutMapping("/update/{spno}")
     public ResponseEntity<Void> modify(@PathVariable Long spno, @RequestBody SpotModifyDTO modifyDTO) {
