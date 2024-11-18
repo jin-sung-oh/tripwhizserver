@@ -4,15 +4,12 @@ import com.example.demo.category.domain.QCategoryProduct;
 import com.example.demo.common.dto.PageRequestDTO;
 import com.example.demo.common.dto.PageResponseDTO;
 import com.example.demo.product.domain.Product;
-import com.example.demo.product.domain.QImage;
 import com.example.demo.product.domain.QProduct;
 import com.example.demo.product.dto.ProductListDTO;
-import com.querydsl.core.QueryResults;
 import com.querydsl.jpa.JPQLQuery;
 
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -33,18 +30,16 @@ public class ProductSearchImpl extends QuerydslRepositorySupport implements Prod
         log.info("-------------------list-----------");
 
         QProduct product = QProduct.product;
-        QImage image = QImage.image;
 
         JPQLQuery<Product> query = from(product);
-        query.leftJoin(product.images, image);
 
         query.groupBy(product);
 
         this.getQuerydsl().applyPagination(pageable, query);
 
-        // 쿼리 실행 및 Page 객체로 변환
-        QueryResults<Product> results = query.fetchResults();
-        return new PageImpl<>(results.getResults(), pageable, results.getTotal());
+        query.fetch();
+
+        return null; // 실제 반환값을 설정하거나 필요한 경우 메서드를 삭제하세요
     }
 
     @Override
@@ -61,12 +56,10 @@ public class ProductSearchImpl extends QuerydslRepositorySupport implements Prod
         );
 
         QProduct product = QProduct.product;
-        QImage image = QImage.image;
         QCategoryProduct categoryProduct = QCategoryProduct.categoryProduct;
 
         JPQLQuery<Product> query = from(product);
         query.leftJoin(categoryProduct).on(categoryProduct.product.eq(product));
-        query.leftJoin(product.images, image);
 
         if (cno != null) {
             query.where(product.category.cno.eq(cno));
@@ -76,18 +69,21 @@ public class ProductSearchImpl extends QuerydslRepositorySupport implements Prod
 
         this.getQuerydsl().applyPagination(pageable, query);
 
-        List<Product> productList = query.fetch();
+        JPQLQuery<Product> tupleQuery = query.select(product);
+
+        List<Product> productList = tupleQuery.fetch();
         if (productList.isEmpty()) {
             return null;
         }
 
         List<ProductListDTO> dtoList = productList.stream().map(productObj ->
+
                 ProductListDTO.builder()
                         .pno(productObj.getPno())
                         .pname(productObj.getPname())
                         .price(productObj.getPrice())
-                        .images(productObj.getImages())
                         .build()
+
         ).collect(Collectors.toList());
 
         long total = query.fetchCount();
@@ -110,7 +106,6 @@ public class ProductSearchImpl extends QuerydslRepositorySupport implements Prod
         QProduct product = QProduct.product;
 
         JPQLQuery<Product> query = from(product);
-        query.leftJoin(product.images);
 
         if (scno != null) {
             query.where(product.subCategory.scno.eq(scno));
@@ -120,7 +115,9 @@ public class ProductSearchImpl extends QuerydslRepositorySupport implements Prod
 
         this.getQuerydsl().applyPagination(pageable, query);
 
-        List<Product> productList = query.fetch();
+        JPQLQuery<Product> tupleQuery = query.select(product);
+
+        List<Product> productList = tupleQuery.fetch();
         if (productList.isEmpty()) {
             return null;
         }
@@ -130,7 +127,6 @@ public class ProductSearchImpl extends QuerydslRepositorySupport implements Prod
                         .pno(productObj.getPno())
                         .pname(productObj.getPname())
                         .price(productObj.getPrice())
-                        .images(productObj.getImages())
                         .build()
         ).collect(Collectors.toList());
 
@@ -154,7 +150,6 @@ public class ProductSearchImpl extends QuerydslRepositorySupport implements Prod
         QProduct product = QProduct.product;
 
         JPQLQuery<Product> query = from(product);
-        query.leftJoin(product.images);
 
         if (themeCategory != null) {
             query.where(product.themeCategory.stringValue().eq(themeCategory));
@@ -164,7 +159,9 @@ public class ProductSearchImpl extends QuerydslRepositorySupport implements Prod
 
         this.getQuerydsl().applyPagination(pageable, query);
 
-        List<Product> productList = query.fetch();
+        JPQLQuery<Product> tupleQuery = query.select(product);
+
+        List<Product> productList = tupleQuery.fetch();
         if (productList.isEmpty()) {
             return null;
         }
@@ -174,7 +171,6 @@ public class ProductSearchImpl extends QuerydslRepositorySupport implements Prod
                         .pno(productObj.getPno())
                         .pname(productObj.getPname())
                         .price(productObj.getPrice())
-                        .images(productObj.getImages())
                         .build()
         ).collect(Collectors.toList());
 
@@ -186,4 +182,5 @@ public class ProductSearchImpl extends QuerydslRepositorySupport implements Prod
                 .pageRequestDTO(pageRequestDTO)
                 .build();
     }
+
 }

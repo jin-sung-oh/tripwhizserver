@@ -9,29 +9,49 @@ import java.util.stream.IntStream;
 
 @Data
 public class PageResponseDTO<E> {
-    private List<E> dtoList;
-    private List<Integer> pageNumList;
-    private PageRequestDTO pageRequestDTO;
-    private boolean prev, next;
-    private int totalCount, prevPage, nextPage, totalPage, current;
+    private List<E> dtoList; // 현재 페이지 데이터 목록
+    private List<Integer> pageNumList; // 현재 표시할 페이지 번호 목록
+    private PageRequestDTO pageRequestDTO; // 요청 DTO
+    private boolean prev, next; // 이전/다음 버튼 활성화 여부
+    private int totalCount; // 총 데이터 개수
+    private int prevPage, nextPage; // 이전/다음 페이지 번호
+    private int totalPage; // 총 페이지 수
+    private int current; // 현재 페이지 번호
 
     @Builder(builderMethodName = "withAll")
     public PageResponseDTO(List<E> dtoList, PageRequestDTO pageRequestDTO, long totalCount) {
         this.dtoList = dtoList;
         this.pageRequestDTO = pageRequestDTO;
-        this.totalCount = (int)totalCount;
-        int end = (int)(Math.ceil( pageRequestDTO.getPage() / 10.0 )) * 10;
+        this.totalCount = (int) totalCount;
+
+        // 총 페이지 수 계산
+        this.totalPage = (int) Math.ceil((double) totalCount / pageRequestDTO.getSize());
+
+        // 현재 페이지 그룹의 끝 페이지 계산
+        int end = (int) (Math.ceil((double) pageRequestDTO.getPage() / 10) * 10);
+
+        // 현재 페이지 그룹의 시작 페이지 계산
         int start = end - 9;
-        int last = (int)(Math.ceil((totalCount/(double)pageRequestDTO.getSize())));
-        end = end > last ? last: end;
+
+        // 끝 페이지가 총 페이지 수를 초과하지 않도록 설정
+        end = Math.min(end, totalPage);
+
+        // 이전/다음 버튼 활성화 여부 설정
         this.prev = start > 1;
-        this.next = totalCount > end * pageRequestDTO.getSize();
-        this.pageNumList = IntStream.rangeClosed(start,end).boxed().collect(Collectors.toList());
-        if(prev)
-            this.prevPage = start -1;
-        if(next)
+        this.next = end < totalPage;
+
+        // 이전/다음 페이지 번호 설정
+        if (prev) {
+            this.prevPage = start - 1;
+        }
+        if (next) {
             this.nextPage = end + 1;
-        this.totalPage = this.pageNumList.size();
+        }
+
+        // 현재 페이지 번호 목록 생성
+        this.pageNumList = IntStream.rangeClosed(start, end).boxed().collect(Collectors.toList());
+
+        // 현재 페이지 설정
         this.current = pageRequestDTO.getPage();
     }
 }
