@@ -3,9 +3,10 @@ spring:
     name: demo6
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
-    url: jdbc:mariadb://localhost:13306/team4db
-    username: team4dbuser
-    password: team4dbuser
+#    url: jdbc:mariadb://10.10.10.217:13306/team4db
+    url: jdbc:mariadb://10.10.10.217:13306/tripwhiz
+    username: debugger
+    password: debugger
 
     hikari:
       minimum-idle: 2
@@ -25,7 +26,7 @@ spring:
     multipart:
       max-file-size: 20MB
       max-request-size: 20MB
-      location: upload
+      location: C:\\upload
       enabled: true
 
 com:
@@ -34,7 +35,9 @@ com:
     refreshTime: 10080
     alwaysNew: true
     upload:
-      path: upload
+      path: C:\\upload
+#      path: /c/upload/attach  # image upload path
+      qrpath: qrimages
     user:
       api:
         url: http://localhost:8081  # User API의 URL
