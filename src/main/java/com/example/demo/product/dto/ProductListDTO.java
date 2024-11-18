@@ -15,9 +15,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ProductListDTO {
 
+
     private Long pno;              // 상품 번호
     private String pname;          // 상품 이름
     private int price;             // 상품 가격
+
     private Long categoryCno;      // 상위 카테고리 ID
     private Long subCategoryScno;  // 하위 카테고리 ID
     private ThemeCategory themeCategory; // 테마 카테고리
