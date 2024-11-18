@@ -14,7 +14,8 @@ import java.util.Optional;
 
 public interface ProductRepository extends JpaRepository<Product, Long>, ProductSearch {
 
-//     특정 상품을 ProductReadDTO 형태로 조회
+    //     특정 상품을 ProductReadDTO 형태로 조회
+
     @Query("select " +
             "new com.example.demo.product.dto.ProductReadDTO(p.pno, p.pname, p.pdesc, p.price," +
             "p.category.cno, p.subCategory.scno, p.themeCategory) " +

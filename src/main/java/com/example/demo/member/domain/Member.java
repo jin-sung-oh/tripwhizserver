@@ -1,4 +1,4 @@
-package com.example.demo.category.domain;
+package com.example.demo.member.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -12,18 +12,18 @@ import lombok.*;
 @NoArgsConstructor
 @Getter
 @ToString
-public class Category {
+public class Member {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long cno;
+    private Long mno;
 
-    @Builder.Default
-    private ParentCategory category = ParentCategory.ALL;
+    private String email;
 
-    private boolean delFlag;
+    private String pw;
 
-    @Builder.Default
-    private ThemeCategory themeCategory = ThemeCategory.RELAXATION;
+    private String name;
+
+    private boolean delFlag = false;
 
 }

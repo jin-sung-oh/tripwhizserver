@@ -26,8 +26,10 @@ public class ProductController {
     // 상품 생성
     @PostMapping("/add")
     public ResponseEntity<Long> createProduct(
-        @RequestPart ProductListDTO productListDTO,
-        @RequestPart(required = false) MultipartFile file) {
+
+            @RequestPart ProductListDTO productListDTO,
+            @RequestPart(required = false) MultipartFile file) {
+
 
         Long pno = productService.createProduct(productListDTO);
         return ResponseEntity.ok(pno);
@@ -36,9 +38,11 @@ public class ProductController {
     // 상품 수정
     @PutMapping("/update/{pno}")
     public ResponseEntity<Long> updateProduct(
-        @PathVariable Long pno,
-        @RequestPart ProductListDTO productListDTO,
-        @RequestPart(required = false) MultipartFile file) {
+
+            @PathVariable Long pno,
+            @RequestPart ProductListDTO productListDTO,
+            @RequestPart(required = false) MultipartFile file) {
+
 
         productService.updateProduct(pno, productListDTO);
         return ResponseEntity.ok(pno);
