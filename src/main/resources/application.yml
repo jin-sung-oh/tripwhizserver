@@ -45,6 +45,13 @@ com:
 logging:
   level:
     org.springframework.security.web: TRACE
+    springframework:
+      security: trace
+      logging:
+        level:
+          org:
+            springframework:
+              security=DEBUG:
 
   spring:
     mvc:

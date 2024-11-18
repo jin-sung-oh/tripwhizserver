@@ -77,13 +77,11 @@ public class ProductSearchImpl extends QuerydslRepositorySupport implements Prod
         }
 
         List<ProductListDTO> dtoList = productList.stream().map(productObj ->
-
-                ProductListDTO.builder()
-                        .pno(productObj.getPno())
-                        .pname(productObj.getPname())
-                        .price(productObj.getPrice())
-                        .build()
-
+            ProductListDTO.builder()
+                    .pno(productObj.getPno())
+                    .pname(productObj.getPname())
+                    .price(productObj.getPrice())
+                    .build()
         ).collect(Collectors.toList());
 
         long total = query.fetchCount();
