@@ -1,0 +1,32 @@
+version: '0.2'
+
+services:
+  nginx:
+    image: nginx:latest
+    container_name: my-nginx
+    ports:
+      - 80:80
+    volumes:
+      - C:/upload:/usr/share/nginx/html:ro  # HTML 파일 마운트
+    restart: always
+
+  upload_container:
+    image: eggzuxi/product_img:latest
+    depends_on:
+      nginx:
+        condition: service_healthy
+
+    container_name: product_img_container
+    ports:
+      - 8080:8080
+    environment:
+      - com.example.upload=C:\\upload
+      - spring.multipart.location=C:\\upload
+    networks:
+      - uploadnet
+    volumes:
+      - C:/upload/:C:\\upload
+
+
+networks:
+  uploadnet: {}     
