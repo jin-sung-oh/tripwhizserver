@@ -2,35 +2,32 @@ package com.example.demo.manager.service;
 
 import com.example.demo.manager.entity.StoreOwner;
 import com.example.demo.manager.repository.StoreOwnerRepository;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
 public class StoreOwnerService {
-
-    private final StoreOwnerRepository storeOwnerRepository;
-
-    // 점주 계정 생성
-    public StoreOwner save(StoreOwner storeOwner) {
-        return storeOwnerRepository.save(storeOwner);
-    }
+    @Autowired
+    private StoreOwnerRepository repository;
 
     // 점주 목록 조회
     public List<StoreOwner> findAll() {
-        return storeOwnerRepository.findAll();
+        return repository.findAll();
     }
 
-    // 점주 정보 조회 (S_no로 찾기)
-    public Optional<StoreOwner> findByS_no(String s_no) {
-        return storeOwnerRepository.findById(s_no);
+    // 점주 계정 생성
+    public StoreOwner save(StoreOwner storeOwner) {
+        // 추가 로직이 필요하면 여기에 작성
+        return repository.save(storeOwner); // StoreOwner 객체 저장
     }
 
-    // 점주 계정 삭제
-    public void delete(String s_no) {
-        storeOwnerRepository.deleteById(s_no);
+    public boolean delete(int sno) { // sNo로 수정
+        if (repository.existsById(sno)) {
+            repository.deleteById(sno);
+            return true; // 삭제 성공
+        }
+        return false; // 삭제 실패: ID 없음
     }
 }
