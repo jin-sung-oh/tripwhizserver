@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -37,24 +38,28 @@ public class CustomSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // CSRF 보호 비활성화
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS 설정 추가
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 관리 비활성화
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll() // 인증이 필요 없는 경로
-                        .requestMatchers("/api/admin/register").permitAll() // /api/admin/register 경로 인증 없이 접근 허용
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN") // ADMIN 권한만 접근 가능
-                        .requestMatchers("/api/storeowner/**").hasRole("STOREOWNER") // STOREOWNER 권한만 접근 가능
-                        .anyRequest().authenticated() // 나머지 요청은 인증된 사용자만 접근 가능
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/admin/register").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/admin/storeOwners").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/admin/deleteStoreOwner/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/admin/createStoreOwner").hasRole("ADMIN")
+                        .requestMatchers("/api/storeowner/**").hasRole("STOREOWNER")
+                        .anyRequest().authenticated()
                 )
-                .addFilterBefore(new JWTCheckFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class) // JWT 인증 필터 추가
+                .addFilterBefore(new JWTCheckFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {
                             log.error("Unauthorized request - {}", authException.getMessage());
-                            response.sendError(403, "Unauthorized");
+                            log.error("Request URI: {}", request.getRequestURI());
+                            response.sendError(401, "Unauthorized");
                         })
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
                             log.error("Access denied - {}", accessDeniedException.getMessage());
+                            log.error("Request URI: {}", request.getRequestURI());
                             response.sendError(403, "Access Denied");
                         })
                 );

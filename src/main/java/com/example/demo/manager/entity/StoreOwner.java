@@ -13,11 +13,9 @@ public class StoreOwner {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "s_no")
-    private int sNo; // 점주 번호
+    private int sno; // 점주 번호
 
-    @Column(name = "s_name", length = 50)
-    private String sName; // 이름
+    private String sname; // 이름
 
     @Column(name = "id", unique = true, length = 50)
     private String id; // 아이디
