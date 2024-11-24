@@ -5,8 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -45,7 +45,6 @@ public class JWTCheckFilter extends OncePerRequestFilter {
             Map<String, Object> claims = jwtUtil.validateToken(token, false);
             String username = (String) claims.get("id");
 
-            // 권한 가져오기
             String role = (String) claims.get("role");
             List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
 
@@ -53,7 +52,6 @@ public class JWTCheckFilter extends OncePerRequestFilter {
                     new UsernamePasswordAuthenticationToken(username, null, authorities);
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
-            // 디버깅 로그 추가
             log.info("Authentication set in SecurityContextHolder: {}", SecurityContextHolder.getContext().getAuthentication());
 
             filterChain.doFilter(request, response);
