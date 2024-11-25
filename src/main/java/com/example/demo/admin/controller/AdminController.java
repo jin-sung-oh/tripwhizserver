@@ -12,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -44,32 +45,31 @@ public class AdminController {
 
     // 점주 목록 조회
     @GetMapping("/storeOwners")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<StoreOwner>> getStoreOwners() {
         List<StoreOwner> storeOwners = storeOwnerService.findAll();
         return ResponseEntity.ok(storeOwners);
     }
 
-    // 점주 정보 조회
-    @GetMapping("/storeOwner/{s_no}")
-    public ResponseEntity<StoreOwner> getStoreOwner(@PathVariable String s_no) {
-        return storeOwnerService.findByS_no(s_no)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    // 점주 계정 삭제
-    @DeleteMapping("/deleteStoreOwner/{s_no}")
+    @DeleteMapping("/storeOwner/{sno}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> deleteStoreOwner(@PathVariable String s_no) {
-        storeOwnerService.delete(s_no);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();  // No content 반환
-    }
-
-    // 관리자 정보 조회
-    @GetMapping("/{id}")
-    public ResponseEntity<Admin> getAdmin(@PathVariable String id) {
-        return adminService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<?> deleteStoreOwnerFromList(@PathVariable int sno) {
+        log.info("Deleting store owner with sno: {}", sno);
+        try {
+            boolean isDeleted = storeOwnerService.delete(sno);
+            if (isDeleted) {
+                log.info("Store owner deleted successfully. sno: {}", sno);
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+            } else {
+                log.warn("Store owner not found. sno: {}", sno);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("점주를 찾을 수 없습니다.");
+            }
+        } catch (Exception e) {
+            log.error("Error occurred while deleting store owner: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("서버 에러가 발생했습니다: " + e.getMessage());
+        }
     }
 }
+

@@ -22,12 +22,4 @@ public class StoreOwnerController {
         return ResponseEntity.ok(savedStoreOwner);
     }
 
-    // 점주 상세 조회
-    @GetMapping("/storeOwner/{s_no}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')") // 관리자와 매니저 권한 확인
-    public ResponseEntity<StoreOwner> getStoreOwner(@PathVariable String s_no) {
-        return storeOwnerService.findByS_no(s_no)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
 }

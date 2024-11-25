@@ -12,11 +12,11 @@ public class Admin {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "a_no")
-    private int aNo; // 관리자 번호
+    @Column(name = "ano")
+    private int ano; // 관리자 번호
 
-    @Column(name = "a_name", length = 50)
-    private String aName; // 이름
+    @Column(name = "aname", length = 50)
+    private String aname; // 이름
 
     @Column(name = "id",  unique = true, length = 50)
     private String id; // 아이디

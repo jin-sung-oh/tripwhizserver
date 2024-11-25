@@ -8,16 +8,14 @@ import org.springframework.context.annotation.Bean;
 @Entity
 @Getter
 @Setter
-@Table(name = "store_owner")
+@Table(name = "storeowner")
 public class StoreOwner {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "s_no")
-    private int sNo; // 점주 번호
+    private int sno; // 점주 번호
 
-    @Column(name = "s_name", length = 50)
-    private String sName; // 이름
+    private String sname; // 이름
 
     @Column(name = "id", unique = true, length = 50)
     private String id; // 아이디
@@ -30,4 +28,7 @@ public class StoreOwner {
 
     @Column(name = "del_flag",  length = 1)
     private boolean delFlag; // 삭제 여부
+
+    @Column(name = "role", length = 50)
+    private String role; // 권한 (ADMIN or MANAGER)
 }

@@ -4,6 +4,7 @@ spring:
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
     url: jdbc:mariadb://localhost:13306/team4db
+#    url: jdbc:mariadb://10.10.10.217:13306/tripwhiz
     username: team4dbuser
     password: team4dbuser
 
