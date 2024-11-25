@@ -1,34 +1,20 @@
-package com.example.demo.store;
+package com.example.demo.store.domain;
 
-import com.example.demo.store.domain.Spot;
-import com.example.demo.store.domain.SpotManagement;
-import com.example.demo.store.domain.StoreOwner;
-import com.example.demo.store.domain.StoreOwnerManagement;
-import com.example.demo.store.repository.SpotManagementRepository;
+import com.example.demo.manager.entity.StoreOwner;
 import com.example.demo.store.repository.SpotRepository;
-import com.example.demo.store.repository.StoreOwnerRepository;
-import com.example.demo.store.repository.StoreOwnerManagementRepository;
-import lombok.extern.log4j.Log4j2;
+import com.example.demo.store.repository.SpotManagementRepository;
+import com.example.demo.manager.repository.StoreOwnerRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.test.annotation.Commit;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.stream.IntStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@Log4j2
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public class SpotManagementRepositoryTest {
-
-    @Autowired
-    private SpotManagementRepository spotManagementRepository;
+class SptoManagerRepositoryTest {
 
     @Autowired
     private SpotRepository spotRepository;
@@ -37,59 +23,55 @@ public class SpotManagementRepositoryTest {
     private StoreOwnerRepository storeOwnerRepository;
 
     @Autowired
-    private StoreOwnerManagementRepository storeOwnerManagementRepository;
+    private SpotManagementRepository spotManagementRepository;
 
     @Test
-    @Transactional
-    @Commit
-    public void insertDummies() {
-        // StoreOwner 100개 자동 생성 및 저장
-        IntStream.rangeClosed(1, 100).forEach(i -> {
-            StoreOwner owner = new StoreOwner();
-            owner.setSname("Test Owner " + i);
-            owner.setId("owner" + i);
-            owner.setPw("password");
-            owner.setTel("010-1234-" + String.format("%04d", i));
-            owner.setEmail("test" + i + "@owner.com");
-            owner.setDelFlag(false);
-            storeOwnerRepository.save(owner);
+    void testSave100SpotsAndSpotManagements() {
+        // Create 100 StoreOwners
+        List<StoreOwner> storeOwners = new ArrayList<>();
+        for (int i = 1; i <= 100; i++) {
+            StoreOwner storeOwner = new StoreOwner();
+            storeOwner.setSname("StoreOwner " + i);
+            storeOwner.setId("owner" + i);
+            storeOwner.setPw("password" + i);
+            storeOwner.setEmail("owner" + i + "@example.com");
+            storeOwner.setDelFlag(false);
+            storeOwner.setRole("MANAGER");
+            storeOwners.add(storeOwner);
+        }
+        List<StoreOwner> savedStoreOwners = storeOwnerRepository.saveAll(storeOwners);
+        assertThat(savedStoreOwners).hasSize(100);
 
-            log.info("Saved StoreOwner: " + owner);
-        });
-
-        // Spot 100개 자동 생성 및 저장
-        IntStream.rangeClosed(1, 100).forEach(i -> {
+        // Create 100 Spots
+        List<Spot> spots = new ArrayList<>();
+        for (int i = 1; i <= 100; i++) {
             Spot spot = new Spot();
-            spot.setSpotname("Test Spot " + i);
-            spot.setAddress("123 Test Street " + i);
-            spot.setTel("010-9876-" + String.format("%04d", i));
+            spot.setSpotname("Spot " + i);
+            spot.setAddress("Address " + i);
+            spot.setTel("123-456-" + String.format("%04d", i));
             spot.setDelFlag(false);
-            spot.setStoreowner(storeOwnerRepository.findById((long) i).orElse(null));
-            spotRepository.save(spot);
+            spot.setStoreowner(savedStoreOwners.get(i - 1)); // Assign a StoreOwner to each Spot
+            spots.add(spot);
+        }
+        List<Spot> savedSpots = spotRepository.saveAll(spots);
+        assertThat(savedSpots).hasSize(100);
 
-            log.info("Saved Spot: " + spot);
-        });
-
-        // SpotManagement 100개 자동 생성 및 저장
-        IntStream.rangeClosed(1, 100).forEach(i -> {
+        // Create 100 SpotManagements
+        List<SpotManagement> spotManagements = new ArrayList<>();
+        for (int i = 1; i <= 100; i++) {
             SpotManagement spotManagement = new SpotManagement();
-            spotManagement.setAddress("Management Avenue " + i);
-            spotManagement.setTel("010-0000-" + String.format("%04d", i));
-            spotManagement.setSpot(spotRepository.findById((long) i).orElse(null));
-            spotManagement.setStoreowner(storeOwnerRepository.findById((long) i).orElse(null));
-            spotManagementRepository.save(spotManagement);
+            spotManagement.setAddress("Management Address " + i);
+            spotManagement.setTel("987-654-" + String.format("%04d", i));
+            spotManagement.setSpot(savedSpots.get(i - 1)); // Assign a Spot to each SpotManagement
+            spotManagement.setStoreowner(savedStoreOwners.get(i - 1)); // Assign the same StoreOwner
+            spotManagements.add(spotManagement);
+        }
+        List<SpotManagement> savedSpotManagements = spotManagementRepository.saveAll(spotManagements);
+        assertThat(savedSpotManagements).hasSize(100);
 
-            log.info("Saved SpotManagement: " + spotManagement);
-        });
-
-        // StoreOwnerManagement 100개 자동 생성 및 저장
-        IntStream.rangeClosed(1, 100).forEach(i -> {
-            StoreOwnerManagement storeOwnerManagement = new StoreOwnerManagement();
-            storeOwnerManagement.setRole("Manager " + i);
-            storeOwnerManagement.setStoreowner(storeOwnerRepository.findById((long) i).orElse(null));
-            storeOwnerManagementRepository.save(storeOwnerManagement);
-
-            log.info("Saved StoreOwnerManagement: " + storeOwnerManagement);
-        });
+        // Assertions
+        assertThat(spotRepository.count()).isEqualTo(100);
+        assertThat(spotManagementRepository.count()).isEqualTo(100);
+        assertThat(storeOwnerRepository.count()).isEqualTo(100);
     }
 }
