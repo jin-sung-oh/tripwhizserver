@@ -33,6 +33,7 @@ public class ProductSearchImpl extends QuerydslRepositorySupport implements Prod
 
         JPQLQuery<Product> query = from(product);
 
+        query.leftJoin(product.attachFiles).fetchJoin();
         query.groupBy(product);
 
         this.getQuerydsl().applyPagination(pageable, query);
@@ -60,6 +61,7 @@ public class ProductSearchImpl extends QuerydslRepositorySupport implements Prod
 
         JPQLQuery<Product> query = from(product);
         query.leftJoin(categoryProduct).on(categoryProduct.product.eq(product));
+        query.leftJoin(product.attachFiles).fetchJoin(); // JH
 
         if (cno != null) {
             query.where(product.category.cno.eq(cno));
@@ -81,6 +83,7 @@ public class ProductSearchImpl extends QuerydslRepositorySupport implements Prod
                     .pno(productObj.getPno())
                     .pname(productObj.getPname())
                     .price(productObj.getPrice())
+                    .attachFiles(productObj.getAttachFiles()) // JH
                     .build()
         ).collect(Collectors.toList());
 
@@ -105,6 +108,8 @@ public class ProductSearchImpl extends QuerydslRepositorySupport implements Prod
 
         JPQLQuery<Product> query = from(product);
 
+        query.leftJoin(product.attachFiles).fetchJoin(); // JH
+
         if (scno != null) {
             query.where(product.subCategory.scno.eq(scno));
         }
@@ -125,6 +130,7 @@ public class ProductSearchImpl extends QuerydslRepositorySupport implements Prod
                         .pno(productObj.getPno())
                         .pname(productObj.getPname())
                         .price(productObj.getPrice())
+                        .attachFiles(productObj.getAttachFiles()) // JH
                         .build()
         ).collect(Collectors.toList());
 
@@ -149,6 +155,8 @@ public class ProductSearchImpl extends QuerydslRepositorySupport implements Prod
 
         JPQLQuery<Product> query = from(product);
 
+        query.leftJoin(product.attachFiles).fetchJoin(); // JH
+
         if (themeCategory != null) {
             query.where(product.themeCategory.stringValue().eq(themeCategory));
         }
@@ -169,6 +177,7 @@ public class ProductSearchImpl extends QuerydslRepositorySupport implements Prod
                         .pno(productObj.getPno())
                         .pname(productObj.getPname())
                         .price(productObj.getPrice())
+                        .attachFiles(productObj.getAttachFiles()) // JH
                         .build()
         ).collect(Collectors.toList());
 

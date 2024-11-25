@@ -4,8 +4,12 @@ import com.example.demo.category.domain.Category;
 import com.example.demo.category.domain.SubCategory;
 import com.example.demo.category.domain.ThemeCategory;
 import com.example.demo.product.dto.ProductListDTO;
+import com.example.demo.util.file.domain.AttachFile;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Builder
@@ -29,6 +33,15 @@ public class Product {
     private int price;
 
     private boolean delFlag;
+
+    // JH
+    @ElementCollection
+    @CollectionTable(
+            name = "product_images", // 연결 테이블 이름
+            joinColumns = @JoinColumn(name = "pno") // 외래 키 이름 지정
+    )
+    @Builder.Default
+    private List<AttachFile> attachFiles = new ArrayList<>();
 
     // 상위 카테고리와의 관계 설정
     @ManyToOne(fetch = FetchType.LAZY)
@@ -71,4 +84,14 @@ public class Product {
         this.themeCategory = productListDTO.getThemeCategory();
         // 필요한 필드들을 업데이트
     }
+
+    // JH
+    public void addAttachFile(AttachFile attachFile) {
+        if (this.attachFiles == null) {
+            this.attachFiles = new ArrayList<>();
+        }
+        this.attachFiles.add(attachFile);
+    }
+
+
 }
