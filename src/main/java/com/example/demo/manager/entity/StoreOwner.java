@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Bean;
 @Entity
 @Getter
 @Setter
-@Table(name = "store_owner")
+@Table(name = "storeowner")
 public class StoreOwner {
 
     @Id
@@ -28,4 +28,7 @@ public class StoreOwner {
 
     @Column(name = "del_flag",  length = 1)
     private boolean delFlag; // 삭제 여부
+
+    @Column(name = "role", length = 50)
+    private String role; // 권한 (ADMIN or MANAGER)
 }
