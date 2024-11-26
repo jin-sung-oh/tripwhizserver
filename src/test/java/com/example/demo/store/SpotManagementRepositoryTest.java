@@ -1,34 +1,18 @@
 package com.example.demo.store;
 
+import com.example.demo.manager.entity.StoreOwner;
 import com.example.demo.store.domain.Spot;
-import com.example.demo.store.domain.SpotManagement;
-import com.example.demo.store.domain.StoreOwner;
-import com.example.demo.store.domain.StoreOwnerManagement;
-import com.example.demo.store.repository.SpotManagementRepository;
 import com.example.demo.store.repository.SpotRepository;
-import com.example.demo.store.repository.StoreOwnerRepository;
-import com.example.demo.store.repository.StoreOwnerManagementRepository;
-import lombok.extern.log4j.Log4j2;
+import com.example.demo.manager.repository.StoreOwnerRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.test.annotation.Commit;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.stream.IntStream;
+import java.util.List;
+import java.util.Random;
 
-@DataJpaTest
-@Log4j2
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@SpringBootTest
 public class SpotManagementRepositoryTest {
-
-    @Autowired
-    private SpotManagementRepository spotManagementRepository;
 
     @Autowired
     private SpotRepository spotRepository;
@@ -36,60 +20,33 @@ public class SpotManagementRepositoryTest {
     @Autowired
     private StoreOwnerRepository storeOwnerRepository;
 
-    @Autowired
-    private StoreOwnerManagementRepository storeOwnerManagementRepository;
-
     @Test
-    @Transactional
-    @Commit
-    public void insertDummies() {
-        // StoreOwner 100개 자동 생성 및 저장
-        IntStream.rangeClosed(1, 100).forEach(i -> {
-            StoreOwner owner = new StoreOwner();
-            owner.setSname("Test Owner " + i);
-            owner.setId("owner" + i);
-            owner.setPw("password");
-            owner.setTel("010-1234-" + String.format("%04d", i));
-            owner.setEmail("test" + i + "@owner.com");
-            owner.setDelFlag(false);
-            storeOwnerRepository.save(owner);
+    public void insert100SpotsWithRandomOwners() {
+        // 모든 StoreOwner 가져오기
+        List<StoreOwner> storeOwners = storeOwnerRepository.findAll();
 
-            log.info("Saved StoreOwner: " + owner);
-        });
+        if (storeOwners.isEmpty()) {
+            throw new IllegalStateException("StoreOwner 데이터가 없습니다. 먼저 점주 데이터를 추가하세요.");
+        }
 
-        // Spot 100개 자동 생성 및 저장
-        IntStream.rangeClosed(1, 100).forEach(i -> {
+        // 랜덤 객체 생성
+        Random random = new Random();
+
+        // Spot 데이터 100개 삽입
+        for (int i = 1; i <= 100; i++) {
             Spot spot = new Spot();
-            spot.setSpotname("Test Spot " + i);
-            spot.setAddress("123 Test Street " + i);
-            spot.setTel("010-9876-" + String.format("%04d", i));
-            spot.setDelFlag(false);
-            spot.setStoreowner(storeOwnerRepository.findById((long) i).orElse(null));
+            spot.setSpotname("Spot " + i); // 지점 이름
+            spot.setAddress("Address " + i); // 지점 주소
+            spot.setTel("123-456-789" + i); // 전화번호
+            spot.setDelFlag(false); // 삭제 여부
+
+            // 무작위 StoreOwner 선택
+            StoreOwner randomStoreOwner = storeOwners.get(random.nextInt(storeOwners.size()));
+            spot.setStoreowner(randomStoreOwner); // 랜덤 점주와 연결
+
             spotRepository.save(spot);
+        }
 
-            log.info("Saved Spot: " + spot);
-        });
-
-        // SpotManagement 100개 자동 생성 및 저장
-        IntStream.rangeClosed(1, 100).forEach(i -> {
-            SpotManagement spotManagement = new SpotManagement();
-            spotManagement.setAddress("Management Avenue " + i);
-            spotManagement.setTel("010-0000-" + String.format("%04d", i));
-            spotManagement.setSpot(spotRepository.findById((long) i).orElse(null));
-            spotManagement.setStoreowner(storeOwnerRepository.findById((long) i).orElse(null));
-            spotManagementRepository.save(spotManagement);
-
-            log.info("Saved SpotManagement: " + spotManagement);
-        });
-
-        // StoreOwnerManagement 100개 자동 생성 및 저장
-        IntStream.rangeClosed(1, 100).forEach(i -> {
-            StoreOwnerManagement storeOwnerManagement = new StoreOwnerManagement();
-            storeOwnerManagement.setRole("Manager " + i);
-            storeOwnerManagement.setStoreowner(storeOwnerRepository.findById((long) i).orElse(null));
-            storeOwnerManagementRepository.save(storeOwnerManagement);
-
-            log.info("Saved StoreOwnerManagement: " + storeOwnerManagement);
-        });
+        System.out.println("100개의 Spot 데이터가 무작위 StoreOwner와 연결되어 저장되었습니다.");
     }
 }
