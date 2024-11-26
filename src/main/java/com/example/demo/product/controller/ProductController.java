@@ -29,7 +29,7 @@ public class ProductController {
     //상품생성(SO)
     @PostMapping("/add")
     public ResponseEntity<Long> createProduct(
-            @RequestPart ProductListDTO productListDTO,
+            @RequestPart("productListDTO") ProductListDTO productListDTO,
             @RequestPart(value = "files", required = false) MultipartFile[] files) {
 
         List<AttachFile> attachFiles = uploadService.uploadFiles(files); // 파일 업로드 처리
