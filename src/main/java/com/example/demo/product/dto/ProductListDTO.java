@@ -4,10 +4,13 @@ import com.example.demo.category.domain.Category;
 import com.example.demo.category.domain.SubCategory;
 import com.example.demo.category.domain.ThemeCategory;
 import com.example.demo.product.domain.Product;
+import com.example.demo.util.file.domain.AttachFile;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @Builder
@@ -21,7 +24,7 @@ public class ProductListDTO {
     private Long categoryCno;      // 상위 카테고리 ID
     private Long subCategoryScno;  // 하위 카테고리 ID
     private ThemeCategory themeCategory; // 테마 카테고리
-    private String fileUrl;
+    private List<AttachFile> attachFiles; // JH
 
     // DTO를 엔티티로 변환하는 메서드
     public Product toEntity(Category category, SubCategory subCategory) {
@@ -31,6 +34,8 @@ public class ProductListDTO {
                 .category(category)
                 .subCategory(subCategory)
                 .themeCategory(this.themeCategory)
+                .attachFiles(this.attachFiles)
                 .build();
     }
+
 }

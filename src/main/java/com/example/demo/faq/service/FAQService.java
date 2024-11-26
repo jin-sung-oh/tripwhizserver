@@ -61,9 +61,9 @@ public class FAQService {
                 .dtoList(dtoList)
                 .pageRequestDTO(pageRequestDTO)
                 .totalCount(totalCount)
-                .totalPage(totalPages) // 총 페이지 수 설정
-                .prev(pageRequestDTO.getPage() > 1) // 이전 버튼 여부
-                .next(pageRequestDTO.getPage() < totalPages) // 다음 버튼 여부
+//                .totalPage(totalPages) // 총 페이지 수 설정
+//                .prev(pageRequestDTO.getPage() > 1) // 이전 버튼 여부
+//                .next(pageRequestDTO.getPage() < totalPages) // 다음 버튼 여부
                 .build();
     }
 

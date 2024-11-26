@@ -4,6 +4,7 @@ import com.example.demo.category.domain.Category;
 import com.example.demo.category.domain.SubCategory;
 import com.example.demo.category.domain.ThemeCategory;
 import com.example.demo.product.dto.ProductListDTO;
+import com.example.demo.util.file.domain.AttachFile;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -33,10 +34,14 @@ public class Product {
 
     private boolean delFlag;
 
-    // Image 컬렉션을 List로 변경하고 정렬 인덱스 추가
+    // JH
     @ElementCollection
-    @CollectionTable(name = "product_images")
-    private List<Image> images = new ArrayList<>();
+    @CollectionTable(
+            name = "product_images", // 연결 테이블 이름
+            joinColumns = @JoinColumn(name = "pno") // 외래 키 이름 지정
+    )
+    @Builder.Default
+    private List<AttachFile> attachFiles = new ArrayList<>();
 
     // 상위 카테고리와의 관계 설정
     @ManyToOne(fetch = FetchType.LAZY)
@@ -55,14 +60,6 @@ public class Product {
     // 삭제 상태 변경 메서드
     public void changeDelFlag(boolean newDelFlag) {
         this.delFlag = newDelFlag;
-    }
-
-    public void addImage(String filename, String fileUrl) {
-        images.add(new Image(images.size(), filename, fileUrl));  // ord 필드 설정
-    }
-
-    public void clearImages() {
-        images.clear();
     }
 
     // 상위 카테고리 설정 메서드
@@ -87,4 +84,14 @@ public class Product {
         this.themeCategory = productListDTO.getThemeCategory();
         // 필요한 필드들을 업데이트
     }
+
+    // JH
+    public void addAttachFile(AttachFile attachFile) {
+        if (this.attachFiles == null) {
+            this.attachFiles = new ArrayList<>();
+        }
+        this.attachFiles.add(attachFile);
+    }
+
+
 }

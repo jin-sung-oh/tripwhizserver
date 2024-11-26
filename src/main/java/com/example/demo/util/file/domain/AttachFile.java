@@ -1,4 +1,4 @@
-package com.example.demo.product.domain;
+package com.example.demo.util.file.domain;
 
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
@@ -11,11 +11,9 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class Image {
+public class AttachFile {
 
     private int ord;  // 고유 ID 필드로 설정
-
     private String fileName;  // 파일명
-    private String fileUrl;  // 이미지 URL
 
 }

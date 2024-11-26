@@ -1,6 +1,5 @@
 package com.example.demo.board.domain;
 
-
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -17,6 +16,7 @@ import java.time.LocalDateTime;
 @ToString(callSuper = true)
 @Table(name = "board")
 public class BoardEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long bno;
@@ -44,6 +44,5 @@ public class BoardEntity {
     public void changeDelFlag(boolean newDelFlag) {
         this.delFlag = newDelFlag;
     }
-
 
 }

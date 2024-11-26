@@ -25,4 +25,3 @@ public interface ProductSearch {
     PageResponseDTO<ProductListDTO> listByTheme(String themeCategory, PageRequestDTO pageRequestDTO);
 }
 
-
