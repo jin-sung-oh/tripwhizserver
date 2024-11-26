@@ -26,17 +26,7 @@ public class ProductController {
     private final ProductService productService;
     private final UploadService uploadService;
 
-//    상품 생성
-//    @PostMapping("/add")
-//    public ResponseEntity<Long> createProduct(
-//        @RequestPart ProductListDTO productListDTO,
-//        @RequestPart(required = false) MultipartFile file) {
-//
-//        Long pno = productService.createProduct(productListDTO);
-//        return ResponseEntity.ok(pno);
-//    }
-
-    // uploadService 추가한 메서드(JH)
+    //상품생성(SO)
     @PostMapping("/add")
     public ResponseEntity<Long> createProduct(
             @RequestPart ProductListDTO productListDTO,
@@ -47,28 +37,39 @@ public class ProductController {
         return ResponseEntity.ok(pno);
     }
 
-//    상품 수정
-//    @PutMapping("/update/{pno}")
-//    public ResponseEntity<Long> updateProduct(
-//        @PathVariable Long pno,
-//        @RequestPart ProductListDTO productListDTO,
-//        @RequestPart(required = false) MultipartFile file) {
+//    // uploadService 추가한 메서드(JH)
+//    @PostMapping("/add")
+//    public ResponseEntity<Long> createProduct(
+//            @RequestPart ProductListDTO productListDTO,
+//            @RequestPart(value = "files", required = false) MultipartFile[] files) {
 //
-//        productService.updateProduct(pno, productListDTO);
+//        List<AttachFile> attachFiles = uploadService.uploadFiles(files); // 파일 업로드 처리
+//        Long pno = productService.createProduct(productListDTO, attachFiles); // 상품 생성
 //        return ResponseEntity.ok(pno);
 //    }
 
-    // uploadService 추가한 메서드(JH)
+    //상품 수정(SO)
     @PutMapping("/update/{pno}")
     public ResponseEntity<Long> updateProduct(
             @PathVariable Long pno,
             @RequestPart ProductListDTO productListDTO,
-            @RequestPart(required = false) MultipartFile[] files) {
+            @RequestPart(value = "files", required = false) MultipartFile[] files) {
 
         List<AttachFile> attachFiles = uploadService.uploadFiles(files); // 파일 업로드 처리
-        productService.updateProduct(pno, productListDTO, attachFiles); // 상품 수정
-        return ResponseEntity.ok(pno);
+        Long updatedPno = productService.updateProduct(pno, productListDTO, attachFiles); // 상품 수정
+        return ResponseEntity.ok(updatedPno);
     }
+    // uploadService 추가한 메서드(JH)
+//    @PutMapping("/update/{pno}")
+//    public ResponseEntity<Long> updateProduct(
+//            @PathVariable Long pno,
+//            @RequestPart ProductListDTO productListDTO,
+//            @RequestPart(required = false) MultipartFile[] files) {
+//
+//        List<AttachFile> attachFiles = uploadService.uploadFiles(files); // 파일 업로드 처리
+//        productService.updateProduct(pno, productListDTO, attachFiles); // 상품 수정
+//        return ResponseEntity.ok(pno);
+//    }
 
     // 상품 삭제
     @DeleteMapping("/delete/{pno}")

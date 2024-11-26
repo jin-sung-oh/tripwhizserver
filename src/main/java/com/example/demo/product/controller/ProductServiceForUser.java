@@ -12,6 +12,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,55 +33,55 @@ public class ProductServiceForUser {
     @Value("${com.example.user.api.url}")
     private String userApiUrl;
 
-    /**
-     * 상품을 생성하고 User API로 데이터를 전송하는 메서드
-     * @param productListDTO 상품 데이터 DTO
-     * @return 생성된 상품의 ID
-     */
-    public Long createProduct(ProductListDTO productListDTO) {
-        // Category와 SubCategory를 찾아서 상품 엔티티에 전달
-        Category category = categoryRepository.findById(productListDTO.getCategoryCno())
-                .orElseThrow(() -> new RuntimeException("Category not found"));
-        SubCategory subCategory = subCategoryRepository.findById(productListDTO.getSubCategoryScno())
-                .orElseThrow(() -> new RuntimeException("SubCategory not found"));
 
-        // ProductListDTO에서 엔티티로 변환한 후 데이터베이스에 저장
-        Product product = productListDTO.toEntity(category, subCategory);
-        Product savedProduct = productRepository.save(product);
-
-        // 생성된 상품 정보를 User API로 전송
-        sendProductToUserApi(productListDTO);
-
-        log.info("Product created with ID: {}", savedProduct.getPno());
-        return savedProduct.getPno();
-    }
-
-    /**
-     * User API에 상품 정보를 전송하는 메서드
-     * @param productListDTO 전송할 상품 데이터 DTO
-     */
-    private void sendProductToUserApi(ProductListDTO productListDTO) {
+    // 생성된 상품 데이터 전송
+    public void sendProductToUserApi(ProductListDTO productListDTO) {
         try {
-            // HTTP 헤더에 Content-Type을 JSON으로 설정
             HttpHeaders headers = new HttpHeaders();
             headers.set("Content-Type", "application/json");
 
-            // HttpEntity를 생성하여 요청 본문과 헤더를 함께 설정
             HttpEntity<ProductListDTO> request = new HttpEntity<>(productListDTO, headers);
-            String userApiEndpoint = userApiUrl + "/api/product/add";  // User API의 상품 추가 엔드포인트
+            String endpoint = userApiUrl + "/api/product/add";
 
-            // User API로 POST 요청을 보내고 응답을 받음
-            ResponseEntity<Long> response = restTemplate.postForEntity(userApiEndpoint, request, Long.class);
+            restTemplate.postForEntity(endpoint, request, Long.class);
 
-            // 요청이 성공했는지 여부를 확인하여 로그 출력
-            if (response.getStatusCode().is2xxSuccessful()) {
-                log.info("Product successfully sent to User API, ID: {}", response.getBody());
-            } else {
-                log.error("Failed to send product to User API: {}", response.getStatusCode());
-            }
+            log.info("Product successfully sent to User API.");
         } catch (Exception e) {
-            // 예외 발생 시 오류 로그 출력
             log.error("Error sending product to User API", e);
+        }
+    }
+
+    // 수정된 상품 데이터 전송
+    public void sendProductUpdateToUserApi(Long pno, ProductListDTO productListDTO) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Content-Type", "application/json");
+
+            HttpEntity<ProductListDTO> request = new HttpEntity<>(productListDTO, headers);
+            String endpoint = userApiUrl + "/api/product/update/" + pno;
+
+            restTemplate.exchange(endpoint, HttpMethod.PUT, request, Void.class);
+
+            log.info("Product successfully updated on User API, ID: {}", pno);
+        } catch (Exception e) {
+            log.error("Error updating product on User API", e);
+        }
+    }
+
+    // 삭제 요청 전송
+    public void sendProductDeleteToUserApi(Long pno) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Content-Type", "application/json");
+
+            HttpEntity<Void> request = new HttpEntity<>(headers);
+            String endpoint = userApiUrl + "/api/product/delete/" + pno;
+
+            restTemplate.exchange(endpoint, HttpMethod.DELETE, request, Void.class);
+
+            log.info("Product successfully deleted on User API, ID: {}", pno);
+        } catch (Exception e) {
+            log.error("Error deleting product on User API", e);
         }
     }
 }
