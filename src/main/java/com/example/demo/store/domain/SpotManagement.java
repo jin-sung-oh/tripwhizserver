@@ -2,24 +2,30 @@ package com.example.demo.store.domain;
 
 import com.example.demo.manager.entity.StoreOwner;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
-@Data
+@Getter
+@Setter
+@Table(name = "spotmanagement")
 public class SpotManagement {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // 기본 키로 설정된 자동 증가 필드
-    private Long spid; // 관리 ID
 
-    private String address; // 관리 지점 주소
-    private String tel; // 관리 지점 전화번호
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id; // 관리 번호
+
+    @Column(name = "address", length = 100)
+    private String address; // 관리 주소
+
+    @Column(name = "tel", length = 50)
+    private String tel; // 관리 전화번호
 
     @ManyToOne
     @JoinColumn(name = "spno", nullable = false)
-    private Spot spot;
-
+    private Spot spot; // 지점 번호
 
     @ManyToOne
     @JoinColumn(name = "sno", nullable = false)
-    private StoreOwner storeowner; // 점주
+    private StoreOwner storeowner; // 점주 번호
 }

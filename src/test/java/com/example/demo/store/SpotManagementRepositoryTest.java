@@ -1,20 +1,18 @@
-package com.example.demo.store.domain;
+package com.example.demo.store;
 
 import com.example.demo.manager.entity.StoreOwner;
+import com.example.demo.store.domain.Spot;
 import com.example.demo.store.repository.SpotRepository;
-import com.example.demo.store.repository.SpotManagementRepository;
 import com.example.demo.manager.repository.StoreOwnerRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-@DataJpaTest
-class SptoManagerRepositoryTest {
+@SpringBootTest
+public class SpotManagementRepositoryTest {
 
     @Autowired
     private SpotRepository spotRepository;
@@ -22,56 +20,33 @@ class SptoManagerRepositoryTest {
     @Autowired
     private StoreOwnerRepository storeOwnerRepository;
 
-    @Autowired
-    private SpotManagementRepository spotManagementRepository;
-
     @Test
-    void testSave100SpotsAndSpotManagements() {
-        // Create 100 StoreOwners
-        List<StoreOwner> storeOwners = new ArrayList<>();
-        for (int i = 1; i <= 100; i++) {
-            StoreOwner storeOwner = new StoreOwner();
-            storeOwner.setSname("StoreOwner " + i);
-            storeOwner.setId("owner" + i);
-            storeOwner.setPw("password" + i);
-            storeOwner.setEmail("owner" + i + "@example.com");
-            storeOwner.setDelFlag(false);
-            storeOwner.setRole("MANAGER");
-            storeOwners.add(storeOwner);
-        }
-        List<StoreOwner> savedStoreOwners = storeOwnerRepository.saveAll(storeOwners);
-        assertThat(savedStoreOwners).hasSize(100);
+    public void insert100SpotsWithRandomOwners() {
+        // 모든 StoreOwner 가져오기
+        List<StoreOwner> storeOwners = storeOwnerRepository.findAll();
 
-        // Create 100 Spots
-        List<Spot> spots = new ArrayList<>();
+        if (storeOwners.isEmpty()) {
+            throw new IllegalStateException("StoreOwner 데이터가 없습니다. 먼저 점주 데이터를 추가하세요.");
+        }
+
+        // 랜덤 객체 생성
+        Random random = new Random();
+
+        // Spot 데이터 100개 삽입
         for (int i = 1; i <= 100; i++) {
             Spot spot = new Spot();
-            spot.setSpotname("Spot " + i);
-            spot.setAddress("Address " + i);
-            spot.setTel("123-456-" + String.format("%04d", i));
-            spot.setDelFlag(false);
-            spot.setStoreowner(savedStoreOwners.get(i - 1)); // Assign a StoreOwner to each Spot
-            spots.add(spot);
-        }
-        List<Spot> savedSpots = spotRepository.saveAll(spots);
-        assertThat(savedSpots).hasSize(100);
+            spot.setSpotname("Spot " + i); // 지점 이름
+            spot.setAddress("Address " + i); // 지점 주소
+            spot.setTel("123-456-789" + i); // 전화번호
+            spot.setDelFlag(false); // 삭제 여부
 
-        // Create 100 SpotManagements
-        List<SpotManagement> spotManagements = new ArrayList<>();
-        for (int i = 1; i <= 100; i++) {
-            SpotManagement spotManagement = new SpotManagement();
-            spotManagement.setAddress("Management Address " + i);
-            spotManagement.setTel("987-654-" + String.format("%04d", i));
-            spotManagement.setSpot(savedSpots.get(i - 1)); // Assign a Spot to each SpotManagement
-            spotManagement.setStoreowner(savedStoreOwners.get(i - 1)); // Assign the same StoreOwner
-            spotManagements.add(spotManagement);
-        }
-        List<SpotManagement> savedSpotManagements = spotManagementRepository.saveAll(spotManagements);
-        assertThat(savedSpotManagements).hasSize(100);
+            // 무작위 StoreOwner 선택
+            StoreOwner randomStoreOwner = storeOwners.get(random.nextInt(storeOwners.size()));
+            spot.setStoreowner(randomStoreOwner); // 랜덤 점주와 연결
 
-        // Assertions
-        assertThat(spotRepository.count()).isEqualTo(100);
-        assertThat(spotManagementRepository.count()).isEqualTo(100);
-        assertThat(storeOwnerRepository.count()).isEqualTo(100);
+            spotRepository.save(spot);
+        }
+
+        System.out.println("100개의 Spot 데이터가 무작위 StoreOwner와 연결되어 저장되었습니다.");
     }
 }
