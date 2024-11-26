@@ -1,7 +1,5 @@
 package com.example.demo.store.controller;
 
-import com.example.demo.store.domain.Spot;
-
 import com.example.demo.store.dto.SpotDTO.SpotDTO;
 import com.example.demo.store.service.SpotService;
 import lombok.RequiredArgsConstructor;
@@ -38,20 +36,23 @@ public class SpotController {
     @PostMapping("/add")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SpotDTO> add(@RequestBody SpotDTO spotDTO) {
+        log.info("----- Spot Addition Request -----");
+        log.info("Received SpotDTO: {}", spotDTO);
 
-        log.info("-----------------------------------1");
+        // Validate received DTO (optional, depending on requirements)
+        if (spotDTO.getSpotname() == null || spotDTO.getSpotname().isEmpty()) {
+            log.error("Spot name is missing in the SpotDTO");
+        }
 
-        log.info("-----------------------------------1");
+        log.info("Attempting to add new Spot...");
+        SpotDTO createdSpot = spotService.add(spotDTO);
 
-        log.info(spotDTO);
+        log.info("Successfully added Spot");
+        log.info("Created Spot Details: {}", createdSpot);
+        log.info("----- End of Spot Addition -----");
 
-        log.info("-----------------------------------1");
-        log.info("-----------------------------------1");
-
-
-        return ResponseEntity.ok(spotService.add(spotDTO));
+        return ResponseEntity.ok(createdSpot);
     }
-
 
     // Spot 수정
     @PutMapping("/update/{spno}")

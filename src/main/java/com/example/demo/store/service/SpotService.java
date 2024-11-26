@@ -6,6 +6,7 @@ import com.example.demo.store.dto.SpotDTO.SpotDTO;
 import com.example.demo.store.repository.SpotRepository;
 import com.example.demo.manager.repository.StoreOwnerRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Log4j2
 public class SpotService {
 
     private final SpotRepository spotRepository;
@@ -48,22 +50,41 @@ public class SpotService {
 
     // 새로운 Spot 추가
     public SpotDTO add(SpotDTO spotDTO) {
-        StoreOwner storeOwner = storeOwnerRepository.findById(spotDTO.getSno())
-                .orElseThrow(() -> new IllegalArgumentException("Store Owner not found."));
+        log.info("----- Starting Spot Addition -----");
+        log.info("Received SpotDTO: {}", spotDTO);
 
+        // StoreOwner 조회
+        log.info("Fetching StoreOwner with sno: {}", spotDTO.getSno());
+        StoreOwner storeOwner = storeOwnerRepository.findById(spotDTO.getSno())
+                .orElseThrow(() -> {
+                    log.error("StoreOwner not found with sno: {}", spotDTO.getSno());
+                    return new IllegalArgumentException("Store Owner not found.");
+                });
+        log.info("Found StoreOwner: {}", storeOwner);
+
+        // Spot 엔티티 생성
+        log.info("Creating Spot entity...");
         Spot spot = Spot.builder()
                 .storeowner(storeOwner)
                 .tel(spotDTO.getTel())
                 .spotname(spotDTO.getSpotname())
                 .address(spotDTO.getAddress())
                 .build();
+        log.info("Spot entity created: {}", spot);
 
+        // Spot 저장
+        log.info("Saving Spot entity to the database...");
         spotRepository.save(spot);
+        log.info("Spot entity saved with spno: {}", spot.getSpno());
 
+        // SpotDTO 업데이트 후 반환
         spotDTO.setSpno(spot.getSpno());
+        log.info("Returning SpotDTO: {}", spotDTO);
+        log.info("----- End of Spot Addition -----");
 
         return spotDTO;
     }
+
 
     // 기존 Spot 수정
     public void modify(Long spno, SpotDTO modifyDTO) {
