@@ -10,6 +10,7 @@ import com.example.demo.util.file.service.UploadService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,6 +29,7 @@ public class ProductController {
 
     //상품생성(SO)
     @PostMapping("/add")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Long> createProduct(
             @RequestPart("productListDTO") ProductListDTO productListDTO,
             @RequestPart(value = "files", required = false) MultipartFile[] files) {
@@ -50,6 +52,7 @@ public class ProductController {
 
     //상품 수정(SO)
     @PutMapping("/update/{pno}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Long> updateProduct(
             @PathVariable Long pno,
             @RequestPart ProductListDTO productListDTO,
@@ -73,6 +76,7 @@ public class ProductController {
 
     // 상품 삭제
     @DeleteMapping("/delete/{pno}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Long> deleteProduct(@PathVariable Long pno) {
         productService.deleteProduct(pno);  // deleteBoard 대신 deleteProduct로 수정
         return ResponseEntity.ok(pno);
@@ -80,6 +84,7 @@ public class ProductController {
 
     // 기본 상품 목록 조회 엔드포인트
     @GetMapping("/list")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PageResponseDTO<ProductListDTO>> list(@Validated PageRequestDTO requestDTO) {
         log.info("Fetching product list");
 

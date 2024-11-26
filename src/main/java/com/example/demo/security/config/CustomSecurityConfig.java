@@ -44,6 +44,7 @@ public class CustomSecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/admin/register").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/api/product/add").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/admin/storeOwners").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/admin/deleteStoreOwner/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/admin/createStoreOwner").hasRole("ADMIN")

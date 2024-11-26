@@ -59,6 +59,8 @@ logging:
     web:
       resources:
         add-mappings: false
+server:
+  port: 8082
 
 
 
