@@ -88,13 +88,29 @@ public class SpotService {
 
     // 기존 Spot 수정
     public void modify(Long spno, SpotDTO modifyDTO) {
+        log.info("----- Starting Spot Modification in Service -----");
+        log.info("Spot ID to modify: {}", spno);
+        log.info("Received SpotDTO: {}", modifyDTO);
+
         Spot spot = spotRepository.findById(spno)
-                .orElseThrow(() -> new IllegalArgumentException("Spot with ID " + spno + " not found."));
+                .orElseThrow(() -> {
+                    log.error("Spot not found with ID: {}", spno);
+                    return new IllegalArgumentException("Spot not found.");
+                });
+        log.info("Found Spot: {}", spot);
+
+        log.info("Updating Spot details...");
         spot.setSpotname(modifyDTO.getSpotname());
         spot.setAddress(modifyDTO.getAddress());
         spot.setTel(modifyDTO.getTel());
+
+        log.info("Saving updated Spot...");
         spotRepository.save(spot);
+        log.info("Updated Spot saved: {}", spot);
+
+        log.info("----- End of Spot Modification in Service -----");
     }
+
 
     // Spot 삭제
     public void delete(Long spno) {

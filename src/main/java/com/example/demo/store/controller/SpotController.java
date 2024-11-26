@@ -22,14 +22,30 @@ public class SpotController {
     @GetMapping("/{spno}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SpotDTO> read(@PathVariable Long spno) {
-        return ResponseEntity.ok(spotService.read(spno));
+        log.info("----- Spot Read Request -----");
+        log.info("Spot ID to read: {}", spno);
+
+        SpotDTO spotDTO = spotService.read(spno);
+
+        log.info("Successfully retrieved Spot: {}", spotDTO);
+        log.info("----- End of Spot Read Request -----");
+
+        return ResponseEntity.ok(spotDTO);
     }
 
     // 모든 Spot 리스트 조회
     @GetMapping("/list")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<SpotDTO>> list() {
-        return ResponseEntity.ok(spotService.list());
+        log.info("----- Spot List Request -----");
+
+        List<SpotDTO> spotList = spotService.list();
+
+        log.info("Successfully retrieved Spot List");
+        log.info("Spot List: {}", spotList);
+        log.info("----- End of Spot List Request -----");
+
+        return ResponseEntity.ok(spotList);
     }
 
     // Spot 추가
@@ -39,12 +55,6 @@ public class SpotController {
         log.info("----- Spot Addition Request -----");
         log.info("Received SpotDTO: {}", spotDTO);
 
-        // Validate received DTO (optional, depending on requirements)
-        if (spotDTO.getSpotname() == null || spotDTO.getSpotname().isEmpty()) {
-            log.error("Spot name is missing in the SpotDTO");
-        }
-
-        log.info("Attempting to add new Spot...");
         SpotDTO createdSpot = spotService.add(spotDTO);
 
         log.info("Successfully added Spot");
@@ -58,7 +68,15 @@ public class SpotController {
     @PutMapping("/update/{spno}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> modify(@PathVariable Long spno, @RequestBody SpotDTO modifyDTO) {
+        log.info("----- Spot Modification Request -----");
+        log.info("Spot ID to modify: {}", spno);
+        log.info("Received SpotDTO for modification: {}", modifyDTO);
+
         spotService.modify(spno, modifyDTO);
+
+        log.info("Successfully modified Spot with ID: {}", spno);
+        log.info("----- End of Spot Modification -----");
+
         return ResponseEntity.ok().build();
     }
 
@@ -66,7 +84,14 @@ public class SpotController {
     @DeleteMapping("/delete/{spno}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long spno) {
+        log.info("----- Spot Deletion Request -----");
+        log.info("Spot ID to delete: {}", spno);
+
         spotService.delete(spno);
+
+        log.info("Successfully deleted Spot with ID: {}", spno);
+        log.info("----- End of Spot Deletion Request -----");
+
         return ResponseEntity.ok().build();
     }
 }
