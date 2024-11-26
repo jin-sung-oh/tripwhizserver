@@ -37,8 +37,19 @@ public class SpotController {
     // Spot 추가
     @PostMapping("/add")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Spot> add(@RequestBody Spot spot) {
-        return ResponseEntity.ok(spotService.add(spot));
+    public ResponseEntity<SpotDTO> add(@RequestBody SpotDTO spotDTO) {
+
+        log.info("-----------------------------------1");
+
+        log.info("-----------------------------------1");
+
+        log.info(spotDTO);
+
+        log.info("-----------------------------------1");
+        log.info("-----------------------------------1");
+
+
+        return ResponseEntity.ok(spotService.add(spotDTO));
     }
 
 

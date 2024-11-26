@@ -47,11 +47,22 @@ public class SpotService {
     }
 
     // 새로운 Spot 추가
-    public Spot add(Spot spot) {
-        StoreOwner storeOwner = storeOwnerRepository.findById(spot.getStoreowner().getSno())
+    public SpotDTO add(SpotDTO spotDTO) {
+        StoreOwner storeOwner = storeOwnerRepository.findById(spotDTO.getSno())
                 .orElseThrow(() -> new IllegalArgumentException("Store Owner not found."));
-        spot.setStoreowner(storeOwner);
-        return spotRepository.save(spot);
+
+        Spot spot = Spot.builder()
+                .storeowner(storeOwner)
+                .tel(spotDTO.getTel())
+                .spotname(spotDTO.getSpotname())
+                .address(spotDTO.getAddress())
+                .build();
+
+        spotRepository.save(spot);
+
+        spotDTO.setSpno(spot.getSpno());
+
+        return spotDTO;
     }
 
     // 기존 Spot 수정
