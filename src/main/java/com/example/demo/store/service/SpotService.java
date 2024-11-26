@@ -6,6 +6,7 @@ import com.example.demo.store.dto.SpotDTO.SpotDTO;
 import com.example.demo.store.repository.SpotRepository;
 import com.example.demo.manager.repository.StoreOwnerRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Log4j2
 public class SpotService {
 
     private final SpotRepository spotRepository;
@@ -47,22 +49,68 @@ public class SpotService {
     }
 
     // 새로운 Spot 추가
-    public Spot add(Spot spot) {
-        StoreOwner storeOwner = storeOwnerRepository.findById(spot.getStoreowner().getSno())
-                .orElseThrow(() -> new IllegalArgumentException("Store Owner not found."));
-        spot.setStoreowner(storeOwner);
-        return spotRepository.save(spot);
+    public SpotDTO add(SpotDTO spotDTO) {
+        log.info("----- Starting Spot Addition -----");
+        log.info("Received SpotDTO: {}", spotDTO);
+
+        // StoreOwner 조회
+        log.info("Fetching StoreOwner with sno: {}", spotDTO.getSno());
+        StoreOwner storeOwner = storeOwnerRepository.findById(spotDTO.getSno())
+                .orElseThrow(() -> {
+                    log.error("StoreOwner not found with sno: {}", spotDTO.getSno());
+                    return new IllegalArgumentException("Store Owner not found.");
+                });
+        log.info("Found StoreOwner: {}", storeOwner);
+
+        // Spot 엔티티 생성
+        log.info("Creating Spot entity...");
+        Spot spot = Spot.builder()
+                .storeowner(storeOwner)
+                .tel(spotDTO.getTel())
+                .spotname(spotDTO.getSpotname())
+                .address(spotDTO.getAddress())
+                .build();
+        log.info("Spot entity created: {}", spot);
+
+        // Spot 저장
+        log.info("Saving Spot entity to the database...");
+        spotRepository.save(spot);
+        log.info("Spot entity saved with spno: {}", spot.getSpno());
+
+        // SpotDTO 업데이트 후 반환
+        spotDTO.setSpno(spot.getSpno());
+        log.info("Returning SpotDTO: {}", spotDTO);
+        log.info("----- End of Spot Addition -----");
+
+        return spotDTO;
     }
+
 
     // 기존 Spot 수정
     public void modify(Long spno, SpotDTO modifyDTO) {
+        log.info("----- Starting Spot Modification in Service -----");
+        log.info("Spot ID to modify: {}", spno);
+        log.info("Received SpotDTO: {}", modifyDTO);
+
         Spot spot = spotRepository.findById(spno)
-                .orElseThrow(() -> new IllegalArgumentException("Spot with ID " + spno + " not found."));
+                .orElseThrow(() -> {
+                    log.error("Spot not found with ID: {}", spno);
+                    return new IllegalArgumentException("Spot not found.");
+                });
+        log.info("Found Spot: {}", spot);
+
+        log.info("Updating Spot details...");
         spot.setSpotname(modifyDTO.getSpotname());
         spot.setAddress(modifyDTO.getAddress());
         spot.setTel(modifyDTO.getTel());
+
+        log.info("Saving updated Spot...");
         spotRepository.save(spot);
+        log.info("Updated Spot saved: {}", spot);
+
+        log.info("----- End of Spot Modification in Service -----");
     }
+
 
     // Spot 삭제
     public void delete(Long spno) {

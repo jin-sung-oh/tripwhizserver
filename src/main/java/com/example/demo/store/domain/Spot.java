@@ -2,13 +2,16 @@ package com.example.demo.store.domain;
 
 import com.example.demo.manager.entity.StoreOwner;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Getter
 @Setter
 @Table(name = "spot")
+@ToString
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Spot {
 
     @Id
