@@ -46,8 +46,15 @@ public class CustomSecurityConfig {
                         .requestMatchers("/api/admin/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/admin/storeOwners").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/admin/deleteStoreOwner/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/spot/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/spot/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/spot/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/admin/createStoreOwner").hasRole("ADMIN")
                         .requestMatchers("/api/storeowner/**").hasRole("STOREOWNER")
+                        //by SA
+                        .requestMatchers("/api/nationality/**").permitAll() // `/api/nationality` 인증 없이 접근 가능
+                        .requestMatchers("/api/stock/**").permitAll()
+
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JWTCheckFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
@@ -71,7 +78,7 @@ public class CustomSecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("http://localhost:3000"));
+        configuration.setAllowedOriginPatterns(List.of("http://localhost:3000", "http://localhost:5173"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Cache-Control"));
         configuration.setAllowCredentials(true);
