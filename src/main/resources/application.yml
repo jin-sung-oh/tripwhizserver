@@ -35,9 +35,9 @@ com:
     refreshTime: 10080
     alwaysNew: true
     upload:
-      path: C:\\upload
+      path: C:\\upload/product
 #      path: /c/upload/attach  # image upload path
-      qrpath: qrimages
+      qrpath: C:\\upload/qrcode
     user:
       api:
         url: http://localhost:8081  # User API의 URL
@@ -60,7 +60,6 @@ logging:
       resources:
         add-mappings: false
 
-
-
-
+server:
+  port: 8082
 

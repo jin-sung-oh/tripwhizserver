@@ -1,5 +1,7 @@
 package com.example.demo.product.service;
 
+import com.example.demo.category.repository.CategoryRepository;
+import com.example.demo.category.repository.SubCategoryRepository;
 import com.example.demo.common.dto.PageRequestDTO;
 import com.example.demo.common.dto.PageResponseDTO;
 import com.example.demo.product.domain.Product;
@@ -8,12 +10,11 @@ import com.example.demo.product.dto.ProductReadDTO;
 import com.example.demo.product.repository.ProductRepository;
 import com.example.demo.category.domain.Category;
 import com.example.demo.category.domain.SubCategory;
-import com.example.demo.category.repository.CategoryRepository;
-import com.example.demo.category.repository.SubCategoryRepository;
 import com.example.demo.util.file.domain.AttachFile;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,9 +31,11 @@ public class ProductService {
     private final SubCategoryRepository subCategoryRepository;
 
     // 기본 상품 목록 조회
-    public PageResponseDTO<ProductListDTO> list(PageRequestDTO pageRequestDTO) {
+    public PageResponseDTO<ProductListDTO> getList(PageRequestDTO pageRequestDTO) {
+
         log.info("Fetching product list with pagination");
-        return productRepository.listByCno(pageRequestDTO);
+
+        return productRepository.list(pageRequestDTO);
     }
 
 //     상품 ID로 단일 상품 조회
@@ -43,19 +46,19 @@ public class ProductService {
     // 상위 카테고리(cno)로 상품 목록 조회
     public PageResponseDTO<ProductListDTO> listByCategory(Long cno, PageRequestDTO pageRequestDTO) {
         log.info("Fetching product list by category ID (cno): {}", cno);
-        return productRepository.listByCategory(cno, pageRequestDTO);
+        return productRepository.findByCategory(cno, pageRequestDTO);
     }
 
     // 하위 카테고리(scno)로 상품 목록 조회
-    public PageResponseDTO<ProductListDTO> listBySubCategory(Long scno, PageRequestDTO pageRequestDTO) {
+    public PageResponseDTO<ProductListDTO> listByCategoryAndSubCategory(Long cno, Long scno, PageRequestDTO pageRequestDTO) {
         log.info("Fetching product list by sub-category ID (scno): {}", scno);
-        return productRepository.listBySubCategory(scno, pageRequestDTO);
+        return productRepository.findByCategoryAndSubCategory(cno, scno, pageRequestDTO);
     }
 
     // 테마 카테고리로 상품 목록 조회
-    public PageResponseDTO<ProductListDTO> listByTheme(String themeCategory, PageRequestDTO pageRequestDTO) {
-        log.info("Fetching product list by theme category: {}", themeCategory);
-        return productRepository.listByTheme(themeCategory, pageRequestDTO);
+    public PageResponseDTO<ProductListDTO> listByTheme(Optional<Long> tno, PageRequestDTO pageRequestDTO) {
+        log.info("Fetching product list by theme category: {}", tno);
+        return productRepository.findByThemeCategory(tno, pageRequestDTO);
     }
 
     // 상품 생성
@@ -111,6 +114,7 @@ public class ProductService {
 //    }
 
     public Long updateProduct(Long pno, ProductListDTO productListDTO, List<AttachFile> attachFiles) {
+
         Product product = productRepository.findById(pno)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
@@ -129,6 +133,7 @@ public class ProductService {
 
         log.info("Product updated with ID: {}", pno);
         return pno;
+
     }
 
     // 상품 삭제

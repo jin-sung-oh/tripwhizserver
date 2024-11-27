@@ -2,7 +2,7 @@ package com.example.demo.product.dto;
 
 import com.example.demo.category.domain.Category;
 import com.example.demo.category.domain.SubCategory;
-import com.example.demo.category.domain.ThemeCategory;
+//import com.example.demo.category.domain.ThemeCategory;
 import com.example.demo.product.domain.Product;
 import com.example.demo.util.file.domain.AttachFile;
 import lombok.AllArgsConstructor;
@@ -23,17 +23,18 @@ public class ProductListDTO {
     private int price;
     private Long categoryCno;      // 상위 카테고리 ID
     private Long subCategoryScno;  // 하위 카테고리 ID
-    private ThemeCategory themeCategory; // 테마 카테고리
+//    private ThemeCategory themeCategory; // 테마 카테고리(주석처리)
     private List<AttachFile> attachFiles; // JH
 
     // DTO를 엔티티로 변환하는 메서드
     public Product toEntity(Category category, SubCategory subCategory) {
         return Product.builder()
+                .pno(this.pno)
                 .pname(this.pname)
                 .price(this.price)
                 .category(category)
                 .subCategory(subCategory)
-                .themeCategory(this.themeCategory)
+//                .themeCategory(this.themeCategory)
                 .attachFiles(this.attachFiles)
                 .build();
     }

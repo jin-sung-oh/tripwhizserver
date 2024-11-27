@@ -79,10 +79,10 @@ public class ProductController {
 
     // 기본 상품 목록 조회 엔드포인트
     @GetMapping("/list")
-    public ResponseEntity<PageResponseDTO<ProductListDTO>> list(@Validated PageRequestDTO requestDTO) {
+    public ResponseEntity<PageResponseDTO<ProductListDTO>> getList(@Validated PageRequestDTO requestDTO) {
         log.info("Fetching product list");
 
-        PageResponseDTO<ProductListDTO> response = productService.list(requestDTO);
+        PageResponseDTO<ProductListDTO> response = productService.getList(requestDTO);
         log.info("Product list response: {}", response);
 
         return ResponseEntity.ok(response);
@@ -113,10 +113,10 @@ public class ProductController {
 
     // 하위 카테고리(scno)로 상품 목록 조회 엔드포인트
     @GetMapping("/list/subcategory")
-    public ResponseEntity<PageResponseDTO<ProductListDTO>> listBySubCategory(@RequestParam Long scno, @Validated PageRequestDTO requestDTO) {
+    public ResponseEntity<PageResponseDTO<ProductListDTO>> listByCategoryAndSubCategory(@RequestParam Long cno, @RequestParam Long scno, @Validated PageRequestDTO requestDTO) {
         log.info("Fetching product list by sub-category ID (scno): {}", scno);
 
-        PageResponseDTO<ProductListDTO> response = productService.listBySubCategory(scno, requestDTO);
+        PageResponseDTO<ProductListDTO> response = productService.listByCategoryAndSubCategory(cno, scno, requestDTO);
         log.info("Product list by sub-category response: {}", response);
 
         return ResponseEntity.ok(response);
@@ -124,10 +124,10 @@ public class ProductController {
 
     // 테마 카테고리로 상품 목록 조회 엔드포인트
     @GetMapping("/list/theme")
-    public ResponseEntity<PageResponseDTO<ProductListDTO>> listByTheme(@RequestParam String themeCategory, @Validated PageRequestDTO requestDTO) {
-        log.info("Fetching product list by theme category: {}", themeCategory);
+    public ResponseEntity<PageResponseDTO<ProductListDTO>> listByTheme(@RequestParam Optional<Long> tno, @Validated PageRequestDTO requestDTO) {
+        log.info("Fetching product list by theme category: {}", tno);
 
-        PageResponseDTO<ProductListDTO> response = productService.listByTheme(themeCategory, requestDTO);
+        PageResponseDTO<ProductListDTO> response = productService.listByTheme(tno, requestDTO);
         log.info("Product list by theme response: {}", response);
 
         return ResponseEntity.ok(response);
