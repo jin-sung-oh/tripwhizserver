@@ -50,6 +50,7 @@ public class CustomSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/spot/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/spot/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/spot/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/spot/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/admin/createStoreOwner").hasRole("ADMIN")
                         .requestMatchers("/api/storeowner/**").hasRole("STOREOWNER")
                         .anyRequest().authenticated()

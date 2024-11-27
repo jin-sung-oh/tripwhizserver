@@ -86,29 +86,34 @@ public class SpotService {
     }
 
 
-    // 기존 Spot 수정
-    public void modify(Long spno, SpotDTO modifyDTO) {
-        log.info("----- Starting Spot Modification in Service -----");
-        log.info("Spot ID to modify: {}", spno);
-        log.info("Received SpotDTO: {}", modifyDTO);
+    public SpotDTO modify(Long spno, SpotDTO modifyDTO) {
+        log.info("Modifying Spot with ID: {}", spno);
+        log.debug("Received SpotDTO for modification: {}", modifyDTO);
 
         Spot spot = spotRepository.findById(spno)
                 .orElseThrow(() -> {
                     log.error("Spot not found with ID: {}", spno);
                     return new IllegalArgumentException("Spot not found.");
                 });
-        log.info("Found Spot: {}", spot);
 
-        log.info("Updating Spot details...");
+        log.info("Spot found for modification: {}", spot);
+
+        // Update fields
         spot.setSpotname(modifyDTO.getSpotname());
         spot.setAddress(modifyDTO.getAddress());
         spot.setTel(modifyDTO.getTel());
 
-        log.info("Saving updated Spot...");
-        spotRepository.save(spot);
-        log.info("Updated Spot saved: {}", spot);
+        Spot updatedSpot = spotRepository.save(spot);
+        log.info("Spot updated successfully: {}", updatedSpot);
 
-        log.info("----- End of Spot Modification in Service -----");
+        return SpotDTO.builder()
+                .spno(updatedSpot.getSpno())
+                .spotname(updatedSpot.getSpotname())
+                .address(updatedSpot.getAddress())
+                .tel(updatedSpot.getTel())
+                .sno(updatedSpot.getStoreowner().getSno())
+                .sname(updatedSpot.getStoreowner().getSname())
+                .build();
     }
 
 

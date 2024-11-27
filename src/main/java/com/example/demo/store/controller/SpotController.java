@@ -67,17 +67,20 @@ public class SpotController {
     // Spot 수정
     @PutMapping("/update/{spno}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> modify(@PathVariable Long spno, @RequestBody SpotDTO modifyDTO) {
+    public ResponseEntity<SpotDTO> modify(@PathVariable Long spno, @RequestBody SpotDTO modifyDTO) {
         log.info("----- Spot Modification Request -----");
         log.info("Spot ID to modify: {}", spno);
         log.info("Received SpotDTO for modification: {}", modifyDTO);
 
-        spotService.modify(spno, modifyDTO);
+        // 서비스 계층에서 수정된 SpotDTO를 반환받음
+        SpotDTO updatedSpot = spotService.modify(spno, modifyDTO);
 
         log.info("Successfully modified Spot with ID: {}", spno);
+        log.info("Updated SpotDTO: {}", updatedSpot);
         log.info("----- End of Spot Modification -----");
 
-        return ResponseEntity.ok().build();
+        // 수정된 SpotDTO를 응답으로 반환
+        return ResponseEntity.ok(updatedSpot);
     }
 
     // Spot 삭제
