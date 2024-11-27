@@ -31,7 +31,8 @@ public class UploadService {
 
         List<AttachFile> uploadedFiles = new ArrayList<>();
 
-        for (MultipartFile file : files) {
+        for (int ord = 0; ord < files.length; ord++) { // ord 값이 0부터 시작
+            MultipartFile file = files[ord];
             String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
 
             try {
@@ -40,11 +41,11 @@ public class UploadService {
                 FileCopyUtils.copy(file.getBytes(), savedFile);
 
                 // AttachFile 생성
-                AttachFile attachFile = new AttachFile(0, fileName);
+                AttachFile attachFile = new AttachFile(ord, fileName); // ord 값을 추가
                 uploadedFiles.add(attachFile);
 
-                // 썸네일 생성 (이미지 파일인 경우)
-                if (file.getContentType() != null && file.getContentType().startsWith("image")) {
+                // 썸네일 생성 (ord=0인 경우에만 생성)
+                if (ord == 0 && file.getContentType() != null && file.getContentType().startsWith("image")) {
                     String thumbnailFileName = "s_" + fileName;
 
                     @Cleanup
@@ -54,8 +55,8 @@ public class UploadService {
 
                     Thumbnailator.createThumbnail(inputStream, outputStream, 200, 200);
 
-                    // 썸네일도 AttachFile로 추가할 경우
-                    AttachFile thumbnailFile = new AttachFile(0, thumbnailFileName);
+                    // 썸네일도 AttachFile로 추가할 필요가 없다면 여기서 종료
+                    AttachFile thumbnailFile = new AttachFile(ord, thumbnailFileName); // 썸네일의 ord도 0으로 설정
                     uploadedFiles.add(thumbnailFile);
                 }
 
