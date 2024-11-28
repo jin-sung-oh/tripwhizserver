@@ -42,21 +42,17 @@ public class CustomSecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/admin/register").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/api/product/add").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/admin/storeOwners").authenticated()
-                        .requestMatchers(HttpMethod.DELETE, "/api/admin/deleteStoreOwner/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/spot/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/spot/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/spot/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/spot/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/admin/createStoreOwner").hasRole("ADMIN")
-                        .requestMatchers("/api/storeowner/**").hasRole("STOREOWNER")
-                        //by SA
-                        .requestMatchers("/api/nationality/**").permitAll() // `/api/nationality` 인증 없이 접근 가능
-                        .requestMatchers("/api/stock/**").permitAll()
+                        // 공통적으로 인증 없이 접근 가능한 경로
+                        .requestMatchers("/api/auth/**", "/api/admin/register", "/api/nationality/**", "/api/stock/**").permitAll()
 
+                        // 관리자 전용 경로
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
+                        // 점주 전용 경로
+                        .requestMatchers("/api/storeowner/**").hasRole("STOREOWNER")
+
+                        // 인증 필요 경로
+                        .requestMatchers(HttpMethod.GET, "/api/admin/storeOwners").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JWTCheckFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)

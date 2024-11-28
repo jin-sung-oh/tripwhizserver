@@ -16,7 +16,7 @@ import java.util.List;
 @RestController
 @Log4j2
 @RequiredArgsConstructor
-@RequestMapping("/api/category")
+@RequestMapping("/api/admin/category")
 public class CategoryController {
 
     private final CategoryService categoryService;

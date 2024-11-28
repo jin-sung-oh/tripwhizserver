@@ -16,7 +16,7 @@ import java.util.List;
 @RestController
 @Log4j2
 @RequiredArgsConstructor
-@RequestMapping("/api/subcategory")
+@RequestMapping("/api/admin/subcategory")
 public class SubCategoryController {
 
     private final SubCategoryService subCategoryService;

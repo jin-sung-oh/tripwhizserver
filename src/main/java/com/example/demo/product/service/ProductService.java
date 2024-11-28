@@ -60,104 +60,104 @@ public class ProductService {
         return productRepository.listByTheme(themeCategory, pageRequestDTO);
     }
 
-    // 상품 생성(SO)
-    public Long createProduct(ProductListDTO productListDTO, List<AttachFile> attachFiles) {
-        Category category = categoryRepository.findById(productListDTO.getCategoryCno())
-                .orElseThrow(() -> new RuntimeException("Category not found"));
-        SubCategory subCategory = subCategoryRepository.findById(productListDTO.getSubCategoryScno())
-                .orElseThrow(() -> new RuntimeException("SubCategory not found"));
-
-        Product product = productListDTO.toEntity(category, subCategory);
-        if (attachFiles != null) {
-            attachFiles.forEach(product::addAttachFile);
-        }
-
-        Product savedProduct = productRepository.save(product);
-
-        // 유저 서버로 생성된 데이터 전송
-        productServiceForUser.sendProductToUserApi(productListDTO);
-
-        log.info("Product created with ID: {}", savedProduct.getPno());
-        return savedProduct.getPno();
-    }
-
-//    // 상품 생성(JH)
+//    // 상품 생성(SO)
 //    public Long createProduct(ProductListDTO productListDTO, List<AttachFile> attachFiles) {
-//        log.info("ProductListDTO: {}", productListDTO);
-//        log.info("AttachFiles: {}", attachFiles);
-//
 //        Category category = categoryRepository.findById(productListDTO.getCategoryCno())
 //                .orElseThrow(() -> new RuntimeException("Category not found"));
 //        SubCategory subCategory = subCategoryRepository.findById(productListDTO.getSubCategoryScno())
 //                .orElseThrow(() -> new RuntimeException("SubCategory not found"));
 //
 //        Product product = productListDTO.toEntity(category, subCategory);
-//
-//        if (attachFiles != null && !attachFiles.isEmpty()) {
-//            for (AttachFile attachFile : attachFiles) {
-//                log.info("Adding file: {}", attachFile); // 로그 추가
-//                product.addAttachFile(attachFile);
-//            }
+//        if (attachFiles != null) {
+//            attachFiles.forEach(product::addAttachFile);
 //        }
 //
 //        Product savedProduct = productRepository.save(product);
+//
+//        // 유저 서버로 생성된 데이터 전송
+//        productServiceForUser.sendProductToUserApi(productListDTO);
 //
 //        log.info("Product created with ID: {}", savedProduct.getPno());
 //        return savedProduct.getPno();
 //    }
 
-    // 상품 수정(SO)
-    public Long updateProduct(Long pno, ProductListDTO productListDTO, List<AttachFile> attachFiles) {
-        Product product = productRepository.findById(pno)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+    // 상품 생성(JH)
+    public Long createProduct(ProductListDTO productListDTO, List<AttachFile> attachFiles) {
+        log.info("ProductListDTO: {}", productListDTO);
+        log.info("AttachFiles: {}", attachFiles);
 
-        product.updateFromDTO(productListDTO);
-        if (attachFiles != null) {
-            attachFiles.forEach(product::addAttachFile);
+        Category category = categoryRepository.findById(productListDTO.getCategoryCno())
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+        SubCategory subCategory = subCategoryRepository.findById(productListDTO.getSubCategoryScno())
+                .orElseThrow(() -> new RuntimeException("SubCategory not found"));
+
+        Product product = productListDTO.toEntity(category, subCategory);
+
+        if (attachFiles != null && !attachFiles.isEmpty()) {
+            for (AttachFile attachFile : attachFiles) {
+                log.info("Adding file: {}", attachFile); // 로그 추가
+                product.addAttachFile(attachFile);
+            }
         }
 
-        productRepository.save(product);
+        Product savedProduct = productRepository.save(product);
 
-        // 유저 서버로 수정된 데이터 전송
-        productServiceForUser.sendProductUpdateToUserApi(pno, productListDTO);
-
-        log.info("Product updated with ID: {}", pno);
-        return pno;
+        log.info("Product created with ID: {}", savedProduct.getPno());
+        return savedProduct.getPno();
     }
 
-    //상품 업데이트(JH)
+//    // 상품 수정(SO)
 //    public Long updateProduct(Long pno, ProductListDTO productListDTO, List<AttachFile> attachFiles) {
 //        Product product = productRepository.findById(pno)
 //                .orElseThrow(() -> new RuntimeException("Product not found"));
 //
-//        // 기존 데이터 업데이트
 //        product.updateFromDTO(productListDTO);
-//
-//        // 기존 AttachFile 리스트를 초기화하고 새 파일 추가
-//        if (attachFiles != null && !attachFiles.isEmpty()) {
-//            for (AttachFile attachFile : attachFiles) {
-//                log.info("Adding file: {}", attachFile); // 로그 추가
-//                product.addAttachFile(attachFile);
-//            }
+//        if (attachFiles != null) {
+//            attachFiles.forEach(product::addAttachFile);
 //        }
 //
 //        productRepository.save(product);
 //
+//        // 유저 서버로 수정된 데이터 전송
+//        productServiceForUser.sendProductUpdateToUserApi(pno, productListDTO);
+//
 //        log.info("Product updated with ID: {}", pno);
 //        return pno;
 //    }
-// 상품삭제(SO)
-    public void deleteProduct(Long pno) {
-        productRepository.findById(pno)
+
+    //상품 업데이트(JH)
+    public Long updateProduct(Long pno, ProductListDTO productListDTO, List<AttachFile> attachFiles) {
+        Product product = productRepository.findById(pno)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
-        productRepository.deleteById(pno);
+        // 기존 데이터 업데이트
+        product.updateFromDTO(productListDTO);
 
-        // 유저 서버로 삭제 요청 전송
-        productServiceForUser.sendProductDeleteToUserApi(pno);
+        // 기존 AttachFile 리스트를 초기화하고 새 파일 추가
+        if (attachFiles != null && !attachFiles.isEmpty()) {
+            for (AttachFile attachFile : attachFiles) {
+                log.info("Adding file: {}", attachFile); // 로그 추가
+                product.addAttachFile(attachFile);
+            }
+        }
 
-        log.info("Product deleted with ID: {}", pno);
+        productRepository.save(product);
+
+        log.info("Product updated with ID: {}", pno);
+        return pno;
     }
+// 상품삭제(SO)
+//    public void deleteProduct(Long pno) {
+//        productRepository.findById(pno)
+//                .orElseThrow(() -> new RuntimeException("Product not found"));
+//
+//        productRepository.deleteById(pno);
+//
+//        // 유저 서버로 삭제 요청 전송
+//        productServiceForUser.sendProductDeleteToUserApi(pno);
+//
+//        log.info("Product deleted with ID: {}", pno);
+//    }
 
 
 

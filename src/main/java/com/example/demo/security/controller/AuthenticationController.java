@@ -71,7 +71,7 @@ public class AuthenticationController {
     private ResponseEntity<?> generateTokens(String id, String role) {
         try {
             // AccessToken: 30분 유효, RefreshToken: 7일 유효
-            String accessToken = jwtUtil.createAccessToken(Map.of("id", id, "role", role), 30);
+            String accessToken = jwtUtil.createAccessToken(Map.of("id", id, "role", role), 60);
             String refreshToken = jwtUtil.createRefreshToken(Map.of("id", id, "role", role), 7);  // 7일 유효
 
             return ResponseEntity.ok(Map.of("accessToken", accessToken, "refreshToken", refreshToken));
