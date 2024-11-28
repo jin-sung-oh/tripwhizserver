@@ -36,7 +36,9 @@ com:
     refreshTime: 10080
     alwaysNew: true
     upload:
-      path: upload
+      productpath: /app/upload/product   # 상품 이미지 저장 경로
+      qrimagepath: /app/upload/qrcode   # QR 코드 이미지 저장 경로
+
     user:
       api:
         url: http://localhost:8081  # User API의 URL
