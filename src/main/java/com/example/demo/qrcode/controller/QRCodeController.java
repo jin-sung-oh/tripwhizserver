@@ -9,6 +9,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+//import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
@@ -17,7 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/order")
+@RequestMapping("/api/storeowner/qrcode")
 @RequiredArgsConstructor
 public class QRCodeController {
 
@@ -30,6 +31,7 @@ public class QRCodeController {
     private String qrCodePath;
 
     @PostMapping("/complete")
+//    @PreAuthorize("hasRole('STOREOWNER')")
     public Map<String, String> completeOrder(@RequestParam String ono, @RequestParam int totalAmount) throws Exception {
         String qrFilePath = qrService.generateQRCode(ono, totalAmount);
 
@@ -41,6 +43,7 @@ public class QRCodeController {
     }
 
     @GetMapping("/view/{qrname}")
+//    @PreAuthorize("hasRole('STOREOWNER')")
     public ResponseEntity<Resource> viewQRCode(@PathVariable String qrname) {
         File qrFile = Paths.get(uploadBasePath, qrCodePath, qrname + ".png").toFile();
 
