@@ -1,9 +1,6 @@
 package com.example.demo.category.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
@@ -18,12 +15,9 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long cno;
 
-    @Builder.Default
-    private ParentCategory category = ParentCategory.ALL;
+    @Column(nullable = false)
+    private String cname;
 
     private boolean delFlag;
-
-    @Builder.Default
-    private ThemeCategory themeCategory = ThemeCategory.RELAXATION;
 
 }
