@@ -38,7 +38,6 @@ public class ProductController {
 
     // uploadService 추가한 메서드(JH)
     @PostMapping("/add")
-
     public ResponseEntity<Long> createProduct(
             @RequestPart("productListDTO") ProductListDTO productListDTO,
             @RequestPart(value = "files", required = false) MultipartFile[] files) {

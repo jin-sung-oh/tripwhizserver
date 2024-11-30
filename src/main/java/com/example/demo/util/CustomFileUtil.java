@@ -19,12 +19,12 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class CustomFileUtil {
 
-  @Value("${com.tripwhiz.uploadBasic}")
+  @Value("${com.example.uploadBasic}")
   private String uploadPath;
 
-  @Value("${com.tripwhiz.upload.productpath}")
+  @Value("${com.example.upload.productpath}")
   private String productPath;
-  @Value("${com.tripwhiz.upload.qrcodepath}")
+  @Value("${com.example.upload.qrcodepath}")
   private String qrcodePath;
 
   @PostConstruct

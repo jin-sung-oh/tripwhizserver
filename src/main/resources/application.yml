@@ -27,7 +27,7 @@ spring:
     multipart:
       max-file-size: 20MB
       max-request-size: 20MB
-      location: upload
+      location: /app/upload  # 컨테이너 내부 업로드 경로와 일치
       enabled: true
 
 com:
@@ -35,8 +35,10 @@ com:
     accessTime: 60
     refreshTime: 10080
     alwaysNew: true
+    uploadBasic: C:\\upload
     upload:
-      path: upload
+      productpath: product  # 상품 이미지 저장 경로
+      qrcodepath: qrcode  # QR 코드 이미지 저장 경로
     user:
       api:
         url: http://localhost:8081  # User API의 URL
@@ -53,7 +55,4 @@ logging:
         add-mappings: false
 server:
   port: 8082
-
-
-
 

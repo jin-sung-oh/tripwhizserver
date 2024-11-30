@@ -21,10 +21,10 @@ import java.nio.file.Paths;
 @Log4j2
 public class QRService {
 
-    @Value("${com.tripwhiz.uploadBasic}")
+    @Value("${com.example.uploadBasic}")
     private String uploadBasePath;
 
-    @Value("${com.tripwhiz.upload.qrcodepath}")
+    @Value("${com.example.upload.qrcodepath}")
     private String qrCodePath;
 
     public String generateQRCode(String orderId, int totalAmount) throws WriterException, IOException {

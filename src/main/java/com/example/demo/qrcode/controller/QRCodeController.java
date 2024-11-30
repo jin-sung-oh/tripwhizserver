@@ -23,10 +23,10 @@ public class QRCodeController {
 
     private final QRService qrService;
 
-    @Value("${com.tripwhiz.uploadBasic}")
+    @Value("${com.example.uploadBasic}")
     private String uploadBasePath;
 
-    @Value("${com.tripwhiz.upload.qrcodepath}")
+    @Value("${com.example.upload.qrcodepath}")
     private String qrCodePath;
 
     @PostMapping("/complete")
