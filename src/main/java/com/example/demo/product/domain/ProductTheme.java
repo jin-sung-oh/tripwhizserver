@@ -1,9 +1,9 @@
 package com.example.demo.product.domain;
 
+
 import jakarta.persistence.*;
 import lombok.*;
 
-// JH
 @Entity
 @Getter
 @Setter
@@ -25,4 +25,5 @@ public class ProductTheme {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "theme_category_tno", nullable = false)
     private ThemeCategory themeCategory;
+
 }

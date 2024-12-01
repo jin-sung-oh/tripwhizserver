@@ -15,10 +15,8 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long cno;
 
-    // 상위 카테고리 설정 (ParentCategory Enum 사용)
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ParentCategory parentCategory;
+    private String cname;
 
     private boolean delFlag;
 
