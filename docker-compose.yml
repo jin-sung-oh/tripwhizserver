@@ -7,25 +7,18 @@ services:
     ports:
       - 80:80
     volumes:
-      - C:/upload:/usr/share/nginx/html:ro           # HTML 파일 마운트
+      - C:/upload:/usr/share/nginx/html:ro  # HTML 파일 마운트
     restart: always
 
   upload_container:
     image: eggzuxi/uploadapi:latest
-
     container_name: uploadapi_container
     ports:
       - 8080:8080
     environment:
-      - com.example.upload.productpath=/app/upload/product
-      - com.example.upload.qrimagepath=/app/upload/qrcode
+      - com.example.upload.path=/app/upload
       - spring.multipart.location=/app/upload
-      - spring.datasource.url=jdbc:mariadb://10.10.10.92:13306/team4db
-    networks:
-      - uploadnet
+      - spring.datasource.url=jdbc:mariadb://localhost:13306/tripwhiz
+
     volumes:
-      - C:/upload/:/app/upload
-
-
-networks:
-  uploadnet: {}
+      - C:\\upload:/app/upload

@@ -1,26 +1,26 @@
 package com.example.demo.product;
 
 import com.example.demo.category.domain.Category;
-import com.example.demo.category.domain.CategoryProduct;
-import com.example.demo.category.domain.ParentCategory;
-import com.example.demo.category.domain.ThemeCategory;
-import com.example.demo.category.repository.CategoryProductRepository;
+import com.example.demo.category.domain.SubCategory;
 import com.example.demo.category.repository.CategoryRepository;
+import com.example.demo.category.repository.SubCategoryRepository;
 import com.example.demo.product.domain.Product;
+import com.example.demo.product.domain.ProductTheme;
+import com.example.demo.product.domain.ThemeCategory;
 import com.example.demo.product.repository.ProductRepository;
-import jakarta.transaction.Transactional;
+import com.example.demo.product.repository.ThemeCategoryRepository;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.annotation.Commit;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.IntStream;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @DataJpaTest
 @Log4j2
@@ -31,71 +31,102 @@ public class ProductRepoTests {
     private CategoryRepository categoryRepository;
 
     @Autowired
-    private ProductRepository productRepository;
+    private SubCategoryRepository subCategoryRepository;
 
     @Autowired
-    private CategoryProductRepository categoryProductRepository;
+    private ThemeCategoryRepository themeCategoryRepository;
 
-    private final Random random = new Random();
+    @Autowired
+    private ProductRepository productRepository;
 
     @Test
     @Transactional
     @Commit
-    public void testInsertCategoriesProductsAndCategoryProducts() {
-        // 1. 카테고리 10개 생성 및 저장
-        IntStream.rangeClosed(1, 10).forEach(i -> {
-            Category category = Category.builder()
-                    .category(ParentCategory.ALL)
-                    .themeCategory(ThemeCategory.RELAXATION)
-                    .delFlag(false)
-                    .build();
-            categoryRepository.save(category);
-            log.info("Inserted Category: " + category);
-        });
+    public void createDataAndProducts() {
+        // Step 1: 카테고리 생성
+        List<Category> categories = createCategories();
 
-        // 2. 프로덕트 100개 생성 및 동일한 이미지 파일 이름 설정하여 저장
+        // Step 2: 하위 카테고리 생성
+        List<SubCategory> subCategories = createSubCategories(categories);
+
+        // Step 3: 테마 카테고리 생성
+        List<ThemeCategory> themeCategories = createThemeCategories();
+
+        // Step 4: 상품 생성
+        createProducts(categories, subCategories, themeCategories);
+    }
+
+    private List<Category> createCategories() {
+        List<Category> categories = new ArrayList<>();
+        categories.add(new Category(1L, "수납/편의",  false));
+        categories.add(new Category(2L, "의류", false));
+        categories.add(new Category(3L, "안전/위생", false));
+        categories.add(new Category(4L, "악세사리", false));
+        categories.add(new Category(5L, "액티비티 용품", false));
+        return categoryRepository.saveAll(categories);
+    }
+
+    private List<SubCategory> createSubCategories(List<Category> categories) {
+        List<SubCategory> subCategories = new ArrayList<>();
+        subCategories.add(new SubCategory(null, "파우치", categories.get(0)));
+        subCategories.add(new SubCategory(null, "케이스/커버", categories.get(0)));
+        subCategories.add(new SubCategory(null, "안대/목베개", categories.get(0)));
+        subCategories.add(new SubCategory(null, "와이파이 유심", categories.get(0)));
+        subCategories.add(new SubCategory(null, "아우터", categories.get(1)));
+        subCategories.add(new SubCategory(null, "상의/하의", categories.get(1)));
+        subCategories.add(new SubCategory(null, "잡화", categories.get(1)));
+        subCategories.add(new SubCategory(null, "뷰티케어", categories.get(2)));
+        subCategories.add(new SubCategory(null, "세면도구", categories.get(2)));
+        subCategories.add(new SubCategory(null, "상비약", categories.get(2)));
+        subCategories.add(new SubCategory(null, "전기/전자용품", categories.get(3)));
+        subCategories.add(new SubCategory(null, "여행 아이템", categories.get(3)));
+        subCategories.add(new SubCategory(null, "캠핑/등산", categories.get(4)));
+        subCategories.add(new SubCategory(null, "수영", categories.get(4)));
+        subCategories.add(new SubCategory(null, "야외/트래킹", categories.get(4)));
+        return subCategoryRepository.saveAll(subCategories);
+    }
+
+    private List<ThemeCategory> createThemeCategories() {
+        List<ThemeCategory> themeCategories = new ArrayList<>();
+        themeCategories.add(new ThemeCategory(null, "Healing", false));
+        themeCategories.add(new ThemeCategory(null, "Business", false));
+        themeCategories.add(new ThemeCategory(null, "Eating", false));
+        themeCategories.add(new ThemeCategory(null, "Shopping", false));
+        themeCategories.add(new ThemeCategory(null, "Activity", false));
+        themeCategories.add(new ThemeCategory(null, "Culture", false));
+        return themeCategoryRepository.saveAll(themeCategories);
+    }
+
+    private void createProducts(List<Category> categories, List<SubCategory> subCategories, List<ThemeCategory> themeCategories) {
+        Random random = new Random();
+
         IntStream.rangeClosed(1, 100).forEach(i -> {
+            // 랜덤 카테고리 및 하위 카테고리 선택
+            Category category = categories.get(random.nextInt(categories.size()));
+            List<SubCategory> relatedSubCategories = subCategoryRepository.findByCategory_Cno(category.getCno());
+            SubCategory subCategory = relatedSubCategories.get(random.nextInt(relatedSubCategories.size()));
 
+            // 랜덤 테마 선택
+            ThemeCategory themeCategory = themeCategories.get(random.nextInt(themeCategories.size()));
+
+            // 상품 생성
             Product product = Product.builder()
-                    .pname("상품 " + i)
-                    .pdesc("설명 " + i)
-                    .price(1000 * i)
-                    .delFlag(false)
-                    .themeCategory(ThemeCategory.RELAXATION)
+                    .pname("Product " + i)
+                    .price(1000 + random.nextInt(9000)) // 1000 ~ 9999 범위의 랜덤 가격
+                    .pdesc("Description for product " + i)
+                    .category(category)
+                    .subCategory(subCategory)
                     .build();
             productRepository.save(product);
-            log.info("Inserted Product: " + product);
-        });
 
-        // 3. 모든 카테고리와 프로덕트를 조회하여 각각 하나씩 연결
-        List<Category> categories = categoryRepository.findAll();
-        List<Product> products = productRepository.findAll();
-
-        products.forEach(product -> {
-            // Product마다 랜덤한 1개의 Category와 연결
-            Category category = categories.get(random.nextInt(categories.size()));
-
-            // CategoryProduct 생성 및 저장
-            CategoryProduct categoryProduct = CategoryProduct.builder()
-                    .category(category)
+            // 상품 테마 설정
+            ProductTheme productTheme = ProductTheme.builder()
                     .product(product)
+                    .themeCategory(themeCategory)
                     .build();
-            categoryProductRepository.save(categoryProduct);
 
-            log.info("Linked Product: " + product.getPname() + " with Category: " + category.getCategory());
         });
-
-        // 4. 검증
-        long categoryCount = categoryRepository.count();
-        long productCount = productRepository.count();
-        long categoryProductCount = categoryProductRepository.count();
-
-        assertThat(categoryCount).isEqualTo(10);
-        assertThat(productCount).isEqualTo(100);
-        assertThat(categoryProductCount).isEqualTo(100); // Product마다 하나의 Category 연결 확인
-
-        log.info("Total Categories in DB: " + categoryCount);
-        log.info("Total Products in DB: " + productCount);
-        log.info("Total CategoryProduct entries in DB: " + categoryProductCount);
     }
+
+
 }

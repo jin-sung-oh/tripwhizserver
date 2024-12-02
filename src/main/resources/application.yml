@@ -5,7 +5,7 @@ spring:
     driver-class-name: org.mariadb.jdbc.Driver
 
     url: jdbc:mariadb://localhost:13306/team4db
-#    url: jdbc:mariadb://10.10.10.214:13306/team4db
+    #    url: jdbc:mariadb://10.10.10.214:13306/team4db
     username: team4dbuser
     password: team4dbuser
 
@@ -27,7 +27,7 @@ spring:
     multipart:
       max-file-size: 20MB
       max-request-size: 20MB
-      location: upload
+      location: /app/upload  # 컨테이너 내부 업로드 경로와 일치
       enabled: true
 
 com:
@@ -35,10 +35,10 @@ com:
     accessTime: 60
     refreshTime: 10080
     alwaysNew: true
+    uploadBasic: C:\\upload
     upload:
-      productpath: /app/upload/product   # 상품 이미지 저장 경로
-      qrimagepath: /app/upload/qrcode   # QR 코드 이미지 저장 경로
-
+      productpath: product  # 상품 이미지 저장 경로
+      qrcodepath: qrcode  # QR 코드 이미지 저장 경로
     user:
       api:
         url: http://localhost:8081  # User API의 URL
@@ -55,7 +55,4 @@ logging:
         add-mappings: false
 server:
   port: 8082
-
-
-
 

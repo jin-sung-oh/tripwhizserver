@@ -8,8 +8,9 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-@ToString
+@ToString(exclude = "category")
 public class SubCategory {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long scno;
@@ -18,6 +19,7 @@ public class SubCategory {
     private String sname;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cno")
+    @JoinColumn(name = "category_cno")
     private Category category;
+
 }
