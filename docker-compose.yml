@@ -1,3 +1,4 @@
+version: '0.2'
 
 services:
   nginx:
@@ -15,10 +16,9 @@ services:
     ports:
       - 8080:8080
     environment:
-      - com.example.upload.productpath=/app/upload/product
-      - com.example.upload.qrimagepath=/app/upload/qrcode
+      - com.example.upload.path=/app/upload
       - spring.multipart.location=/app/upload
-      - spring.datasource.url=jdbc:mariadb://10.10.10.99:13306/team4db
+      - spring.datasource.url=jdbc:mariadb://localhost:13306/tripwhiz
 
     volumes:
       - C:\\upload:/app/upload
