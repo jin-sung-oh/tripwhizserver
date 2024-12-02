@@ -11,14 +11,14 @@ services:
     restart: always
 
   upload_container:
-    image: eggzuxi/product_img:latest
+    image: sungohjin/product_img:latest
     container_name: upload_container
     ports:
       - 8080:8080
     environment:
       - com.example.upload.path=/app/upload
       - spring.multipart.location=/app/upload
-      - spring.datasource.url=jdbc:mariadb://10.10.10.217:13306/tripwhiz
+      - spring.datasource.url=jdbc:mariadb://localhost:13306/tripwhiz
 
     volumes:
       - C:\\upload:/app/upload

@@ -19,16 +19,17 @@ import java.util.Map;
 @Log4j2
 public class JWTUtil {
 
-    private static final String SECRET_KEY = "1234567890123456789012345678901234567890123456789012345678901234";  // 256비트 키
-    private static final String REFRESH_SECRET_KEY = "refreshSecretKey12345678901234567890123456789012345678901234567890";  // 256비트 리프레시 키
+    private static final String SECRET_KEY = "1234567890123456789012345678901234567890123456789012345678901234"; // 256-bit key
+    private static final String REFRESH_SECRET_KEY = "refreshSecretKey12345678901234567890123456789012345678901234567890"; // 256-bit refresh key
 
     public String createAccessToken(Map<String, Object> valueMap, int min) {
-        SecretKey secretKey = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));  // 256비트 키
+        SecretKey secretKey = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8)); // 256-bit key
         try {
+            // Add ROLE_ prefix for all roles
+            valueMap = new HashMap<>(valueMap); // Clone map to avoid mutation
             String role = (String) valueMap.get("role");
-            if ("ADMIN".equals(role)) {
-                valueMap = new HashMap<>(valueMap);
-                valueMap.put("role", "ROLE_ADMIN");
+            if (!role.startsWith("ROLE_")) {
+                valueMap.put("role", "ROLE_" + role.toUpperCase());
             }
 
             return Jwts.builder()
@@ -44,12 +45,13 @@ public class JWTUtil {
     }
 
     public String createRefreshToken(Map<String, Object> valueMap, int days) {
-        SecretKey secretKey = Keys.hmacShaKeyFor(REFRESH_SECRET_KEY.getBytes(StandardCharsets.UTF_8));  // 256비트 키
+        SecretKey secretKey = Keys.hmacShaKeyFor(REFRESH_SECRET_KEY.getBytes(StandardCharsets.UTF_8)); // 256-bit key
         try {
+            // Add ROLE_ prefix for all roles
+            valueMap = new HashMap<>(valueMap); // Clone map to avoid mutation
             String role = (String) valueMap.get("role");
-            if ("ADMIN".equals(role)) {
-                valueMap = new HashMap<>(valueMap);
-                valueMap.put("role", "ROLE_ADMIN");
+            if (!role.startsWith("ROLE_")) {
+                valueMap.put("role", "ROLE_" + role.toUpperCase());
             }
 
             return Jwts.builder()
@@ -66,7 +68,7 @@ public class JWTUtil {
 
     public Map<String, Object> validateToken(String token, boolean isRefreshToken) {
         String key = isRefreshToken ? REFRESH_SECRET_KEY : SECRET_KEY;
-        SecretKey secretKey = Keys.hmacShaKeyFor(key.getBytes(StandardCharsets.UTF_8));  // 256비트 키
+        SecretKey secretKey = Keys.hmacShaKeyFor(key.getBytes(StandardCharsets.UTF_8)); // 256-bit key
         try {
             Claims claims = Jwts.parserBuilder()
                     .setSigningKey(secretKey)

@@ -6,10 +6,6 @@ import lombok.extern.log4j.Log4j2;
 import net.coobird.thumbnailator.Thumbnails;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,8 +14,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -27,92 +21,107 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class CustomFileUtil {
 
-  @Value("${com.example.upload.path}")
+  @Value("${com.example.uploadBasic}")
   private String uploadPath;
+
+  @Value("${com.example.upload.productpath}")
+  private String productPath;
+
+  @Value("${com.example.upload.qrcodepath}")
+  private String qrcodePath;
+
+  @Value("${com.example.upload.storagepath}")
+  private String storagePath;
+
+  @Value("${com.example.upload.movingpath}")
+  private String movingPath;
+
+  private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB 제한
 
   @PostConstruct
   public void init() {
-    File tempFolder = new File(uploadPath);
+    // 업로드 및 QR코드 경로 초기화
+    createDirectoryIfNotExists(Paths.get(uploadPath, productPath));
+    createDirectoryIfNotExists(Paths.get(uploadPath, qrcodePath));
+    createDirectoryIfNotExists(Paths.get(uploadPath, storagePath));
+    createDirectoryIfNotExists(Paths.get(uploadPath, movingPath));
 
-    if (!tempFolder.exists()) {
-      tempFolder.mkdir();
-    }
-
-    uploadPath = tempFolder.getAbsolutePath();
-
-    log.info("-------------------------------------");
-    log.info(uploadPath);
+    log.info("Upload path initialized: {}", uploadPath);
+    log.info("QR Code path initialized: {}", qrcodePath);
+    log.info("Product path initialized: {}", productPath);
+    log.info("Storage path initialized: {}", storagePath);
+    log.info("Moving path initialized: {}", movingPath);
   }
 
-  // 파일 업로드 메서드 추가
-  public String uploadFile(MultipartFile file) {
-    String savedName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
-    Path savePath = Paths.get(uploadPath, savedName);
-
+  private void createDirectoryIfNotExists(Path path) {
     try {
-      Files.copy(file.getInputStream(), savePath);
-
-      String contentType = file.getContentType();
-      if (contentType != null && contentType.startsWith("image")) { // 이미지 여부 확인
-        Path thumbnailPath = Paths.get(uploadPath, "s_" + savedName);
-        Thumbnails.of(savePath.toFile())
-                .size(400, 400)
-                .toFile(thumbnailPath.toFile());
-      }
+      Files.createDirectories(path);
     } catch (IOException e) {
-      throw new RuntimeException("File upload failed: " + e.getMessage());
+      log.error("Failed to create directory: {}", path, e);
+      throw new RuntimeException("Failed to initialize upload directories", e);
     }
+  }
+
+  public String uploadQRCodeFile(MultipartFile file) throws IOException {
+    validateFile(file);
+    return saveFile(file, qrcodePath);
+  }
+
+  public String uploadProductImageFile(MultipartFile file) throws IOException {
+    validateFile(file);
+    String savedName = saveFile(file, productPath);
+
+    // 썸네일 생성
+    createThumbnail(file, savedName);
 
     return savedName;
   }
 
-  public List<String> saveFiles(List<MultipartFile> files) throws RuntimeException {
-    if (files == null || files.size() == 0) {
-      return null;
-    }
-
-    List<String> uploadNames = new ArrayList<>();
-
-    for (MultipartFile multipartFile : files) {
-      String savedName = uploadFile(multipartFile); // 기존 메서드 로직 재사용
-      uploadNames.add(savedName);
-    }
-    return uploadNames;
+  public String uploadStorageFile(MultipartFile file) throws IOException {
+    validateFile(file);
+    return saveFile(file, storagePath);
   }
 
-  public ResponseEntity<Resource> getFile(String fileName) {
-    Resource resource = new FileSystemResource(uploadPath + File.separator + fileName);
-
-    if (!resource.exists()) {
-      resource = new FileSystemResource(uploadPath + File.separator + "default.jpeg");
-    }
-
-    HttpHeaders headers = new HttpHeaders();
-
-    try {
-      headers.add("Content-Type", Files.probeContentType(resource.getFile().toPath()));
-    } catch (Exception e) {
-      return ResponseEntity.internalServerError().build();
-    }
-    return ResponseEntity.ok().headers(headers).body(resource);
+  public String uploadMovingFile(MultipartFile file) throws IOException {
+    validateFile(file);
+    return saveFile(file, movingPath);
   }
 
-  public void deleteFiles(List<String> fileNames) {
-    if (fileNames == null || fileNames.isEmpty()) {
-      return;
+  private void validateFile(MultipartFile file) {
+    if (file.isEmpty()) {
+      throw new IllegalArgumentException("File is empty");
     }
 
-    fileNames.forEach(fileName -> {
-      String thumbnailFileName = "s_" + fileName;
-      Path thumbnailPath = Paths.get(uploadPath, thumbnailFileName);
-      Path filePath = Paths.get(uploadPath, fileName);
+    if (file.getSize() > MAX_FILE_SIZE) {
+      throw new IllegalArgumentException("File size exceeds the maximum limit of 10MB");
+    }
 
-      try {
-        Files.deleteIfExists(filePath);
-        Files.deleteIfExists(thumbnailPath);
-      } catch (IOException e) {
-        throw new RuntimeException("File deletion failed: " + e.getMessage());
-      }
-    });
+    String contentType = file.getContentType();
+    if (contentType == null || (!contentType.startsWith("image/") && !contentType.equals("application/octet-stream"))) {
+      throw new IllegalArgumentException("Invalid file type: " + contentType);
+    }
+  }
+
+  private String saveFile(MultipartFile file, String targetPath) throws IOException {
+    String savedName = UUID.randomUUID() + "_" + sanitizeFileName(file.getOriginalFilename());
+    Path savePath = Paths.get(uploadPath, targetPath, savedName);
+    Files.copy(file.getInputStream(), savePath);
+    log.info("Saved file at: {}", savePath);
+    return savedName;
+  }
+
+  private void createThumbnail(MultipartFile file, String savedName) throws IOException {
+    String thumbnailName = "s_" + savedName;
+    Path thumbnailPath = Paths.get(uploadPath, productPath, thumbnailName);
+
+    Thumbnails.of(file.getInputStream())
+            .size(200, 200) // 썸네일 크기 설정
+            .toFile(thumbnailPath.toFile());
+
+    log.info("Created thumbnail file at: {}", thumbnailPath);
+  }
+
+  private String sanitizeFileName(String fileName) {
+    return fileName.replaceAll("[^a-zA-Z0-9._-]", "_");
   }
 }

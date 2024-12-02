@@ -27,5 +27,4 @@ public class OrderDetails {
 
     @Column(nullable = false)
     private int amount;
-
 }
