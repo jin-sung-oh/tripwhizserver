@@ -2,21 +2,18 @@ package com.example.demo.category.dto;
 
 
 import com.example.demo.category.domain.Category;
-import com.example.demo.category.domain.ParentCategory;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class CategoryDTO {
 
     private Long cno;
 
-    private ParentCategory category;
+    private String cname;
 
-    public static CategoryDTO fromEntity(Category category) {
-        CategoryDTO dto = new CategoryDTO();
-        dto.setCno(category.getCno());
-        dto.setCategory(category.getCategory());
-        return dto;
-    }
 
 }
