@@ -21,7 +21,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UploadService {
 
-    @Value("${com.example.upload.path}")
+    @Value("${com.example.upload.productpath}")
     private String uploadFolder;
 
     public List<AttachFile> uploadFiles(MultipartFile[] files) {

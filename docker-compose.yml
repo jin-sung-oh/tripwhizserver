@@ -1,4 +1,3 @@
-version: '0.2'
 
 services:
   nginx:
@@ -11,14 +10,15 @@ services:
     restart: always
 
   upload_container:
-    image: eggzuxi/product_img:latest
+    image: sungohjin/product_img:latest
     container_name: upload_container
     ports:
       - 8080:8080
     environment:
-      - com.example.upload.path=/app/upload
+      - com.example.upload.productpath=/app/upload/product
+      - com.example.upload.qrimagepath=/app/upload/qrcode
       - spring.multipart.location=/app/upload
-      - spring.datasource.url=jdbc:mariadb://10.10.10.217:13306/tripwhiz
+      - spring.datasource.url=jdbc:mariadb://10.10.10.99:13306/team4db
 
     volumes:
       - C:\\upload:/app/upload

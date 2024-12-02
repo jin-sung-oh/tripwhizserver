@@ -1,6 +1,7 @@
 package com.example.demo.order.domain;
 
 import com.example.demo.member.domain.Member;
+import com.example.demo.store.domain.Spot;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -22,8 +23,12 @@ public class Order {
     private Long ono;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "mno", nullable = false)
+    @JoinColumn(name = "email", nullable = false)
     private Member member;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "spno", nullable = false)
+    private Spot spot;
 
     @Column(nullable = false)
     private int totalAmount;
@@ -36,7 +41,8 @@ public class Order {
     private LocalDateTime createtime = LocalDateTime.now();
 
     @Column(nullable = false)
-    private LocalDateTime pickupdate;
+    @Builder.Default
+    private LocalDateTime pickupdate = LocalDateTime.now();
 
     @Builder.Default
     @Column(nullable = false, columnDefinition = "varchar(50) default 'PREPARING'")
@@ -46,5 +52,25 @@ public class Order {
     @Column(nullable = false)
     private boolean delFlag = false;
 
+    // QR 코드 파일명 필드
+    @Column(nullable = true)
+    private String qrCodePath;
 
+    @Column(nullable = true)
+    private LocalDateTime statusChangeTime;
+
+    public void changeStatus(OrderStatus newStatus) {
+        validateStatusChange(newStatus);
+        this.status = newStatus;
+        this.statusChangeTime = LocalDateTime.now();
+    }
+
+    public void validateStatusChange(OrderStatus newStatus) {
+        if (this.status == OrderStatus.CANCELLED) {
+            throw new IllegalStateException("Cancelled orders cannot be modified.");
+        }
+        if (this.status == OrderStatus.PREPARING && newStatus != OrderStatus.APPROVED) {
+            throw new IllegalArgumentException("Invalid status transition from PREPARING.");
+        }
+    }
 }
