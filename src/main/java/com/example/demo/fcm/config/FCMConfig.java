@@ -6,41 +6,42 @@ import com.google.firebase.FirebaseOptions;
 import com.google.firebase.messaging.FirebaseMessaging;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
 
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
 @Configuration
 public class FCMConfig {
 
     @Bean
-    FirebaseMessaging firebaseMessaging() throws IOException {
+    public FirebaseMessaging firebaseMessaging() throws IOException {
+        String firebaseConfigPath = System.getenv("FIREBASE_CONFIG_PATH");
 
-        ClassPathResource resource = new ClassPathResource("firebase/jin1107-c14a2-firebase-adminsdk-vvtqr-c688c2c6b4.json");
-
-        InputStream inputStream = resource.getInputStream();
-
-        FirebaseApp firebaseApp = null;
-        List<FirebaseApp> firebaseApps = FirebaseApp.getApps();
-
-        if( firebaseApps != null &&  firebaseApps.size() > 0) {
-
-            for(FirebaseApp firebaseApp1 : firebaseApps) {
-                if(firebaseApp1.getName().equals(FirebaseApp.DEFAULT_APP_NAME)) {
-                    firebaseApp = firebaseApp1;
-                }
-            }//end for
-
-        }else {
-            FirebaseOptions firebaseOptions = FirebaseOptions.builder()
-                    .setCredentials(GoogleCredentials.fromStream(inputStream)).build();
-
-            firebaseApp = FirebaseApp.initializeApp(firebaseOptions);
+        if (firebaseConfigPath == null || firebaseConfigPath.isEmpty()) {
+            throw new IllegalArgumentException("환경 변수 'FIREBASE_CONFIG_PATH'가 설정되지 않았습니다. Firebase 서비스 계정 키 파일 경로를 지정하세요.");
         }
 
-        return FirebaseMessaging.getInstance(firebaseApp);
+        try (FileInputStream serviceAccount = new FileInputStream(firebaseConfigPath)) {
+            FirebaseApp firebaseApp = null;
+            List<FirebaseApp> firebaseApps = FirebaseApp.getApps();
+
+            if (firebaseApps != null && !firebaseApps.isEmpty()) {
+                for (FirebaseApp existingApp : firebaseApps) {
+                    if (FirebaseApp.DEFAULT_APP_NAME.equals(existingApp.getName())) {
+                        firebaseApp = existingApp;
+                        break;
+                    }
+                }
+            } else {
+                FirebaseOptions options = FirebaseOptions.builder()
+                        .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                        .build();
+
+                firebaseApp = FirebaseApp.initializeApp(options);
+            }
+
+            return FirebaseMessaging.getInstance(firebaseApp);
+        }
     }
 }
-
