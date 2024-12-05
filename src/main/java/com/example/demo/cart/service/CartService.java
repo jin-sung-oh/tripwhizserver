@@ -5,7 +5,9 @@ import com.example.demo.cart.dto.CartListDTO;
 import com.example.demo.cart.dto.CartProductDTO;
 import com.example.demo.cart.repository.CartRepository;
 import com.example.demo.member.domain.Member;
+import com.example.demo.member.repository.MemberRepository;
 import com.example.demo.order.repository.OrderRepository;
+import com.example.demo.order.service.OrderService;
 import com.example.demo.product.domain.Product;
 import com.example.demo.product.repository.ProductRepository;
 import jakarta.transaction.Transactional;
@@ -24,8 +26,9 @@ import java.util.stream.Collectors;
 public class CartService {
 
     private final CartRepository cartRepository;
-//    private final ProductRepository productRepository;
-//    private final OrderRepository orderRepository;
+    private final ProductRepository productRepository;
+    private final MemberRepository memberRepository;
+
 
 
     // 장바구니에 물건 추가
@@ -79,7 +82,8 @@ public class CartService {
     }
 
 
-//    public void saveCart(String email) {
+    // 장바구니 저장
+//    public void sendCart(String email) {
 //        // 장바구니 목록 조회
 //        List<CartListDTO> cartList = list(email);
 //
@@ -88,10 +92,10 @@ public class CartService {
 //        // cartList 데이터를 Order 테이블에 저장
 //        for (CartListDTO cart : cartList) {
 //            Order order = Order.builder()
-////                    .email(cart.getEmail())
+//                    .email(cart.getEmail())
 //                    .productNo(cart.getPno())
 //                    .quantity(cart.getQty())
-//                    .orderDate(LocalDateTime.now())
+//                    .orderDate(cartList.get())
 //                    .status("CREATED") // 상태 값은 필요에 따라 변경 가능
 //                    .build();
 //
@@ -100,6 +104,35 @@ public class CartService {
 //
 //        log.info("Cart list successfully saved to order table.");
 //    }
+
+    public void saveCart(String email) {
+        // 장바구니 목록 조회
+        List<CartListDTO> cartList = list(email);
+
+        log.info("Received cart list for saving to cart table: {}", cartList);
+
+        // Member 조회
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Member"));
+
+        // Cart 데이터 생성 및 저장
+        for (CartListDTO cartDTO : cartList) {
+            Product product = productRepository.findById(cartDTO.getPno())
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid Product ID"));
+
+            // Cart 데이터 생성
+            Cart cart = Cart.builder()
+                    .member(member)
+                    .product(product)
+                    .qty(cartDTO.getQty())
+                    .build();
+
+            // Cart 저장
+            cartRepository.save(cart);
+        }
+
+        log.info("Cart list successfully saved to cart table.");
+    }
 
 
 
