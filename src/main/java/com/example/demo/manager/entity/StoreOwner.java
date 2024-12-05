@@ -13,7 +13,7 @@ public class StoreOwner {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int sno; // 점주 번호
+    private Long sno; // 점주 번호
 
     private String sname; // 이름
 

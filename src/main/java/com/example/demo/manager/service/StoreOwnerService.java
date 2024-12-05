@@ -34,7 +34,7 @@ public class StoreOwnerService {
     }
 
     // 점주 삭제
-    public boolean delete(int sno) { // sNo로 삭제
+    public boolean delete(Long sno) { // sNo로 삭제
         if (storeOwnerRepository.existsById(sno)) {
             storeOwnerRepository.deleteById(sno);
             return true; // 삭제 성공

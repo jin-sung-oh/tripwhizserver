@@ -53,7 +53,7 @@ public class AdminController {
 
     @DeleteMapping("/storeOwner/{sno}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> deleteStoreOwnerFromList(@PathVariable int sno) {
+    public ResponseEntity<?> deleteStoreOwnerFromList(@PathVariable Long sno) {
         log.info("Deleting store owner with sno: {}", sno);
         try {
             boolean isDeleted = storeOwnerService.delete(sno);

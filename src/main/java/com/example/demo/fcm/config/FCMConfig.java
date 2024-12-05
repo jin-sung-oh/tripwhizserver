@@ -6,6 +6,7 @@ import com.google.firebase.FirebaseOptions;
 import com.google.firebase.messaging.FirebaseMessaging;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -16,32 +17,19 @@ public class FCMConfig {
 
     @Bean
     public FirebaseMessaging firebaseMessaging() throws IOException {
-        String firebaseConfigPath = System.getenv("FIREBASE_CONFIG_PATH");
+        // JSON 경로를 application.yml에서 관리
+        String firebaseConfigPath = "firebase/jin1107-c14a2-firebase-adminsdk-vvtqr-c688c2c6b4.json";
 
-        if (firebaseConfigPath == null || firebaseConfigPath.isEmpty()) {
-            throw new IllegalArgumentException("환경 변수 'FIREBASE_CONFIG_PATH'가 설정되지 않았습니다. Firebase 서비스 계정 키 파일 경로를 지정하세요.");
+        // FirebaseOptions 초기화
+        FirebaseOptions options = FirebaseOptions.builder()
+                .setCredentials(GoogleCredentials.fromStream(new ClassPathResource(firebaseConfigPath).getInputStream()))
+                .build();
+
+        // FirebaseApp 초기화 (이미 초기화된 경우 재사용)
+        if (FirebaseApp.getApps().isEmpty()) {
+            FirebaseApp.initializeApp(options);
         }
 
-        try (FileInputStream serviceAccount = new FileInputStream(firebaseConfigPath)) {
-            FirebaseApp firebaseApp = null;
-            List<FirebaseApp> firebaseApps = FirebaseApp.getApps();
-
-            if (firebaseApps != null && !firebaseApps.isEmpty()) {
-                for (FirebaseApp existingApp : firebaseApps) {
-                    if (FirebaseApp.DEFAULT_APP_NAME.equals(existingApp.getName())) {
-                        firebaseApp = existingApp;
-                        break;
-                    }
-                }
-            } else {
-                FirebaseOptions options = FirebaseOptions.builder()
-                        .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                        .build();
-
-                firebaseApp = FirebaseApp.initializeApp(options);
-            }
-
-            return FirebaseMessaging.getInstance(firebaseApp);
-        }
+        return FirebaseMessaging.getInstance();
     }
 }

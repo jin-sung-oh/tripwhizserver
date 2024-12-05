@@ -27,6 +27,13 @@ public class Spot {
     @Column(name = "tel", length = 50)
     private String tel; // 지점 전화번호
 
+    @Column(name = "latitude", nullable = true) // 위도
+    private Double latitude;
+
+    @Column(name = "longitude", nullable = true) // 경도
+    private Double longitude;
+
+
     @Column(name = "del_flag", length = 1)
     private boolean delFlag; // 삭제 여부
 
