@@ -43,7 +43,7 @@ public class CustomSecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // 공통적으로 인증 없이 접근 가능한 경로
-                        .requestMatchers("/api/auth/**", "/api/admin/register", "/api/nationality/**", "/api/stock/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/api/admin/register", "/api/nationality/**", "/api/stock/**", "/api/product/image/**").permitAll()
 
                         // 관리자 전용 경로
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
