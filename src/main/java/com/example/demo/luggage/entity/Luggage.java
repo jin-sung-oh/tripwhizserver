@@ -27,7 +27,7 @@ public class Luggage {
     private Member member;
 
     @Enumerated(EnumType.STRING)
-    private LuggageStatus status;
+    private LuggageMoveStatus status;
 
     private String storageQrCodePath; // 보관 QR 코드 경로
     private String movingQrCodePath; // 이동 QR 코드 경로

@@ -43,6 +43,14 @@ public class CustomSecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // 공통적으로 인증 없이 접근 가능한 경로
+                        .requestMatchers(
+                                "/api/auth/**",
+                                "/api/admin/register",
+                                "/api/nationality/**",
+                                "/api/stock/**",
+                                "/api/storeowner/luggagemove/**",
+                                "api/storeowner/luggagestorage/**"
+                        ).permitAll()
                         .requestMatchers("/api/auth/**", "/api/admin/register", "/api/nationality/**", "/api/stock/**", "/api/product/image/**").permitAll()
 
                         // 관리자 전용 경로
@@ -52,7 +60,7 @@ public class CustomSecurityConfig {
                         .requestMatchers("/api/storeowner/**").hasRole("STOREOWNER")
 
                         // 인증 필요 경로
-                        .requestMatchers(HttpMethod.GET, "/api/admin/storeOwners").authenticated()
+                        //.requestMatchers(HttpMethod.GET, "/api/admin/storeOwners").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JWTCheckFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)

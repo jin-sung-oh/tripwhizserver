@@ -1,13 +1,14 @@
 package com.example.demo.store.service;
 
-import com.example.demo.store.domain.Spot;
 import com.example.demo.manager.entity.StoreOwner;
+import com.example.demo.manager.repository.StoreOwnerRepository;
+import com.example.demo.store.domain.Spot;
 import com.example.demo.store.dto.SpotDTO.SpotDTO;
 import com.example.demo.store.repository.SpotRepository;
-import com.example.demo.manager.repository.StoreOwnerRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Log4j2
+@Transactional
 public class SpotService {
 
     private final SpotRepository spotRepository;
@@ -31,6 +33,8 @@ public class SpotService {
                 .spotname(spot.getSpotname())
                 .address(spot.getAddress())
                 .tel(spot.getTel())
+                .latitude(spot.getLatitude()) // 위도 추가
+                .longitude(spot.getLongitude()) // 경도 추가
                 .sno(storeOwner.getSno())
                 .sname(storeOwner.getSname())
                 .build();
@@ -44,78 +48,59 @@ public class SpotService {
                         .spotname(spot.getSpotname())
                         .address(spot.getAddress())
                         .tel(spot.getTel())
+                        .latitude(spot.getLatitude()) // 위도 추가
+                        .longitude(spot.getLongitude()) // 경도 추가
+                        .sno(spot.getStoreowner().getSno())
+                        .sname(spot.getStoreowner().getSname())
                         .build())
                 .collect(Collectors.toList());
     }
 
     // 새로운 Spot 추가
     public SpotDTO add(SpotDTO spotDTO) {
-        log.info("----- Starting Spot Addition -----");
-        log.info("Received SpotDTO: {}", spotDTO);
-
-        // StoreOwner 조회
-        log.info("Fetching StoreOwner with sno: {}", spotDTO.getSno());
         StoreOwner storeOwner = storeOwnerRepository.findById(spotDTO.getSno())
-                .orElseThrow(() -> {
-                    log.error("StoreOwner not found with sno: {}", spotDTO.getSno());
-                    return new IllegalArgumentException("Store Owner not found.");
-                });
-        log.info("Found StoreOwner: {}", storeOwner);
+                .orElseThrow(() -> new IllegalArgumentException("Store Owner not found."));
 
-        // Spot 엔티티 생성
-        log.info("Creating Spot entity...");
         Spot spot = Spot.builder()
                 .storeowner(storeOwner)
-                .tel(spotDTO.getTel())
                 .spotname(spotDTO.getSpotname())
                 .address(spotDTO.getAddress())
+                .tel(spotDTO.getTel())
+                .latitude(spotDTO.getLatitude()) // 위도 추가
+                .longitude(spotDTO.getLongitude()) // 경도 추가
+                .delFlag(false) // 기본값 설정
                 .build();
-        log.info("Spot entity created: {}", spot);
 
-        // Spot 저장
-        log.info("Saving Spot entity to the database...");
         spotRepository.save(spot);
-        log.info("Spot entity saved with spno: {}", spot.getSpno());
 
-        // SpotDTO 업데이트 후 반환
         spotDTO.setSpno(spot.getSpno());
-        log.info("Returning SpotDTO: {}", spotDTO);
-        log.info("----- End of Spot Addition -----");
-
         return spotDTO;
     }
 
-
+    // Spot 수정
     public SpotDTO modify(Long spno, SpotDTO modifyDTO) {
-        log.info("Modifying Spot with ID: {}", spno);
-        log.debug("Received SpotDTO for modification: {}", modifyDTO);
-
         Spot spot = spotRepository.findById(spno)
-                .orElseThrow(() -> {
-                    log.error("Spot not found with ID: {}", spno);
-                    return new IllegalArgumentException("Spot not found.");
-                });
+                .orElseThrow(() -> new IllegalArgumentException("Spot not found."));
 
-        log.info("Spot found for modification: {}", spot);
-
-        // Update fields
         spot.setSpotname(modifyDTO.getSpotname());
         spot.setAddress(modifyDTO.getAddress());
         spot.setTel(modifyDTO.getTel());
+        spot.setLatitude(modifyDTO.getLatitude()); // 위도 수정
+        spot.setLongitude(modifyDTO.getLongitude()); // 경도 수정
 
         Spot updatedSpot = spotRepository.save(spot);
-        log.info("Spot updated successfully: {}", updatedSpot);
 
         return SpotDTO.builder()
                 .spno(updatedSpot.getSpno())
                 .spotname(updatedSpot.getSpotname())
                 .address(updatedSpot.getAddress())
                 .tel(updatedSpot.getTel())
+                .latitude(updatedSpot.getLatitude()) // 위도 추가
+                .longitude(updatedSpot.getLongitude()) // 경도 추가
                 .sno(updatedSpot.getStoreowner().getSno())
                 .sname(updatedSpot.getStoreowner().getSname())
                 .build();
     }
-
 
     // Spot 삭제
     public void delete(Long spno) {

@@ -41,6 +41,10 @@ public class JWTCheckFilter extends OncePerRequestFilter {
 
         return false;
 
+        return uri.startsWith("/api/auth") ||
+                uri.startsWith("/api/admin/register")||
+                uri.startsWith("/api/storeowner/luggagemove")||
+                uri.startsWith("/api/storeowner/luggagestorage"); // 인증이 필요 없는 경로는 필터링하지 않음
     }
 
     @Override
