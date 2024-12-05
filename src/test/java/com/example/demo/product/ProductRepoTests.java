@@ -8,7 +8,9 @@ import com.example.demo.product.domain.Product;
 import com.example.demo.product.domain.ProductTheme;
 import com.example.demo.product.domain.ThemeCategory;
 import com.example.demo.product.repository.ProductRepository;
+import com.example.demo.product.repository.ProductThemeRepository;
 import com.example.demo.product.repository.ThemeCategoryRepository;
+import com.example.demo.util.file.domain.AttachFile;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +40,9 @@ public class ProductRepoTests {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private ProductThemeRepository productThemeRepository;
 
     @Test
     @Transactional
@@ -99,8 +104,9 @@ public class ProductRepoTests {
 
     private void createProducts(List<Category> categories, List<SubCategory> subCategories, List<ThemeCategory> themeCategories) {
         Random random = new Random();
+        final int[] imageCounter = {1}; // 반복문 외부에 선언
 
-        IntStream.rangeClosed(1, 100).forEach(i -> {
+        IntStream.rangeClosed(1, 70).forEach(i -> {
             // 랜덤 카테고리 및 하위 카테고리 선택
             Category category = categories.get(random.nextInt(categories.size()));
             List<SubCategory> relatedSubCategories = subCategoryRepository.findByCategory_Cno(category.getCno());
@@ -109,6 +115,16 @@ public class ProductRepoTests {
             // 랜덤 테마 선택
             ThemeCategory themeCategory = themeCategories.get(random.nextInt(themeCategories.size()));
 
+            // attachFiles 생성 (builder 사용)
+            List<AttachFile> attachFiles = new ArrayList<>();
+            for (int j = 0; j < 2; j++) { // 한 상품당 2장의 이미지
+                attachFiles.add(AttachFile.builder()
+                        .ord(j + 1) // 순서 설정 (1, 2)
+                        .fileName(imageCounter[0] + ".jpg") // 고유한 파일 이름 설정
+                        .build());
+                imageCounter[0]++; // 배열로 선언된 값 증가
+            }
+
             // 상품 생성
             Product product = Product.builder()
                     .pname("Product " + i)
@@ -116,6 +132,7 @@ public class ProductRepoTests {
                     .pdesc("Description for product " + i)
                     .category(category)
                     .subCategory(subCategory)
+                    .attachFiles(attachFiles) // attachFiles 추가
                     .build();
             productRepository.save(product);
 
@@ -125,8 +142,10 @@ public class ProductRepoTests {
                     .themeCategory(themeCategory)
                     .build();
 
+            productThemeRepository.save(productTheme); // 테마 저장
         });
     }
+
 
 
 }
