@@ -85,7 +85,7 @@ public class ProductService {
             productThemeRepository.save(productTheme);
         }
 
-        sendProductToUserApi(productListDTO, imageFiles, "/api/admin/product/add", HttpMethod.POST, null);
+        sendProductToUserApi(productListDTO, imageFiles, "/api/product/add", HttpMethod.POST, null);
 
         return savedProduct.getPno();
     }
