@@ -62,8 +62,7 @@ public class ProductService {
         return productRepository.findByFiltering(tno, cno, scno, pageRequestDTO);
     }
 
-    // 상품 생성 메서드
-    public Long createProduct(ProductListDTO productListDTO, List<MultipartFile> imageFiles) throws IOException {
+    public Long createProduct(ProductListDTO productListDTO, List<MultipartFile> imageFiles, Long themeCategoryId) throws IOException {
         log.info("상품 생성 요청 시작: {}", productListDTO);
 
         try {
@@ -90,21 +89,18 @@ public class ProductService {
             Product savedProduct = productRepository.save(product);
             log.info("Product 저장 완료: {}", savedProduct.getPno());
 
-            // ProductTheme 조회
-            ProductTheme productTheme = productThemeRepository.findByProduct(savedProduct)
-                    .orElseThrow(() -> new RuntimeException("ProductTheme not found for productId: " + savedProduct.getPno()));
+            // 테마 카테고리 조회 (themeCategoryId 사용)
+            ThemeCategory themeCategory = themeCategoryRepository.findById(themeCategoryId)
+                    .orElseThrow(() -> new RuntimeException("ThemeCategory not found with ID: " + themeCategoryId));
 
-            // ThemeCategory 조회 및 연결
-            ThemeCategory themeCategory = productTheme.getThemeCategory();
-            if (themeCategory == null) {
-                throw new RuntimeException("ThemeCategory not found for productId: " + savedProduct.getPno());
-            }
-
-            Long tno = themeCategory.getTno();
-            log.info("상품과 ThemeCategory 연결: productId = {}, themeCategoryId = {}", savedProduct.getPno(), tno);
+            // ProductTheme 생성
+            ProductTheme productTheme = new ProductTheme();
+            productTheme.setProduct(savedProduct);
+            productTheme.setThemeCategory(themeCategory);
 
             // ProductTheme 저장
             productThemeRepository.save(productTheme);
+            log.info("ProductTheme 저장 완료");
 
             // 외부 API로 상품 정보 전송
             sendProductToUserApi(productListDTO, imageFiles, "/api/admin/product/add", HttpMethod.POST, themeCategory);
@@ -117,8 +113,7 @@ public class ProductService {
     }
 
 
-    // 상품 수정 메서드
-    public Long updateProduct(Long pno, ProductListDTO productListDTO, List<MultipartFile> imageFiles) throws IOException {
+    public Long updateProduct(Long pno, ProductListDTO productListDTO, List<MultipartFile> imageFiles, Long themeCategoryId) throws IOException {
         log.info("상품 수정 요청 시작: pno = {}", pno);
 
         try {
@@ -129,15 +124,20 @@ public class ProductService {
                         return new RuntimeException("Product not found with ID: " + pno);
                     });
 
-            // 카테고리, 서브카테고리, 테마카테고리 조회
+            // 카테고리, 서브카테고리 조회
             Category category = categoryRepository.findById(productListDTO.getCno())
                     .orElseThrow(() -> new RuntimeException("Category not found with ID: " + productListDTO.getCno()));
 
             SubCategory subCategory = subCategoryRepository.findById(productListDTO.getScno())
                     .orElseThrow(() -> new RuntimeException("SubCategory not found with ID: " + productListDTO.getScno()));
 
-            ThemeCategory themeCategory = themeCategoryRepository.findById(productListDTO.getTno())
-                    .orElseThrow(() -> new RuntimeException("ThemeCategory not found with ID: " + productListDTO.getTno()));
+            // 기존 ProductTheme 조회
+            ProductTheme productTheme = productThemeRepository.findByProduct(product)
+                    .orElseThrow(() -> new RuntimeException("ProductTheme not found for productId: " + product.getPno()));
+
+            // 테마 카테고리 조회 (themeCategoryId 사용)
+            ThemeCategory themeCategory = themeCategoryRepository.findById(themeCategoryId)
+                    .orElseThrow(() -> new RuntimeException("ThemeCategory not found with ID: " + themeCategoryId));
 
             // Product 업데이트
             product.updateFromDTO(productListDTO, category, subCategory);
@@ -156,15 +156,8 @@ public class ProductService {
             Product updatedProduct = productRepository.save(product);
             log.info("Product 수정 완료: {}", updatedProduct.getPno());
 
-            // ProductTheme을 이용하여 tno 조회
-            ProductTheme productTheme = productThemeRepository.findByProduct(updatedProduct)
-                    .orElseThrow(() -> new RuntimeException("ProductTheme not found for productId: " + updatedProduct.getPno()));
-
-            ThemeCategory updatedThemeCategory = productTheme.getThemeCategory();
-            Long tno = updatedThemeCategory.getTno();
-
-            // User API에 수정된 상품 정보 전송
-            sendProductToUserApi(productListDTO, imageFiles, "/api/product/update/" + pno, HttpMethod.PUT, updatedThemeCategory);
+            // User API에 수정된 상품 정보 전송 (ThemeCategory 객체 전달)
+            sendProductToUserApi(productListDTO, imageFiles, "/api/product/update/" + pno, HttpMethod.PUT, themeCategory);
 
             return updatedProduct.getPno();
         } catch (Exception e) {
@@ -172,8 +165,6 @@ public class ProductService {
             throw e;
         }
     }
-
-
 
     // 상품 삭제
     public void deleteProduct(Long pno) {
@@ -202,14 +193,14 @@ public class ProductService {
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
             ObjectMapper objectMapper = new ObjectMapper();
 
-            // ProductListDTO와 ThemeCategory 정보 포함하여 JSON으로 변환
+            // ProductListDTO를 JSON으로 변환
             String jsonProduct = objectMapper.writeValueAsString(productListDTO);
-            String jsonThemeCategory = objectMapper.writeValueAsString(themeCategory);
 
-            // JSON 문자열을 Body에 추가
+            // tno 값을 별도로 JSON으로 추가 (themeCategory에서 tno만 추출)
             body.add("productListDTO", jsonProduct);
-            body.add("themeCategory", jsonThemeCategory);
+            body.add("themeCategoryId", themeCategory.getTno()); // themeCategory의 tno 값을 별도로 추가
 
+            // 이미지 파일이 있을 경우 추가
             if (imageFiles != null) {
                 for (MultipartFile file : imageFiles) {
                     body.add("imageFiles", new ByteArrayResource(file.getBytes()) {
@@ -235,6 +226,7 @@ public class ProductService {
                 log.error("User API 전송 실패: {}", response.getStatusCode());
             }
         } catch (Exception e) {
+            e.printStackTrace();
             log.error("User API 전송 중 오류 발생", e);
         }
     }

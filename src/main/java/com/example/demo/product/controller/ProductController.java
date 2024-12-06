@@ -101,34 +101,31 @@ public class ProductController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Long> createProduct(
             @RequestPart("productListDTO") String productListDTOJson,
-            @RequestPart(value = "imageFiles", required = false) List<MultipartFile> imageFiles) throws JsonProcessingException, IOException {
+            @RequestPart(value = "imageFiles", required = false) List<MultipartFile> imageFiles,
+            @RequestPart("themeCategoryId") Long themeCategoryId) throws JsonProcessingException, IOException {
 
         // JSON 문자열을 객체로 변환
         ObjectMapper objectMapper = new ObjectMapper();
         ProductListDTO productListDTO = objectMapper.readValue(productListDTOJson, ProductListDTO.class);
 
-        log.info("Received Product: {}", productListDTO);
-
-        // 이미지 파일이 존재할 경우 처리
-        if (imageFiles != null) {
-            log.info("Received {} image files", imageFiles.size());
-        }
+        log.info("Received product create request: {}", productListDTO);
+        log.info("Received themeCategoryId: {}", themeCategoryId);
 
         // 서비스 호출
-        Long productId = productService.createProduct(productListDTO, imageFiles);
+        Long createdProductPno = productService.createProduct(productListDTO, imageFiles, themeCategoryId);
 
         // 생성된 상품 ID 반환
-        return ResponseEntity.ok(productId);
-    }
-
+        return ResponseEntity.ok(createdProductPno);
+        }
 
 
 
     // 상품 수정
-    @PutMapping("/update/{pno}")
+    @PutMapping("/update/{pno}/{themeCategoryId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Long> updateProduct(
             @PathVariable Long pno,
+            @PathVariable Long themeCategoryId, // themeCategoryId를 PathVariable로 받기
             @RequestPart("productListDTO") String productListDTOJson,
             @RequestPart(value = "imageFiles", required = false) List<MultipartFile> imageFiles) throws JsonProcessingException, IOException {
 
@@ -143,11 +140,13 @@ public class ProductController {
         }
 
         // 서비스 호출
-        Long updatedProductPno = productService.updateProduct(pno, productListDTO, imageFiles);
+        Long updatedProductPno = productService.updateProduct(pno, productListDTO, imageFiles, themeCategoryId);
 
         // 수정된 상품 ID 반환
         return ResponseEntity.ok(updatedProductPno);
     }
+
+
 
     // 상품 삭제
     @PutMapping("/delete/{pno}")

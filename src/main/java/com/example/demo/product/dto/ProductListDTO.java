@@ -26,7 +26,7 @@ public class ProductListDTO {
     private Long cno;
     private Long scno;
     private List<AttachFile> attachFiles;
-    private Long tno;
+
 
     // 엔티티 변환 메소드
     public Product toEntity(Category category, SubCategory subCategory) {
