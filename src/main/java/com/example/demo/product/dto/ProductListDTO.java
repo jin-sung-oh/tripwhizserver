@@ -25,6 +25,7 @@ public class ProductListDTO {
     private String pdesc;
     private Long cno;
     private Long scno;
+    private List<Long> tnos;
     private List<AttachFile> attachFiles;
 
 
