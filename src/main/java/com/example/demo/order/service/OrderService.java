@@ -1,24 +1,17 @@
 package com.example.demo.order.service;
 
-import com.example.demo.common.dto.PageRequestDTO;
-import com.example.demo.common.dto.PageResponseDTO;
+import com.example.demo.cart.dto.CartListDTO;
 import com.example.demo.fcm.dto.FCMRequestDTO;
 import com.example.demo.fcm.service.FCMService;
 import com.example.demo.order.domain.Order;
+import com.example.demo.order.domain.OrderDetails;
 import com.example.demo.order.domain.OrderStatus;
-import com.example.demo.order.dto.OrderListDTO;
-import com.example.demo.order.dto.OrderReadDTO;
 import com.example.demo.order.repository.OrderRepository;
+import com.example.demo.product.domain.Product;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Log4j2
 @Service
@@ -101,4 +94,17 @@ public class OrderService {
                 .body("주문 번호: " + ono)
                 .build());
     }
+
+    // convertCartToOrderDetails 메서드
+    private OrderDetails convertCartToOrderDetails(CartListDTO cartListDTO, Order order, Product product) {
+
+        return OrderDetails.builder()
+                .order(order)
+                .product(product)
+                .amount(cartListDTO.getQty())
+//                .price(cartListDTO.getQty() * product.getPrice()) // 단가 * 수량
+                .build();
+
+    }
+
 }

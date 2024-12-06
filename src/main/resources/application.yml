@@ -51,6 +51,7 @@ firebase:
 logging:
   level:
     org.springframework.security.web: TRACE
+    com.example.demo: TRACE
 
   spring:
   mvc:
