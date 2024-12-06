@@ -6,7 +6,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,6 +22,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.List;
 
 @Configuration
+@EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
 @Log4j2
 public class CustomSecurityConfig {
@@ -47,8 +52,7 @@ public class CustomSecurityConfig {
                                 "/api/storeowner/luggagemove/**",
                                 "/api/storeowner/luggagestorage/**",
                                 "/api/member/**",
-                                "api/cart/**",
-                                "api/admin/product/**"
+                                "api/cart/**"
                         ).permitAll()
                         .requestMatchers("/api/auth/**", "/api/admin/register", "/api/nationality/**", "/api/stock/**", "/api/product/image/**").permitAll()
 
@@ -59,6 +63,8 @@ public class CustomSecurityConfig {
                         .requestMatchers("/api/storeowner/**").hasRole("STOREOWNER")
 
                         .requestMatchers("/api/storeowner/**").hasRole("STOREOWNER")
+
+                        .requestMatchers("/error").permitAll()  // error 경로는 인증 없이 접근 가능
 
                         .requestMatchers("/api/member/**").permitAll()
                         .requestMatchers("/api/cart/**").permitAll()
