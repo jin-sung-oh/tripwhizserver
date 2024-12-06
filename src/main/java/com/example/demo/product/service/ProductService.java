@@ -12,6 +12,7 @@ import com.example.demo.product.dto.ProductReadDTO;
 import com.example.demo.product.repository.ProductRepository;
 import com.example.demo.util.CustomFileUtil;
 import com.example.demo.util.file.domain.AttachFile;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -27,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Log4j2
@@ -45,11 +47,50 @@ public class ProductService {
     @Value("${com.example.user.api.url}")
     private String userApiUrl;
 
+    @Value("${com.example.upload.productpath}")
+    private String productPath;
+
 
     // 상품 ID로 단일 상품 조회
-    public Optional<ProductReadDTO> getProductById(Long pno) {
-        log.info("ID로 상품을 조회합니다: {}", pno);
-        return productRepository.read(pno);
+    public Optional<ProductReadDTO> getProductByIdNative(Long pno) {
+        log.info("ID로 상품을 조회합니다 (Native Query): {}", pno);
+
+        Optional<Map<String, Object>> nativeResult = productRepository.readNative(pno);
+        log.info("Native Query 실행 결과: {}", nativeResult);
+
+        if (nativeResult.isPresent()) {
+            Map<String, Object> resultMap = nativeResult.get();
+            log.info("Result Map: {}", resultMap);
+
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            // JSON 문자열을 List<AttachFile>로 변환
+            List<AttachFile> attachFiles = null;
+            try {
+                String attachFilesJson = (String) resultMap.get("attachFiles");
+                if (attachFilesJson != null) {
+                    attachFiles = objectMapper.readValue(attachFilesJson, new TypeReference<List<AttachFile>>() {});
+                }
+            } catch (Exception e) {
+                log.error("attachFiles 변환 오류: ", e);
+            }
+
+            ProductReadDTO dto = new ProductReadDTO(
+                    ((Number) resultMap.get("pno")).longValue(),
+                    (String) resultMap.get("pname"),
+                    (String) resultMap.get("pdesc"),
+                    ((Number) resultMap.get("price")).intValue(),
+                    ((Number) resultMap.get("cno")) != null ? ((Number) resultMap.get("cno")).longValue() : null,
+                    ((Number) resultMap.get("scno")) != null ? ((Number) resultMap.get("scno")).longValue() : null,
+                    attachFiles // 변환된 List<AttachFile> 전달
+            );
+
+            log.info("Mapped ProductReadDTO: {}", dto);
+            return Optional.of(dto);
+        }
+
+        log.warn("Native Query 결과가 존재하지 않습니다.");
+        return Optional.empty();
     }
 
 
