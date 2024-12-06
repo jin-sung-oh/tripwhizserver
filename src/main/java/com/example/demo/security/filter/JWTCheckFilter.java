@@ -31,7 +31,15 @@ public class JWTCheckFilter extends OncePerRequestFilter {
             return true;
         }
 
-        if (uri.startsWith("/api/product/")) {
+//        if (uri.startsWith("/api/product")) {
+//            return true;
+//        }
+
+        if (uri.startsWith("/api/admin/register")) {
+            return true;
+        }
+
+        if (uri.startsWith("/api/storeowner/luggagemove")) {
             return true;
         }
 

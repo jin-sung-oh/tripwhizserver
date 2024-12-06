@@ -16,8 +16,10 @@ import com.example.demo.product.repository.ProductThemeRepository;
 import com.example.demo.product.repository.ThemeCategoryRepository;
 import com.example.demo.util.CustomFileUtil;
 import com.example.demo.util.file.domain.AttachFile;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
@@ -30,8 +32,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+@Log4j2
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -45,24 +49,75 @@ public class ProductService {
     private final ThemeCategoryRepository themeCategoryRepository;
     private final ProductThemeRepository productThemeRepository;
 
+    // application.yml 파일에서 User API URL을 불러와 변수에 저장
     @Value("${com.example.user.api.url}")
     private String userApiUrl;
 
-    public Optional<ProductReadDTO> getProductById(Long pno) {
-        return productRepository.read(pno);
+    @Value("${com.example.upload.productpath}")
+    private String productPath;
+
+
+    // 상품 ID로 단일 상품 조회
+    public Optional<ProductReadDTO> getProductByIdNative(Long pno) {
+        log.info("ID로 상품을 조회합니다 (Native Query): {}", pno);
+
+        Optional<Map<String, Object>> nativeResult = productRepository.readNative(pno);
+        log.info("Native Query 실행 결과: {}", nativeResult);
+
+        if (nativeResult.isPresent()) {
+            Map<String, Object> resultMap = nativeResult.get();
+            log.info("Result Map: {}", resultMap);
+
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            // JSON 문자열을 List<AttachFile>로 변환
+            List<AttachFile> attachFiles = null;
+            try {
+                String attachFilesJson = (String) resultMap.get("attachFiles");
+                if (attachFilesJson != null) {
+                    attachFiles = objectMapper.readValue(attachFilesJson, new TypeReference<List<AttachFile>>() {});
+                }
+            } catch (Exception e) {
+                log.error("attachFiles 변환 오류: ", e);
+            }
+
+            ProductReadDTO dto = new ProductReadDTO(
+                    ((Number) resultMap.get("pno")).longValue(),
+                    (String) resultMap.get("pname"),
+                    (String) resultMap.get("pdesc"),
+                    ((Number) resultMap.get("price")).intValue(),
+                    ((Number) resultMap.get("cno")) != null ? ((Number) resultMap.get("cno")).longValue() : null,
+                    ((Number) resultMap.get("scno")) != null ? ((Number) resultMap.get("scno")).longValue() : null,
+                    attachFiles // 변환된 List<AttachFile> 전달
+            );
+
+            log.info("Mapped ProductReadDTO: {}", dto);
+            return Optional.of(dto);
+        }
+
+        log.warn("Native Query 결과가 존재하지 않습니다.");
+        return Optional.empty();
     }
 
+
+    //상품 필터링
     public PageResponseDTO<ProductListDTO> searchProducts(Long tno, Long cno, Long scno, PageRequestDTO pageRequestDTO) {
+        log.info("상품 목록을 조회합니다", tno, cno, scno);
+
+
         return productRepository.findByFiltering(tno, cno, scno, pageRequestDTO);
     }
 
+    // 상품 생성
     public Long createProduct(ProductListDTO productListDTO, List<MultipartFile> imageFiles) throws IOException {
+        // Category와 SubCategory를 조회
         Category category = categoryRepository.findById(productListDTO.getCno())
                 .orElseThrow(() -> new RuntimeException("Category not found with ID: " + productListDTO.getCno()));
 
         SubCategory subCategory = subCategoryRepository.findById(productListDTO.getScno())
                 .orElseThrow(() -> new RuntimeException("SubCategory not found with ID: " + productListDTO.getScno()));
 
+        // toEntity 호출 시 Category와 SubCategory 전달
         Product product = productListDTO.toEntity(category, subCategory);
 
         if (imageFiles != null && !imageFiles.isEmpty()) {
@@ -108,10 +163,15 @@ public class ProductService {
 
         product.updateFromDTO(productListDTO, category, subCategory);
 
+        // 기존 AttachFile 삭제
         product.getAttachFiles().clear();
+
+        // 새로운 이미지 파일 업로드 및 AttachFile 생성
         for (int i = 0; i < imageFiles.size(); i++) {
             MultipartFile imageFile = imageFiles.get(i);
             String savedImageName = customFileUtil.uploadProductImageFile(imageFile);
+
+            // AttachFile 생성 (ord는 i + 1로 설정)
             AttachFile attachFile = new AttachFile(i + 1, savedImageName);
             product.addAttachFile(attachFile);
         }
@@ -123,21 +183,32 @@ public class ProductService {
         return updatedProduct.getPno();
     }
 
+    // 상품 삭제
     public void deleteProduct(Long pno) {
+        // Product 조회
         Product product = productRepository.findById(pno)
                 .orElseThrow(() -> new RuntimeException("Product not found with ID: " + pno));
 
+        // 소프트 삭제 처리: delFlag를 true로 설정
         product.changeDelFlag(true);
+
+        // 상품 수정 후 저장 (소프트 삭제 처리)
         productRepository.save(product);
 
+        // 생성된 상품 정보를 User API로 전송 (상품 삭제 요청)
         sendProductDelete("/api/product/delete/" + pno, HttpMethod.PUT);
+
+        log.info("Product soft-deleted with ID: {}", pno);
+
     }
 
     private void sendProductToUserApi(ProductListDTO productListDTO, List<MultipartFile> imageFiles, String endpoint, HttpMethod httpMethod, ThemeCategory themeCategory) {
         try {
+            // MultiValueMap으로 요청 데이터 구성
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-            ObjectMapper objectMapper = new ObjectMapper();
 
+            // JSON 데이터를 문자열로 변환하여 추가
+            ObjectMapper objectMapper = new ObjectMapper();
             String jsonProduct = objectMapper.writeValueAsString(productListDTO);
             body.add("productListDTO", jsonProduct);
 
@@ -156,10 +227,14 @@ public class ProductService {
                 }
             }
 
+            // HTTP 헤더 설정
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
+            // HttpEntity 생성
             HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(body, headers);
+
+            // User API Endpoint 설정
             String userApiEndpoint = userApiUrl + endpoint;
 
             restTemplate.exchange(userApiEndpoint, httpMethod, request, Long.class);
@@ -168,8 +243,10 @@ public class ProductService {
         }
     }
 
+    // User API에 상품 정보를 전송하는 메서드(삭제)
     private void sendProductDelete(String endpoint, HttpMethod httpMethod) {
         try {
+            // HTTP 헤더에 Content-Type을 JSON으로 설정
             HttpHeaders headers = new HttpHeaders();
             headers.set("Content-Type", "application/json");
 
@@ -181,4 +258,40 @@ public class ProductService {
             throw new RuntimeException("User API 삭제 요청 중 오류 발생", e);
         }
     }
+
 }
+
+
+// 상품 정보와 이미지를 함께 조회
+//    public Optional<ProductReadDTO> getProductWithImage(Long pno) {
+//        log.info("ID로 상품 및 이미지를 조회합니다: {}", pno);
+//
+//        return productRepository.read(pno).map(product -> {
+//            // 이미지 URL 처리
+//            if (product.getFileName() != null) {
+//                product.setFileName("/uploads/" + product.getFileName());
+//                log.info("이미지 URL 처리 완료: {}", product.getFileName());
+//            }
+//            return product;
+//        });
+//    }
+
+
+// Admin API에서 전송된 상품 정보를 DB에 저장하는 메서드
+//    public void saveProductFromAdmin(ProductListDTO productListDTO) {
+//        log.info("Saving product from admin: {}", productListDTO);
+//
+//        // Category와 SubCategory를 찾음
+//        Category category = categoryRepository.findById(productListDTO.getCategoryCno())
+//                .orElseThrow(() -> new RuntimeException("Category not found for ID: " + productListDTO.getCategoryCno()));
+//
+//        SubCategory subCategory = subCategoryRepository.findById(productListDTO.getSubCategoryScno())
+//                .orElseThrow(() -> new RuntimeException("SubCategory not found for ID: " + productListDTO.getSubCategoryScno()));
+//
+//        // ProductListDTO를 Product 엔티티로 변환 및 저장
+//        Product product = productListDTO.toEntity(category, subCategory);
+//        productRepository.save(product);
+//
+//        log.info("Product saved successfully: {}", product);
+//    }
+
