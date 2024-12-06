@@ -51,13 +51,7 @@ firebase:
 logging:
   level:
     org.springframework.security.web: TRACE
-#    org:
-#      hibernate: DEBUG
-#    hibernate:
-#      type.descriptor.sql: TRACE
-
-
-
+    com.example.demo: TRACE
 
   spring:
   mvc:
