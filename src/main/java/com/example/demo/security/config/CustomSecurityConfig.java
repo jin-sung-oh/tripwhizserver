@@ -6,10 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,8 +19,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.List;
 
 @Configuration
-@EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
 @Log4j2
 public class CustomSecurityConfig {
@@ -39,6 +34,7 @@ public class CustomSecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
+                .formLogin(httpSecurityFormLoginConfigurer -> httpSecurityFormLoginConfigurer.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
@@ -49,7 +45,10 @@ public class CustomSecurityConfig {
                                 "/api/nationality/**",
                                 "/api/stock/**",
                                 "/api/storeowner/luggagemove/**",
-                                "api/storeowner/luggagestorage/**"
+                                "/api/storeowner/luggagestorage/**",
+                                "/api/member/**",
+                                "api/cart/**",
+                                "api/admin/product/**"
                         ).permitAll()
                         .requestMatchers("/api/auth/**", "/api/admin/register", "/api/nationality/**", "/api/stock/**", "/api/product/image/**").permitAll()
 
@@ -59,22 +58,38 @@ public class CustomSecurityConfig {
                         // 점주 전용 경로
                         .requestMatchers("/api/storeowner/**").hasRole("STOREOWNER")
 
+                        .requestMatchers("/api/storeowner/**").hasRole("STOREOWNER")
+
+                        .requestMatchers("/api/member/**").permitAll()
+                        .requestMatchers("/api/cart/**").permitAll()
+
                         // 인증 필요 경로
                         //.requestMatchers(HttpMethod.GET, "/api/admin/storeOwners").authenticated()
                         .anyRequest().authenticated()
+                )
+                .anonymous(anonymous -> anonymous
+                        .authorities("ROLE_ANONYMOUS") // 익명 사용자에게 ROLE_ANONYMOUS 부여
                 )
                 .addFilterBefore(new JWTCheckFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {
                             log.error("Unauthorized request - {}", authException.getMessage());
                             log.error("Request URI: {}", request.getRequestURI());
+
+                            authException.printStackTrace();
+
                             response.sendError(401, "Unauthorized");
                         })
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
                             log.error("Access denied - {}", accessDeniedException.getMessage());
                             log.error("Request URI: {}", request.getRequestURI());
+
+
+                            accessDeniedException.printStackTrace();
+
                             response.sendError(403, "Access Denied");
                         })
+
                 );
 
         log.info("Security configuration applied successfully");

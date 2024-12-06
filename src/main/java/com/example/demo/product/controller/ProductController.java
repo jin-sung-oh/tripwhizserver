@@ -2,6 +2,7 @@ package com.example.demo.product.controller;
 
 import com.example.demo.common.dto.PageRequestDTO;
 import com.example.demo.common.dto.PageResponseDTO;
+import com.example.demo.product.domain.ThemeCategory;
 import com.example.demo.product.dto.ProductListDTO;
 import com.example.demo.product.dto.ProductReadDTO;
 import com.example.demo.product.service.ProductService;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,11 +20,12 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/product")
+@RequestMapping("/api/admin/product")
 @Log4j2
 @RequiredArgsConstructor
 public class ProductController {
@@ -37,6 +40,7 @@ public class ProductController {
 
     // 이미지 조회
     @GetMapping("/image/{fileName}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<byte[]> getImage(@PathVariable String fileName) throws IOException {
         log.info("이미지 파일을 조회합니다: {}", fileName);
 
@@ -63,6 +67,7 @@ public class ProductController {
 
     // 상품 목록 조회
     @GetMapping("/list")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PageResponseDTO<ProductListDTO>> list(
             @RequestParam(required = false) Long tno,
             @RequestParam(required = false) Long cno,
@@ -79,6 +84,7 @@ public class ProductController {
 
     // 특정 상품 ID로 조회 (이미지 포함)
     @GetMapping("/read/{pno}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ProductReadDTO> getProduct(@PathVariable Long pno) {
         log.info("ID로 상품을 조회합니다: {}", pno);
 
@@ -91,8 +97,8 @@ public class ProductController {
                 });
     }
 
-    // 상품 생성
     @PostMapping("/add")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Long> createProduct(
             @RequestPart("productListDTO") String productListDTOJson,
             @RequestPart(value = "imageFiles", required = false) List<MultipartFile> imageFiles) throws JsonProcessingException, IOException {
@@ -103,6 +109,7 @@ public class ProductController {
 
         log.info("Received Product: {}", productListDTO);
 
+        // 이미지 파일이 존재할 경우 처리
         if (imageFiles != null) {
             log.info("Received {} image files", imageFiles.size());
         }
@@ -115,8 +122,11 @@ public class ProductController {
     }
 
 
+
+
     // 상품 수정
     @PutMapping("/update/{pno}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Long> updateProduct(
             @PathVariable Long pno,
             @RequestPart("productListDTO") String productListDTOJson,
@@ -141,6 +151,7 @@ public class ProductController {
 
     // 상품 삭제
     @PutMapping("/delete/{pno}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long pno) {
 
         log.info("Received product deletion request for PNO {}", pno);

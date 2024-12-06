@@ -1,9 +1,12 @@
 package com.example.demo.product.dto;
 
+import com.example.demo.util.file.domain.AttachFile;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @Builder
@@ -17,5 +20,7 @@ public class ProductReadDTO {
     private int price;               // 상품 가격
     private Long cno;        // 상위 카테고리 ID
     private Long scno;    // 하위 카테고리 ID
+
+
 
 }
