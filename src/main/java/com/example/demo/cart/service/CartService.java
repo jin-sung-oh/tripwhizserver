@@ -105,34 +105,34 @@ public class CartService {
 //        log.info("Cart list successfully saved to order table.");
 //    }
 
-    public void saveCart(String email) {
-        // 장바구니 목록 조회
-        List<CartListDTO> cartList = list(email);
-
-        log.info("Received cart list for saving to cart table: {}", cartList);
-
-        // Member 조회
-        Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid Member"));
-
-        // Cart 데이터 생성 및 저장
-        for (CartListDTO cartDTO : cartList) {
-            Product product = productRepository.findById(cartDTO.getPno())
-                    .orElseThrow(() -> new IllegalArgumentException("Invalid Product ID"));
-
-            // Cart 데이터 생성
-            Cart cart = Cart.builder()
-                    .member(member)
-                    .product(product)
-                    .qty(cartDTO.getQty())
-                    .build();
-
-            // Cart 저장
-            cartRepository.save(cart);
-        }
-
-        log.info("Cart list successfully saved to cart table.");
-    }
+//    public void saveCart(String email) {
+//        // 장바구니 목록 조회
+//        List<CartListDTO> cartList = list(email);
+//
+//        log.info("Received cart list for saving to cart table: {}", cartList);
+//
+//        // Member 조회
+//        Member member = memberRepository.findByEmail(email)
+//                .orElseThrow(() -> new IllegalArgumentException("Invalid Member"));
+//
+//        // Cart 데이터 생성 및 저장
+//        for (CartListDTO cartDTO : cartList) {
+//            Product product = productRepository.findById(cartDTO.getPno())
+//                    .orElseThrow(() -> new IllegalArgumentException("Invalid Product ID"));
+//
+//            // Cart 데이터 생성
+//            Cart cart = Cart.builder()
+//                    .member(member)
+//                    .product(product)
+//                    .qty(cartDTO.getQty())
+//                    .build();
+//
+//            // Cart 저장
+//            cartRepository.save(cart);
+//        }
+//
+//        log.info("Cart list successfully saved to cart table.");
+//    }
 
 
 

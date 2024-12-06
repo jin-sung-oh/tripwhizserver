@@ -64,19 +64,19 @@ public class CartController {
         return ResponseEntity.noContent().build(); // 204 No Content 반환
     }
 
-    @PostMapping("/save")
-    @PreAuthorize("hasRole('ANONYMOUS')")
-    public ResponseEntity<String> createOrder(@RequestHeader String email) {
-
-        // 주문 생성 서비스 호출
-        log.info("Received order creation request for email: {}", email);
-
-        cartService.saveCart(email);
-
-        log.info("Order successfully created and sent to Admin API for email: {}", email);
-
-        // 성공 응답 반환
-        return ResponseEntity.ok("Order successfully created and sent to Admin API.");
-    }
+//    @PostMapping("/save")
+//    @PreAuthorize("hasRole('ANONYMOUS')")
+//    public ResponseEntity<String> createOrder(@RequestHeader String email) {
+//
+//        // 주문 생성 서비스 호출
+//        log.info("Received order creation request for email: {}", email);
+//
+//        cartService.saveCart(email);
+//
+//        log.info("Order successfully created and sent to Admin API for email: {}", email);
+//
+//        // 성공 응답 반환
+//        return ResponseEntity.ok("Order successfully created and sent to Admin API.");
+//    }
 
 }
