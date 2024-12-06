@@ -120,7 +120,7 @@ public class ProductRepoTests {
             for (int j = 0; j < 2; j++) { // 한 상품당 2장의 이미지
                 attachFiles.add(AttachFile.builder()
                         .ord(j + 1) // 순서 설정 (1, 2)
-                        .fileName(imageCounter[0] + ".jpg") // 고유한 파일 이름 설정
+                        .filename(imageCounter[0] + ".jpg") // 고유한 파일 이름 설정
                         .build());
                 imageCounter[0]++; // 배열로 선언된 값 증가
             }

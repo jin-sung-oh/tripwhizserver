@@ -31,20 +31,32 @@ public class JWTCheckFilter extends OncePerRequestFilter {
             return true;
         }
 
-        if (uri.startsWith("/api/product/")) {
+//        if (uri.startsWith("/api/product")) {
+//            return true;
+//        }
+
+        if (uri.startsWith("/api/admin/register")) {
             return true;
         }
 
-        if (uri.equals("/api/admin/register")) {
+        if (uri.startsWith("/api/storeowner/luggagemove")) {
+            return true;
+        }
+
+        if (uri.startsWith("/api/storeowner/luggagestorage")) {
+            return true;
+        }
+
+        if (uri.startsWith("/api/member/save")) {
+            return true;
+        }
+
+        if (uri.startsWith("/api/cart/save")) {
             return true;
         }
 
         return false;
 
-        return uri.startsWith("/api/auth") ||
-                uri.startsWith("/api/admin/register")||
-                uri.startsWith("/api/storeowner/luggagemove")||
-                uri.startsWith("/api/storeowner/luggagestorage"); // 인증이 필요 없는 경로는 필터링하지 않음
     }
 
     @Override

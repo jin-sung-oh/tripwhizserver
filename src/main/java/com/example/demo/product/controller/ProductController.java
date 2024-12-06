@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -77,18 +78,22 @@ public class ProductController {
     }
 
 
-    // 특정 상품 ID로 조회 (이미지 포함)
-    @GetMapping("/read/{pno}")
-    public ResponseEntity<ProductReadDTO> getProduct(@PathVariable Long pno) {
-        log.info("ID로 상품을 조회합니다: {}", pno);
 
-        Optional<ProductReadDTO> productObj = productService.getProductById(pno);
-
-        return productObj.map(ResponseEntity::ok)
-                .orElseGet(() -> {
-                    log.warn("해당 ID의 상품을 찾을 수 없습니다: {}", pno);
-                    return ResponseEntity.notFound().build();
-                });
+    // 특정 상품 ID로 조회 (Native Query 사용)
+    @GetMapping("/read/native/{pno}")
+    public ResponseEntity<ProductReadDTO> getProductNative(@PathVariable Long pno) {
+        log.info("Attempting to fetch product with ID: {} using Native Query", pno);
+        try {
+            Optional<ProductReadDTO> productObj = productService.getProductByIdNative(pno);
+            return productObj.map(ResponseEntity::ok)
+                    .orElseGet(() -> {
+                        log.warn("No product found with ID: {} using Native Query", pno);
+                        return ResponseEntity.notFound().build();
+                    });
+        } catch (Exception e) {
+            log.error("Error occurred while fetching product with ID: {} using Native Query", pno, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     // 상품 생성
