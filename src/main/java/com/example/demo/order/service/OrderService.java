@@ -27,7 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 @Service
@@ -38,28 +37,36 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderDetailsRepository orderDetailsRepository;
     private final SpotRepository spotRepository;
-    private final CartRepository cartRepository;
     private final MemberRepository memberRepository;
     private final RestTemplate restTemplate;
     private final FCMService fcmService;
 
-    public void createOrderFromDTO(String email, Long spno, OrderReadDTO orderReadDTO) {
-        // 1. Order 생성
+    public void createOrderFromDTO(OrderReadDTO orderReadDTO) {
+
+        // 1. Member와 Spot 엔티티 조회
+        Member member = memberRepository.findByEmail(orderReadDTO.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("Member not found with email: "));
+
+        Spot spot = spotRepository.findById(orderReadDTO.getSpno())
+                .orElseThrow(() -> new IllegalArgumentException("Spot not found with spno: " + orderReadDTO.getSpno()));
+
+        // 2. Order 생성
         Order order = Order.builder()
                 .ono(orderReadDTO.getOno())
                 .totalPrice(orderReadDTO.getTotalPrice())
                 .status(OrderStatus.valueOf(orderReadDTO.getStatus()))
                 .pickupdate(orderReadDTO.getPickUpDate())
-                .spot(Spot.builder().spno(spno).build()) // Spot은 점주 서버에서는 필요하지 않다면 null 처리
-                .member(Member.builder().email(email).build()) // Member 정보도 점주 서버에서는 제외 가능
+                .spot(spot)
+                .member(member)
                 .build();
         order = orderRepository.save(order);
 
-        // 2. OrderDetails 생성
+        // 3. OrderDetails 생성
         for (OrderProductDTO productDTO : orderReadDTO.getProducts()) {
             OrderDetails orderDetails = OrderDetails.builder()
                     .order(order)
                     .pno(productDTO.getPno())
+                    .pname(productDTO.getPname())
                     .price(productDTO.getPrice())
                     .amount(productDTO.getAmount())
                     .build();
@@ -67,10 +74,10 @@ public class OrderService {
         }
     }
 
-    // 내 주문 리스트 조회
-    public PageResponseDTO<OrderListDTO> getUserOrders(String memberEmail, PageRequestDTO pageRequestDTO) {
+    // 주문 리스트 조회
+    public PageResponseDTO<OrderListDTO> getUserOrders(PageRequestDTO pageRequestDTO) {
         Pageable pageable = PageRequest.of(pageRequestDTO.getPage() - 1, pageRequestDTO.getSize());
-        Page<Order> result = orderRepository.findByMemberEmail(memberEmail, pageable);
+        Page<Order> result = orderRepository.findAll(pageable);
 
         List<OrderListDTO> dtoList = result.getContent().stream()
                 .map(order -> OrderListDTO.builder()
@@ -110,7 +117,8 @@ public class OrderService {
         // OrderDetails -> OrderProductDTO 변환
         List<OrderProductDTO> products = orderDetailsList.stream()
                 .map(details -> OrderProductDTO.builder()
-                        .pno(details.getPno())  // Product 번호
+                        .pno(details.getPno())         // 번호
+                        .pname(details.getPname())     // 이름
                         .amount(details.getAmount())   // 수량
                         .price(details.getPrice())     // 가격
                         .build())

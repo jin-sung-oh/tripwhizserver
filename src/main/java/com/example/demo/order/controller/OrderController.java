@@ -9,12 +9,14 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 
+@Log4j2
 @RestController
 @RequestMapping("/api/user/order")
 @RequiredArgsConstructor
@@ -24,11 +26,12 @@ public class OrderController {
 
     // 주문 생성
     @PostMapping("/receive")
-    public ResponseEntity<?> receiveOrder(@RequestParam String email,
-                                          @RequestParam Long spno,
-                                          @RequestBody OrderReadDTO orderReadDTO) {
+    public ResponseEntity<?> receiveOrder(@RequestBody OrderReadDTO orderReadDTO) {
+
+        log.info("receive order: {}", orderReadDTO);
+
         try {
-            userOrderService.createOrderFromDTO(email, spno, orderReadDTO);
+            userOrderService.createOrderFromDTO(orderReadDTO);
             return ResponseEntity.ok("주문 데이터가 성공적으로 점주 서버에 저장되었습니다.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -36,12 +39,10 @@ public class OrderController {
         }
     }
 
-    // 내 주문 리스트 조회
+    // 주문 리스트 조회
     @GetMapping("/list")
-    public ResponseEntity<PageResponseDTO<OrderListDTO>> getUserOrders(
-            @RequestParam @NotBlank(message = "Email cannot be blank") String email,
-            @Valid PageRequestDTO pageRequestDTO) {
-        PageResponseDTO<OrderListDTO> response = userOrderService.getUserOrders(email, pageRequestDTO);
+    public ResponseEntity<PageResponseDTO<OrderListDTO>> getUserOrders(@Valid PageRequestDTO pageRequestDTO) {
+        PageResponseDTO<OrderListDTO> response = userOrderService.getUserOrders(pageRequestDTO);
         return ResponseEntity.ok(response);
     }
 

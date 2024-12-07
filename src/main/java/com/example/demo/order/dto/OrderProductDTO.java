@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 public class OrderProductDTO {
 
     private Long pno;   // 상품 번호
+    private String pname; // 상품 이름
     private int price;  // 상품 가격
     private int amount; // 수량
 }

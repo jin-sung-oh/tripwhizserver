@@ -63,6 +63,10 @@ public class JWTCheckFilter extends OncePerRequestFilter {
             return true;
         }
 
+        if (uri.startsWith("/api/user/order")) {
+            return true;
+        }
+
         return false;
 
     }

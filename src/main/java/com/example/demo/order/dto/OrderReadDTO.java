@@ -14,6 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 public class OrderReadDTO {
     private Long ono; // 주문 번호
+    private String email; // 사용자 이메일
     private List<OrderProductDTO> products; // 주문 상품 목록
     private int totalPrice; // 총 가격
     private String status; // 주문 상태
