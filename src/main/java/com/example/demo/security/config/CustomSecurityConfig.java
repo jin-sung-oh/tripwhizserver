@@ -57,8 +57,6 @@ public class CustomSecurityConfig {
                         // 점주 전용 경로
                         .requestMatchers("/api/storeowner/**").hasRole("STOREOWNER")
 
-                        .requestMatchers("/api/storeowner/**").hasRole("STOREOWNER")
-
                         .requestMatchers("/error").permitAll()  // error 경로는 인증 없이 접근 가능
 
                         .requestMatchers("/api/member/**").permitAll()
