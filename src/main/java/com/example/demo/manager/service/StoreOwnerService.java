@@ -3,12 +3,13 @@ package com.example.demo.manager.service;
 import com.example.demo.manager.entity.StoreOwner;
 import com.example.demo.manager.repository.StoreOwnerRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-
+@Log4j2
 @Service
 @RequiredArgsConstructor
 public class StoreOwnerService {
