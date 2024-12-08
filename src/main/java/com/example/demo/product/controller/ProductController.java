@@ -2,6 +2,7 @@ package com.example.demo.product.controller;
 
 import com.example.demo.common.dto.PageRequestDTO;
 import com.example.demo.common.dto.PageResponseDTO;
+import com.example.demo.product.domain.ThemeCategory;
 import com.example.demo.product.dto.ProductListDTO;
 import com.example.demo.product.dto.ProductReadDTO;
 import com.example.demo.product.service.ProductService;
@@ -87,33 +88,63 @@ public class ProductController {
         }
     }
 
-    // 상품 생성
     @PostMapping("/add")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Long> createProduct(
             @RequestPart("productListDTO") String productListDTOJson,
             @RequestPart(value = "imageFiles", required = false) List<MultipartFile> imageFiles
     ) throws JsonProcessingException, IOException {
+        log.info("Start: 상품 생성 요청 수신");
+
         ObjectMapper objectMapper = new ObjectMapper();
-        ProductListDTO productListDTO = objectMapper.readValue(productListDTOJson, ProductListDTO.class);
-        Long createdProductPno = productService.createProduct(productListDTO, imageFiles);
+        ProductListDTO productListDTO;
+
+        try {
+            log.info("productListDTO JSON 변환 시작");
+            productListDTO = objectMapper.readValue(productListDTOJson, ProductListDTO.class);
+            log.debug("productListDTO 변환 성공: {}", productListDTO);
+        } catch (JsonProcessingException e) {
+            log.error("JSON 변환 오류 - 입력 데이터: {}", productListDTOJson, e);
+            throw e;
+        }
+
+        Long createdProductPno;
+
+        try {
+            log.info("ProductService.createProduct 호출 시작");
+            createdProductPno = productService.createProduct(productListDTO, imageFiles);
+            log.info("Product 생성 성공 - pno: {}", createdProductPno);
+        } catch (IOException e) {
+            log.error("Product 생성 중 파일 처리 오류", e);
+            throw e;
+        } catch (Exception e) {
+            log.error("Product 생성 중 예기치 않은 오류 발생", e);
+            throw e;
+        }
+
+        log.info("Received Product Add Request");
+        log.info("ProductListDTO JSON: {}", productListDTOJson);
+
+        log.info("End: 상품 생성 요청 처리 완료 - pno: {}", createdProductPno);
         return ResponseEntity.ok(createdProductPno);
+
     }
 
-    @PutMapping("/update/{pno}/{themeCategoryId}")
+
+    @PutMapping("/update/{pno}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Long> updateProduct(
             @PathVariable Long pno,
-            @PathVariable Long themeCategoryId,
             @RequestPart("productListDTO") String productListDTOJson,
             @RequestPart(value = "imageFiles", required = false) List<MultipartFile> imageFiles) throws JsonProcessingException, IOException {
 
         // JSON 문자열을 객체로 변환
         ObjectMapper objectMapper = new ObjectMapper();
         ProductListDTO productListDTO = objectMapper.readValue(productListDTOJson, ProductListDTO.class);
-        Long updatedProductPno = productService.updateProduct(pno, productListDTO, imageFiles, themeCategoryId);
+        Long updatedProductPno = productService.updateProduct(pno, productListDTO, imageFiles);
         return ResponseEntity.ok(updatedProductPno);
     }
+
 
     // 상품 삭제
     @PutMapping("/delete/{pno}")
@@ -122,6 +153,15 @@ public class ProductController {
         productService.deleteProduct(pno);
         return ResponseEntity.ok().build();
 
+    }
+
+    @GetMapping("/themes")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<ThemeCategory>> getThemes() {
+        log.info("테마 목록 조회 요청 수신");
+        List<ThemeCategory> themes = productService.getThemes();
+        log.info("테마 목록 조회 성공 - 개수: {}", themes.size());
+        return ResponseEntity.ok(themes);
     }
 
 }

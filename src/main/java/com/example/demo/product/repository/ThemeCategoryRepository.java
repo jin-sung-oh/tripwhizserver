@@ -8,7 +8,4 @@ import java.util.Optional;
 
 public interface ThemeCategoryRepository extends JpaRepository<ThemeCategory, Long> {
 
-    Optional<ThemeCategory> findByIsDefaultTrue();
-
-
 }

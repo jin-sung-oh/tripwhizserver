@@ -52,8 +52,8 @@ public class CustomSecurityConfig {
                                 "/api/storeowner/luggagemove/**",
                                 "/api/storeowner/luggagestorage/**",
                                 "/api/member/**",
-                                "api/cart/**",
-                                "api/admin/product/**"
+                                "/api/cart/**",
+                                "/api/admin/product/**"
                         ).permitAll()
                         .requestMatchers("/api/auth/**", "/api/admin/register", "/api/nationality/**", "/api/stock/**", "/api/product/image/**").permitAll()
 

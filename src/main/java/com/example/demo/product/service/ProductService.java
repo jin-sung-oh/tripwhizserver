@@ -27,6 +27,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -56,7 +58,9 @@ public class ProductService {
     @Value("${com.example.upload.productpath}")
     private String productPath;
 
-
+    public List<ThemeCategory> getThemes() {
+        return themeCategoryRepository.findAll();
+    }
     // 상품 ID로 단일 상품 조회
     public Optional<ProductReadDTO> getProductByIdNative(Long pno) {
         log.info("ID로 상품을 조회합니다 (Native Query): {}", pno);
@@ -110,27 +114,48 @@ public class ProductService {
 
     // 상품 생성
     public Long createProduct(ProductListDTO productListDTO, List<MultipartFile> imageFiles) throws IOException {
-        // Category와 SubCategory를 조회
-        Category category = categoryRepository.findById(productListDTO.getCno())
-                .orElseThrow(() -> new RuntimeException("Category not found with ID: " + productListDTO.getCno()));
+        log.info("Start: 상품 생성 요청 - 데이터: {}", productListDTO);
 
+        // Category와 SubCategory를 조회
+        log.info("카테고리 조회 - cno: {}", productListDTO.getCno());
+        Category category = categoryRepository.findById(productListDTO.getCno())
+                .orElseThrow(() -> {
+                    log.error("Category not found with ID: {}", productListDTO.getCno());
+                    return new RuntimeException("Category not found with ID: " + productListDTO.getCno());
+                });
+
+        log.info("서브 카테고리 조회 - scno: {}", productListDTO.getScno());
         SubCategory subCategory = subCategoryRepository.findById(productListDTO.getScno())
-                .orElseThrow(() -> new RuntimeException("SubCategory not found with ID: " + productListDTO.getScno()));
+                .orElseThrow(() -> {
+                    log.error("SubCategory not found with ID: {}", productListDTO.getScno());
+                    return new RuntimeException("SubCategory not found with ID: " + productListDTO.getScno());
+                });
 
         // toEntity 호출 시 Category와 SubCategory 전달
+        log.debug("Product 엔티티 생성 시작");
         Product product = productListDTO.toEntity(category, subCategory);
+        log.debug("Product 엔티티 생성 완료 - 데이터: {}", product);
 
+        // 이미지 파일 처리
         if (imageFiles != null && !imageFiles.isEmpty()) {
+            log.info("이미지 파일 처리 시작 - 파일 개수: {}", imageFiles.size());
             for (int i = 0; i < imageFiles.size(); i++) {
                 MultipartFile imageFile = imageFiles.get(i);
                 String savedImageName = customFileUtil.uploadProductImageFile(imageFile);
                 AttachFile attachFile = new AttachFile(i + 1, savedImageName);
                 product.addAttachFile(attachFile);
+                log.debug("첨부 파일 추가 - 파일명: {}, ord: {}", savedImageName, attachFile.getOrd());
             }
+            log.info("이미지 파일 처리 완료");
         }
 
+        // 상품 저장
+        log.info("Product 저장 시작");
         Product savedProduct = productRepository.save(product);
+        log.info("Product 저장 완료 - pno: {}", savedProduct.getPno());
 
+        // 테마 카테고리 연결
+        log.info("테마 카테고리 연결 시작 - tnos: {}", productListDTO.getTnos());
         List<ThemeCategory> themeCategories = themeCategoryRepository.findAllById(productListDTO.getTnos());
         for (ThemeCategory themeCategory : themeCategories) {
             ProductTheme productTheme = ProductTheme.builder()
@@ -138,14 +163,20 @@ public class ProductService {
                     .themeCategory(themeCategory)
                     .build();
             productThemeRepository.save(productTheme);
+            log.debug("ProductTheme 저장 완료 - themeCategory: {}", themeCategory.getTno());
         }
+        log.info("테마 카테고리 연결 완료");
 
+        // User API 호출
+        log.info("User API 전송 시작");
         sendProductToUserApi(productListDTO, imageFiles, "/api/product/add", HttpMethod.POST, null);
+        log.info("User API 전송 완료");
 
+        log.info("End: 상품 생성 완료 - pno: {}", savedProduct.getPno());
         return savedProduct.getPno();
     }
 
-    public Long updateProduct(Long pno, ProductListDTO productListDTO, List<MultipartFile> imageFiles, Long themeCategoryId) throws IOException {
+    public Long updateProduct(Long pno, ProductListDTO productListDTO, List<MultipartFile> imageFiles) throws IOException {
         Product product = productRepository.findById(pno)
                 .orElseThrow(() -> new RuntimeException("Product not found with ID: " + pno));
 
@@ -154,12 +185,6 @@ public class ProductService {
 
         SubCategory subCategory = subCategoryRepository.findById(productListDTO.getScno())
                 .orElseThrow(() -> new RuntimeException("SubCategory not found with ID: " + productListDTO.getScno()));
-
-        ProductTheme productTheme = productThemeRepository.findByProduct(product)
-                .orElseThrow(() -> new RuntimeException("ProductTheme not found for productId: " + product.getPno()));
-
-        ThemeCategory themeCategory = themeCategoryRepository.findById(themeCategoryId)
-                .orElseThrow(() -> new RuntimeException("ThemeCategory not found with ID: " + themeCategoryId));
 
         product.updateFromDTO(productListDTO, category, subCategory);
 
@@ -178,10 +203,13 @@ public class ProductService {
 
         Product updatedProduct = productRepository.save(product);
 
-        sendProductToUserApi(productListDTO, imageFiles, "/api/product/update/" + pno, HttpMethod.PUT, themeCategory);
+        // User API로 상품 업데이트 요청 전송
+        sendProductToUserApi(productListDTO, imageFiles, "/api/product/update/" + pno, HttpMethod.PUT, null);
+        log.info("User API request sent for updating product - PNO: {}", updatedProduct.getPno());
 
         return updatedProduct.getPno();
     }
+
 
     // 상품 삭제
     public void deleteProduct(Long pno) {
@@ -204,16 +232,20 @@ public class ProductService {
 
     private void sendProductToUserApi(ProductListDTO productListDTO, List<MultipartFile> imageFiles, String endpoint, HttpMethod httpMethod, ThemeCategory themeCategory) {
         try {
+            log.info("Starting User API Request");
+            log.debug("Endpoint: {}", endpoint);
+            log.debug("HTTP Method: {}", httpMethod);
+
             // MultiValueMap으로 요청 데이터 구성
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-
-            // JSON 데이터를 문자열로 변환하여 추가
             ObjectMapper objectMapper = new ObjectMapper();
             String jsonProduct = objectMapper.writeValueAsString(productListDTO);
             body.add("productListDTO", jsonProduct);
+            log.debug("Serialized ProductListDTO: {}", jsonProduct);
 
             if (themeCategory != null) {
                 body.add("themeCategoryId", themeCategory.getTno());
+                log.debug("ThemeCategoryId: {}", themeCategory.getTno());
             }
 
             if (imageFiles != null && !imageFiles.isEmpty()) {
@@ -224,24 +256,36 @@ public class ProductService {
                             return file.getOriginalFilename();
                         }
                     });
+                    log.debug("Attached File: {}, Size: {} bytes", file.getOriginalFilename(), file.getSize());
                 }
             }
 
             // HTTP 헤더 설정
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+            log.debug("Request Headers: {}", headers);
 
             // HttpEntity 생성
             HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(body, headers);
+            log.debug("HttpEntity Body: {}", body);
 
             // User API Endpoint 설정
             String userApiEndpoint = userApiUrl + endpoint;
+            log.info("Sending request to User API: {}", userApiEndpoint);
 
-            restTemplate.exchange(userApiEndpoint, httpMethod, request, Long.class);
-        } catch (Exception e) {
+            // API 호출
+            ResponseEntity<Long> response = restTemplate.exchange(userApiEndpoint, httpMethod, request, Long.class);
+
+            log.info("User API Response: Status - {}, Body - {}", response.getStatusCode(), response.getBody());
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            log.error("User API returned error: Status - {}, Body - {}", e.getStatusCode(), e.getResponseBodyAsString());
             throw new RuntimeException("User API 전송 중 오류 발생", e);
+        } catch (Exception e) {
+            log.error("Unexpected error during User API request", e);
+            throw new RuntimeException("User API 전송 중 예기치 않은 오류 발생", e);
         }
     }
+
 
     // User API에 상품 정보를 전송하는 메서드(삭제)
     private void sendProductDelete(String endpoint, HttpMethod httpMethod) {
