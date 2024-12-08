@@ -102,6 +102,14 @@ public class ProductService {
         return productRepository.findByFiltering(tno, cno, scno, pageRequestDTO);
     }
 
+    // 상품 키워드 검색 및 가격 필터링(JH)
+    public PageResponseDTO<ProductListDTO> searchWithFilters(String keyword, Integer minPrice, Integer maxPrice,
+                                                             Long tno, Long cno, Long scno, PageRequestDTO pageRequestDTO) {
+        log.info("상품 키워드 검색 및 가격 필터링 실행 - keyword: {}, minPrice: {}, maxPrice: {}", keyword, minPrice, maxPrice);
+
+        return productRepository.searchWithKeywordAndFilters(keyword, minPrice, maxPrice, tno, cno, scno, pageRequestDTO);
+    }
+
     // 상품 생성
     public Long createProduct(ProductListDTO productListDTO, List<MultipartFile> imageFiles) throws IOException {
         // Category와 SubCategory를 조회
