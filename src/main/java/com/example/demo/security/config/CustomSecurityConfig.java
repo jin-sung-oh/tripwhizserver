@@ -56,6 +56,7 @@ public class CustomSecurityConfig {
                         ).permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("api/admin/spot/**").hasRole("ADMIN")
+                        .requestMatchers("api/admin/product/**").hasRole("ADMIN")
                         .requestMatchers("/api/storeowner/**").hasRole("STOREOWNER")
                         .requestMatchers("/api/storeowner/luggagemove/**").hasRole("STOREOWNER")
                         .requestMatchers("/api/storeowner/luggagestorage/**").hasRole("STOREOWNER")
