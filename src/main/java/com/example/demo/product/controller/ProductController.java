@@ -69,7 +69,23 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
+    // 상품 검색
+    @GetMapping("/list/search")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<PageResponseDTO<ProductListDTO>> searchWithFilters(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Integer minPrice,
+            @RequestParam(required = false) Integer maxPrice,
+            @RequestParam(required = false) Long tno,
+            @RequestParam(required = false) Long cno,
+            @RequestParam(required = false) Long scno,
+            PageRequestDTO pageRequestDTO) {
+        log.info("상품 키워드 검색 요청 - keyword: {}, minPrice: {}, maxPrice: {}, tno: {}, cno: {}, scno: {}",
+                keyword, minPrice, maxPrice, tno, cno, scno);
 
+        PageResponseDTO<ProductListDTO> result = productService.searchWithFilters(keyword, minPrice, maxPrice, tno, cno, scno, pageRequestDTO);
+        return ResponseEntity.ok(result);
+    }
 
     // 특정 상품 ID로 조회 (Native Query 사용)
     @GetMapping("/read/native/{pno}")

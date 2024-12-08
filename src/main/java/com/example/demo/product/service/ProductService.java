@@ -112,6 +112,17 @@ public class ProductService {
         return productRepository.findByFiltering(tno, cno, scno, pageRequestDTO);
     }
 
+    // 상품 검색
+    public PageResponseDTO<ProductListDTO> searchWithFilters(
+            String keyword, Integer minPrice, Integer maxPrice,
+            Long tno, Long cno, Long scno, PageRequestDTO pageRequestDTO) {
+        log.info("상품 키워드 검색 및 필터링 실행 - keyword: {}, minPrice: {}, maxPrice: {}, tno: {}, cno: {}, scno: {}",
+                keyword, minPrice, maxPrice, tno, cno, scno);
+
+        return productRepository.searchWithKeywordAndFilters(keyword, minPrice, maxPrice, tno, cno, scno, pageRequestDTO);
+    }
+
+
     // 상품 생성
     public Long createProduct(ProductListDTO productListDTO, List<MultipartFile> imageFiles) throws IOException {
         log.info("Start: 상품 생성 요청 - 데이터: {}", productListDTO);
