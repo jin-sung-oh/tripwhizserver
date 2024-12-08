@@ -52,6 +52,9 @@ logging:
   level:
     org.springframework.security.web: TRACE
     com.example.demo: TRACE
+    org.springframework.security: DEBUG
+    org.springframework.web.filter: TRACE
+
 
   spring:
   mvc:
