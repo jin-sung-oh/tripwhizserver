@@ -19,7 +19,6 @@ public class LuggageStorageController {
     private final LuggageStorageService luggageStorageService;
 
     @PostMapping("/create")
-    @PreAuthorize("hasRole('ANONYMOUS')")
     public ResponseEntity<LuggageStorageDTO> createLuggageStorage(@RequestBody LuggageStorage luggageStorage) {
         LuggageStorageDTO luggageStorageDTO = luggageStorageService.createLuggageStorage(luggageStorage);
         return ResponseEntity.ok(luggageStorageDTO);

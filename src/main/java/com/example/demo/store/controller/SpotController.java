@@ -12,14 +12,14 @@ import java.util.List;
 
 @Log4j2
 @RestController
-@RequestMapping("/api/spot")
+@RequestMapping("/api/admin/spot")
 @RequiredArgsConstructor
 public class SpotController {
 
     private final SpotService spotService;
 
     // 특정 Spot 조회
-    @GetMapping("/{spno}")
+    @GetMapping("/read/{spno}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SpotDTO> read(@PathVariable Long spno) {
         log.info("----- Spot Read Request -----");

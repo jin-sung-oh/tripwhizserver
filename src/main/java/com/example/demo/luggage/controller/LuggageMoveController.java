@@ -18,15 +18,14 @@ public class LuggageMoveController {
 
     private final LuggageMoveService luggageMoveService;
 
-    // 이동 신청 생성
+    // 인증 없이 접근 가능
     @PostMapping("/create")
-    @PreAuthorize("hasRole('ANONYMOUS')")
     public ResponseEntity<LuggageMoveDTO> createLuggageMove(@RequestBody LuggageMove luggageMove) {
         LuggageMoveDTO luggageMoveDTO = luggageMoveService.createLuggageMove(luggageMove);
         return ResponseEntity.ok(luggageMoveDTO);
     }
 
-    // 이동 상세 정보 조회
+    // 점주 로그인 필요
     @GetMapping("/list/{lmno}")
     @PreAuthorize("hasRole('STOREOWNER')")
     public ResponseEntity<LuggageMoveDTO> getLuggageMoveDetails(@PathVariable Long lmno) {
@@ -34,7 +33,7 @@ public class LuggageMoveController {
         return ResponseEntity.ok(luggageMoveDTO);
     }
 
-    // 모든 이동 리스트 조회
+    // 점주 로그인 필요
     @GetMapping("/list")
     @PreAuthorize("hasRole('STOREOWNER')")
     public ResponseEntity<List<LuggageMoveDTO>> getAllLuggageMoves() {
@@ -42,7 +41,7 @@ public class LuggageMoveController {
         return ResponseEntity.ok(luggageMoves);
     }
 
-    // 이동 상태 업데이트
+    // 점주 로그인 필요
     @PutMapping("/{lmno}/status")
     @PreAuthorize("hasRole('STOREOWNER')")
     public ResponseEntity<Void> updateMoveStatus(@PathVariable Long lmno, @RequestParam LuggageMoveStatus status) {
