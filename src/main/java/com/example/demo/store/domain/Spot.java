@@ -40,4 +40,6 @@ public class Spot {
     @ManyToOne
     @JoinColumn(name = "sno", nullable = false)
     private StoreOwner storeowner; // 점주
+
+
 }

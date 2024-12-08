@@ -8,6 +8,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Log4j2
 @Service
 @Transactional
@@ -18,15 +21,13 @@ public class MemberService {
 
     public boolean saveMember(MemberDTO memberDTO) {
         try {
-            // MemberEntity로 변환
             Member member = Member.builder()
                     .email(memberDTO.getEmail())
                     .name(memberDTO.getName())
                     .pw(memberDTO.getPw())
-                    .delFlag(false) // 기본값 설정
+                    .delFlag(false)
                     .build();
 
-            // 데이터 저장
             memberRepository.save(member);
             log.info("Member successfully saved: {}", memberDTO.getEmail());
             return true;
@@ -36,4 +37,10 @@ public class MemberService {
         }
     }
 
+    public List<MemberDTO> getMemberList() {
+        List<Member> members = memberRepository.findAll();
+        return members.stream()
+                .map(member -> new MemberDTO(member.getEmail(), member.getPw(), member.getName()))
+                .collect(Collectors.toList());
+    }
 }
