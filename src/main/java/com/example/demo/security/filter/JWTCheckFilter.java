@@ -39,19 +39,15 @@ public class JWTCheckFilter extends OncePerRequestFilter {
             return true;
         }
 
-        if (uri.startsWith("/api/storeowner/luggagemove")) {
+        if (uri.startsWith("/api/storeowner/luggagemove/create")) {
+            return true;
+        }
+
+        if (uri.startsWith("/api/storeowner/luggagestorage/create")) {
             return true;
         }
 
         if (uri.startsWith("/api/admin/register")) {
-            return true;
-        }
-
-        if (uri.startsWith("/api/storeowner/luggagemove")) {
-            return true;
-        }
-
-        if (uri.startsWith("/api/storeowner/luggagestorage")) {
             return true;
         }
 
@@ -63,34 +59,27 @@ public class JWTCheckFilter extends OncePerRequestFilter {
             return true;
         }
 
-        if (uri.startsWith("/api/user/order")) {
-            return true;
-        }
-
         return false;
 
     }
 
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            log.warn("Authorization header missing or invalid for URI: {}", request.getRequestURI());
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("{\"error\": \"Authorization header missing or invalid\"}");
+            log.warn("Missing Authorization header for URI: {}", request.getRequestURI());
+            filterChain.doFilter(request, response);
             return;
         }
 
         String token = authHeader.substring(7);
 
         try {
-            // JWT 토큰 검증
             Map<String, Object> claims = jwtUtil.validateToken(token, false);
 
-            // 사용자 정보 추출
             String username = (String) claims.get("id");
             String role = (String) claims.get("role");
 
@@ -98,25 +87,19 @@ public class JWTCheckFilter extends OncePerRequestFilter {
                 throw new IllegalArgumentException("Role not found in JWT claims");
             }
 
-            // 권한 설정
             List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
             UsernamePasswordAuthenticationToken authenticationToken =
                     new UsernamePasswordAuthenticationToken(username, null, authorities);
 
-            // SecurityContext에 인증 정보 설정
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-
             log.info("User '{}' authenticated with role '{}'", username, role);
-            filterChain.doFilter(request, response);
 
-        } catch (IllegalArgumentException e) {
-            log.error("Invalid JWT claims: {}", e.getMessage());
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            response.getWriter().write("{\"error\": \"Invalid JWT claims\"}");
         } catch (Exception e) {
-            log.error("Unauthorized access attempt: {}", e.getMessage());
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("{\"error\": \"Unauthorized: Invalid or expired token\"}");
+            log.error("Authentication error: {}", e.getMessage());
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token");
+            return;
         }
+
+        filterChain.doFilter(request, response);
     }
 }

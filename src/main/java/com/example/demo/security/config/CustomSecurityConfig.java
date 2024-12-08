@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -43,58 +42,36 @@ public class CustomSecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // 공통적으로 인증 없이 접근 가능한 경로
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/api/admin/register",
                                 "/api/nationality/**",
                                 "/api/stock/**",
-                                "/api/storeowner/luggagemove/**",
-                                "/api/storeowner/luggagestorage/**",
+                                "/api/storeowner/luggagemove/create",
+                                "/api/storeowner/luggagestorage/create",
                                 "/api/member/**",
-                                "api/cart/**",
-                                "api/user/order/**"
+                                "/api/cart/**",
+                                "/error"
                         ).permitAll()
-                        .requestMatchers("/api/auth/**", "/api/admin/register", "/api/nationality/**", "/api/stock/**", "/api/product/image/**").permitAll()
-
-                        // 관리자 전용 경로
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-
-                        // 점주 전용 경로
                         .requestMatchers("/api/storeowner/**").hasRole("STOREOWNER")
-
-                        .requestMatchers("/error").permitAll()  // error 경로는 인증 없이 접근 가능
-
-                        .requestMatchers("/api/member/**").permitAll()
-                        .requestMatchers("/api/cart/**").permitAll()
-
-                        // 인증 필요 경로
-                        //.requestMatchers(HttpMethod.GET, "/api/admin/storeOwners").authenticated()
+                        .requestMatchers("/api/storeowner/luggagemove/**").hasRole("STOREOWNER")
+                        .requestMatchers("/api/storeowner/luggagestorage/**").hasRole("STOREOWNER")
                         .anyRequest().authenticated()
                 )
                 .anonymous(anonymous -> anonymous
-                        .authorities("ROLE_ANONYMOUS") // 익명 사용자에게 ROLE_ANONYMOUS 부여
+                        .authorities("ROLE_ANONYMOUS")
                 )
                 .addFilterBefore(new JWTCheckFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {
                             log.error("Unauthorized request - {}", authException.getMessage());
-                            log.error("Request URI: {}", request.getRequestURI());
-
-                            authException.printStackTrace();
-
                             response.sendError(401, "Unauthorized");
                         })
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
                             log.error("Access denied - {}", accessDeniedException.getMessage());
-                            log.error("Request URI: {}", request.getRequestURI());
-
-
-                            accessDeniedException.printStackTrace();
-
                             response.sendError(403, "Access Denied");
                         })
-
                 );
 
         log.info("Security configuration applied successfully");
@@ -106,13 +83,12 @@ public class CustomSecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOriginPatterns(List.of("http://localhost:3000", "http://localhost:5173"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Cache-Control"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
 
-        log.info("CORS configuration applied successfully");
         return source;
     }
 }

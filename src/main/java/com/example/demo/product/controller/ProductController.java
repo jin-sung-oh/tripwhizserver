@@ -12,6 +12,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,7 +24,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/product")
+@RequestMapping("/api/admin/product")
 @Log4j2
 @RequiredArgsConstructor
 public class ProductController {
@@ -64,6 +65,7 @@ public class ProductController {
 
     // 상품 목록 조회
     @GetMapping("/list")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PageResponseDTO<ProductListDTO>> list(
             @RequestParam(required = false) Long tno,
             @RequestParam(required = false) Long cno,
@@ -79,6 +81,7 @@ public class ProductController {
 
     // 상품 키워드 검색 및 가격 필터링(JH)
     @GetMapping("/list/search")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PageResponseDTO<ProductListDTO>> searchWithFilters(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Integer minPrice,
@@ -95,6 +98,7 @@ public class ProductController {
 
     // 특정 상품 ID로 조회 (Native Query 사용)
     @GetMapping("/read/native/{pno}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ProductReadDTO> getProductNative(@PathVariable Long pno) {
         log.info("Attempting to fetch product with ID: {} using Native Query", pno);
         try {
@@ -112,6 +116,7 @@ public class ProductController {
 
     // 상품 생성
     @PostMapping("/add")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Long> createProduct(
             @RequestPart("productListDTO") String productListDTOJson,
             @RequestPart(value = "imageFiles", required = false) List<MultipartFile> imageFiles) throws JsonProcessingException, IOException {
@@ -136,6 +141,7 @@ public class ProductController {
 
     // 상품 수정
     @PutMapping("/update/{pno}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Long> updateProduct(
             @PathVariable Long pno,
             @RequestPart("productListDTO") String productListDTOJson,
@@ -160,6 +166,7 @@ public class ProductController {
 
     // 상품 삭제
     @PutMapping("/delete/{pno}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long pno) {
 
         log.info("Received product deletion request for PNO {}", pno);

@@ -15,5 +15,3 @@ public interface ProductSearch {
                                                                 Long tno, Long cno, Long scno, PageRequestDTO pageRequestDTO);
 
 }
-
-

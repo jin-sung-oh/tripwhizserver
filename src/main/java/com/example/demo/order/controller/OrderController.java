@@ -12,13 +12,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 
 @Log4j2
 @RestController
-@RequestMapping("/api/user/order")
+@RequestMapping("/api/storeowner/order")
 @RequiredArgsConstructor
 public class OrderController {
 
@@ -41,6 +42,7 @@ public class OrderController {
 
     // 주문 리스트 조회
     @GetMapping("/list")
+    @PreAuthorize("hasRole('STOREOWNER')")
     public ResponseEntity<PageResponseDTO<OrderListDTO>> getUserOrders(@Valid PageRequestDTO pageRequestDTO) {
         PageResponseDTO<OrderListDTO> response = userOrderService.getUserOrders(pageRequestDTO);
         return ResponseEntity.ok(response);
@@ -48,6 +50,7 @@ public class OrderController {
 
     // 특정 주문 상세 조회
     @GetMapping("/details/{ono}")
+    @PreAuthorize("hasRole('STOREOWNER')")
     public ResponseEntity<?> getOrderDetails(
             @PathVariable Long ono,
             @RequestParam @NotBlank(message = "Email cannot be blank") String email) {
@@ -62,6 +65,7 @@ public class OrderController {
 
     // 주문 취소
     @PutMapping("/cancel/{ono}")
+    @PreAuthorize("hasRole('STOREOWNER')")
     public ResponseEntity<?> cancelOrder(
             @PathVariable Long ono,
             @RequestParam @NotBlank(message = "Email cannot be blank") String email) {
