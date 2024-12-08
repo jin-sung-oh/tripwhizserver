@@ -26,12 +26,15 @@ public class Product {
     @Column(nullable = false, length = 50)
     private String pname;
 
-    @Column(length = 1000)
+    @Lob
     private String pdesc;
 
     private int price;
 
     private boolean delFlag;
+
+
+
 
     // JH
     @ElementCollection
@@ -84,5 +87,6 @@ public class Product {
         }
         this.attachFiles.add(attachFile);
     }
+
 
 }
