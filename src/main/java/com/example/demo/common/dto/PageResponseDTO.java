@@ -17,6 +17,7 @@ public class PageResponseDTO<E> {
     private int prevPage, nextPage; // 이전/다음 페이지 번호
     private int totalPage; // 총 페이지 수
     private int current; // 현재 페이지 번호
+    private List<Long> tnos;
 
     @Builder(builderMethodName = "withAll")
     public PageResponseDTO(List<E> dtoList, PageRequestDTO pageRequestDTO, long totalCount) {

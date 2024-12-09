@@ -64,10 +64,27 @@ public class ProductController {
             @RequestParam(required = false) Long tno,
             @RequestParam(required = false) Long cno,
             @RequestParam(required = false) Long scno,
+            @RequestParam(required = false) List<Long> tnos,  // tnos를 리스트로 받기
             @Validated PageRequestDTO pageRequestDTO) {
-        PageResponseDTO<ProductListDTO> response = productService.searchProducts(tno, cno, scno, pageRequestDTO);
+
+        // 로그 찍기: 요청된 파라미터 확인
+        log.info("Received request to list products");
+        log.debug("tno: {}, cno: {}, scno: {}, tnos: {}, pageRequestDTO: {}", tno, cno, scno, tnos, pageRequestDTO);
+
+        // 만약 tnos가 null이 아니면, 이를 사용해서 검색하도록 처리
+        if (tnos != null && !tnos.isEmpty()) {
+            log.debug("Using tnos for search: {}", tnos);
+        }
+
+        // 서비스 호출
+        PageResponseDTO<ProductListDTO> response = productService.searchProducts(tnos, cno, scno, pageRequestDTO);
+
+        // 로그 추가: 응답 데이터 로그 찍기
+        log.debug("Product list response: {}", response);
+
         return ResponseEntity.ok(response);
     }
+
 
 
 
