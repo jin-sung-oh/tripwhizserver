@@ -51,7 +51,8 @@ public class CustomSecurityConfig {
                                 "/api/stock/**",
                                 "/api/storeowner/luggagemove/create",
                                 "/api/storeowner/luggagestorage/create",
-                                "/api/member/**",
+                                "/api/storeowner/order/receive",
+                                "/api/admin/member/save",
                                 "/api/cart/**",
                                 "/error",
                                 "/api/scraping/spots" // 지점 스크래핑 경로

@@ -27,6 +27,7 @@ public class OrderController {
 
     // 주문 생성
     @PostMapping("/receive")
+    @PreAuthorize("permitAll()")
     public ResponseEntity<?> receiveOrder(@RequestBody OrderReadDTO orderReadDTO) {
 
         log.info("receive order: {}", orderReadDTO);
