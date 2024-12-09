@@ -39,6 +39,10 @@ public class JWTCheckFilter extends OncePerRequestFilter {
             return true;
         }
 
+        if (uri.startsWith("/api/admin/spot/user/list")) {
+            return true;
+        }
+
         if (uri.startsWith("/api/storeowner/luggagemove/create")) {
             return true;
         }
