@@ -17,6 +17,10 @@ public class CartListDTO {
 
     private Long pno;
 
+    private String pname;
+
+    private int price;
+
     private int qty;
 
     private boolean delFlag;

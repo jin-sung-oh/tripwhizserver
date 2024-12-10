@@ -1,10 +1,6 @@
 package com.example.demo.order.domain;
 
-/**
- * Enum representing the various statuses of an order.
- */
 public enum OrderStatus {
-
     CANCELLED, // 주문이 취소된 상태
     PREPARING, // 주문이 준비 중인 상태
     APPROVED, // 점주가 주문을 승인한 상태

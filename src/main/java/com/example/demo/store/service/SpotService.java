@@ -3,12 +3,14 @@ package com.example.demo.store.service;
 import com.example.demo.manager.entity.StoreOwner;
 import com.example.demo.manager.repository.StoreOwnerRepository;
 import com.example.demo.store.domain.Spot;
-import com.example.demo.store.dto.SpotDTO.SpotDTO;
+import com.example.demo.store.dto.SpotDTO;
 import com.example.demo.store.repository.SpotRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,7 +34,8 @@ public class SpotService {
                 .spno(spot.getSpno())
                 .spotname(spot.getSpotname())
                 .address(spot.getAddress())
-                .tel(spot.getTel())
+                .url(spot.getUrl())
+//                .tel(spot.getTel())
                 .latitude(spot.getLatitude()) // 위도 추가
                 .longitude(spot.getLongitude()) // 경도 추가
                 .sno(storeOwner.getSno())
@@ -47,7 +50,8 @@ public class SpotService {
                         .spno(spot.getSpno())
                         .spotname(spot.getSpotname())
                         .address(spot.getAddress())
-                        .tel(spot.getTel())
+                        .url(spot.getUrl())
+//                        .tel(spot.getTel())
                         .latitude(spot.getLatitude()) // 위도 추가
                         .longitude(spot.getLongitude()) // 경도 추가
                         .sno(spot.getStoreowner().getSno())
@@ -65,7 +69,8 @@ public class SpotService {
                 .storeowner(storeOwner)
                 .spotname(spotDTO.getSpotname())
                 .address(spotDTO.getAddress())
-                .tel(spotDTO.getTel())
+                .url(spotDTO.getUrl())
+//                .tel(spotDTO.getTel())
                 .latitude(spotDTO.getLatitude()) // 위도 추가
                 .longitude(spotDTO.getLongitude()) // 경도 추가
                 .delFlag(false) // 기본값 설정
@@ -84,7 +89,8 @@ public class SpotService {
 
         spot.setSpotname(modifyDTO.getSpotname());
         spot.setAddress(modifyDTO.getAddress());
-        spot.setTel(modifyDTO.getTel());
+        spot.setUrl(modifyDTO.getUrl());
+//        spot.setTel(modifyDTO.getTel());
         spot.setLatitude(modifyDTO.getLatitude()); // 위도 수정
         spot.setLongitude(modifyDTO.getLongitude()); // 경도 수정
 
@@ -94,7 +100,8 @@ public class SpotService {
                 .spno(updatedSpot.getSpno())
                 .spotname(updatedSpot.getSpotname())
                 .address(updatedSpot.getAddress())
-                .tel(updatedSpot.getTel())
+                .url(updatedSpot.getUrl())
+//                .tel(updatedSpot.getTel())
                 .latitude(updatedSpot.getLatitude()) // 위도 추가
                 .longitude(updatedSpot.getLongitude()) // 경도 추가
                 .sno(updatedSpot.getStoreowner().getSno())
