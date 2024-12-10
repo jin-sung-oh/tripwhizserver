@@ -7,6 +7,7 @@ import com.example.demo.product.domain.ThemeCategory;
 import com.example.demo.util.file.domain.AttachFile;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -36,7 +37,8 @@ public class ProductListDTO {
     private String pdesc;
     private Long cno; // 카테고리 ID
     private Long scno; // 서브 카테고리 ID
-    private List<ThemeCategory> tnos;  // 테마 카테고리 리스트
+    @Builder.Default
+    private List<Long> tnos = new ArrayList<>();
     private List<AttachFile> attachFiles; // 첨부 파일
 
 //    // JSON 필드에서 category 객체를 cno로 매핑

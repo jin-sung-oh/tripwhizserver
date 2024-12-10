@@ -15,10 +15,10 @@ import java.util.Optional;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
-    // Native Query로 특정 상품을 Map 형태로 조회
+    // 첫 번째 Native Query 수정
     @Query(value = "SELECT p.pno AS pno, p.pname AS pname, p.pdesc AS pdesc, p.price AS price, " +
             "c.cno AS cno, sc.scno AS scno, " +
-            "JSON_ARRAYAGG(JSON_OBJECT('ord', af.ord, 'filename', af.filename)) AS attachFiles " +
+            "JSON_ARRAYAGG(JSON_OBJECT('ord', af.ord, 'file_name', af.file_name)) AS attachFiles " + // 수정된 부분
             "FROM product p " +
             "LEFT JOIN category c ON p.category_cno = c.cno " +
             "LEFT JOIN sub_category sc ON p.sub_category_scno = sc.scno " +
@@ -27,27 +27,30 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "GROUP BY p.pno", nativeQuery = true)
     Optional<Map<String, Object>> readNative(@Param("pno") Long pno);
 
-
-
-
-        @Query("SELECT p FROM Product p " +
-                "LEFT JOIN ProductTheme pt ON pt.product = p " +
-                "LEFT JOIN ThemeCategory tc ON tc.tno = pt.themeCategory.tno " +
-                "WHERE (:cno IS NULL OR p.category.cno = :cno) " +
-                "AND (:scno IS NULL OR p.subCategory.scno = :scno) " +
-                "AND (:tnos IS NULL OR tc.tno IN :tnos)")
-        Page<Product> findByThemesIn(@Param("tnos") List<Long> tnos,
-                                     @Param("cno") Long cno,
-                                     @Param("scno") Long scno,
-                                     Pageable pageable);
-
-        @Query("SELECT p FROM Product p " +
-                "WHERE (:cno IS NULL OR p.category.cno = :cno) " +
-                "AND (:scno IS NULL OR p.subCategory.scno = :scno)")
-        Page<Product> findAllWithFiltering(@Param("cno") Long cno,
-                                           @Param("scno") Long scno,
-                                           Pageable pageable);
-    }
+    // 두 번째 Native Query 수정
+    @Query(value = """
+SELECT p.pno, 
+       p.pname, 
+       p.pdesc, 
+       p.price, 
+       p.category_cno, 
+       p.sub_category_scno,
+       JSON_ARRAYAGG(DISTINCT tc.tno) AS tnos, -- 테마 ID를 배열로 반환
+       JSON_ARRAYAGG(JSON_OBJECT('ord', af.ord, 'file_name', af.file_name)) AS attachFiles -- 수정된 부분
+FROM product p
+LEFT JOIN product_theme pt ON p.pno = pt.product_pno
+LEFT JOIN theme_category tc ON pt.theme_category_tno = tc.tno
+LEFT JOIN product_images af ON af.pno = p.pno
+WHERE (:tnos IS NULL OR tc.tno IN (:tnos))
+  AND (:cno IS NULL OR p.category_cno = :cno)
+  AND (:scno IS NULL OR p.sub_category_scno = :scno)
+GROUP BY p.pno
+""", nativeQuery = true)
+    List<Map<String, Object>> findProductsWithThemesAndAttachments(
+            @Param("tnos") List<Long> tnos,
+            @Param("cno") Long cno,
+            @Param("scno") Long scno
+    );
 
 }
 

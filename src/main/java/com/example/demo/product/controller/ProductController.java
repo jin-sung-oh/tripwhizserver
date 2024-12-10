@@ -60,28 +60,13 @@ public class ProductController {
     // 상품 목록 조회
     @GetMapping("/list")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<PageResponseDTO<ProductListDTO>> list(
-            @RequestParam(required = false) Long tno,
+    public ResponseEntity<List<ProductListDTO>> list(
+            @RequestParam(required = false) List<Long> tnos,
             @RequestParam(required = false) Long cno,
-            @RequestParam(required = false) Long scno,
-            @RequestParam(required = false) List<Long> tnos,  // tnos를 리스트로 받기
-            @Validated PageRequestDTO pageRequestDTO) {
+            @RequestParam(required = false) Long scno) {
 
-        // 로그 찍기: 요청된 파라미터 확인
-        log.info("Received request to list products");
-        log.debug("tno: {}, cno: {}, scno: {}, tnos: {}, pageRequestDTO: {}", tno, cno, scno, tnos, pageRequestDTO);
-
-        // 만약 tnos가 null이 아니면, 이를 사용해서 검색하도록 처리
-        if (tnos != null && !tnos.isEmpty()) {
-            log.debug("Using tnos for search: {}", tnos);
-        }
-
-        // 서비스 호출
-        PageResponseDTO<ProductListDTO> response = productService.searchProducts(tnos, cno, scno, pageRequestDTO);
-
-        // 로그 추가: 응답 데이터 로그 찍기
-        log.debug("Product list response: {}", response);
-
+        log.info("상품 목록 요청: tnos={}, cno={}, scno={}", tnos, cno, scno);
+        List<ProductListDTO> response = productService.searchProducts(tnos, cno, scno);
         return ResponseEntity.ok(response);
     }
 
@@ -90,6 +75,7 @@ public class ProductController {
 
     // 특정 상품 ID로 조회 (Native Query 사용)
     @GetMapping("/read/native/{pno}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ProductReadDTO> getProductNative(@PathVariable Long pno) {
         log.info("Attempting to fetch product with ID: {} using Native Query", pno);
         try {
@@ -110,42 +96,18 @@ public class ProductController {
     public ResponseEntity<Long> createProduct(
             @RequestPart("productListDTO") String productListDTOJson,
             @RequestPart(value = "imageFiles", required = false) List<MultipartFile> imageFiles
-    ) throws JsonProcessingException, IOException {
-        log.info("Start: 상품 생성 요청 수신");
+    ) throws IOException {
+        log.info("Raw JSON received: {}", productListDTOJson);
 
         ObjectMapper objectMapper = new ObjectMapper();
-        ProductListDTO productListDTO;
+        ProductListDTO productListDTO = objectMapper.readValue(productListDTOJson, ProductListDTO.class);
 
-        try {
-            log.info("productListDTO JSON 변환 시작");
-            productListDTO = objectMapper.readValue(productListDTOJson, ProductListDTO.class);
-            log.debug("productListDTO 변환 성공: {}", productListDTO);
-        } catch (JsonProcessingException e) {
-            log.error("JSON 변환 오류 - 입력 데이터: {}", productListDTOJson, e);
-            throw e;
-        }
+        log.info("Parsed ProductListDTO: {}", productListDTO);
 
-        Long createdProductPno;
-
-        try {
-            log.info("ProductService.createProduct 호출 시작");
-            createdProductPno = productService.createProduct(productListDTO, imageFiles);
-            log.info("Product 생성 성공 - pno: {}", createdProductPno);
-        } catch (IOException e) {
-            log.error("Product 생성 중 파일 처리 오류", e);
-            throw e;
-        } catch (Exception e) {
-            log.error("Product 생성 중 예기치 않은 오류 발생", e);
-            throw e;
-        }
-
-        log.info("Received Product Add Request");
-        log.info("ProductListDTO JSON: {}", productListDTOJson);
-
-        log.info("End: 상품 생성 요청 처리 완료 - pno: {}", createdProductPno);
-        return ResponseEntity.ok(createdProductPno);
-
+        Long createdProductId = productService.createProduct(productListDTO, imageFiles);
+        return ResponseEntity.ok(createdProductId);
     }
+
 
 
     @PutMapping("/update/{pno}")
@@ -155,12 +117,18 @@ public class ProductController {
             @RequestPart("productListDTO") String productListDTOJson,
             @RequestPart(value = "imageFiles", required = false) List<MultipartFile> imageFiles) throws JsonProcessingException, IOException {
 
+        log.info("Received pno: {}", pno);  // pno 로깅 추가
+
         // JSON 문자열을 객체로 변환
         ObjectMapper objectMapper = new ObjectMapper();
         ProductListDTO productListDTO = objectMapper.readValue(productListDTOJson, ProductListDTO.class);
+
+        // 상품 업데이트
         Long updatedProductPno = productService.updateProduct(pno, productListDTO, imageFiles);
         return ResponseEntity.ok(updatedProductPno);
     }
+
+
 
 
     // 상품 삭제

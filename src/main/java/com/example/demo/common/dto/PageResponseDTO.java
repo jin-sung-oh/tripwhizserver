@@ -17,10 +17,10 @@ public class PageResponseDTO<E> {
     private int prevPage, nextPage; // 이전/다음 페이지 번호
     private int totalPage; // 총 페이지 수
     private int current; // 현재 페이지 번호
-    private List<Long> tnos;
+    private List<Long> tnos; // 필터링된 테마 카테고리 리스트
 
     @Builder(builderMethodName = "withAll")
-    public PageResponseDTO(List<E> dtoList, PageRequestDTO pageRequestDTO, long totalCount) {
+    public PageResponseDTO(List<E> dtoList, PageRequestDTO pageRequestDTO, long totalCount, List<Long> tnos) {
         this.dtoList = dtoList;
         this.pageRequestDTO = pageRequestDTO;
         this.totalCount = (int) totalCount;
@@ -54,5 +54,8 @@ public class PageResponseDTO<E> {
 
         // 현재 페이지 설정
         this.current = pageRequestDTO.getPage();
+
+        // tnos 반환
+        this.tnos = tnos;
     }
 }
