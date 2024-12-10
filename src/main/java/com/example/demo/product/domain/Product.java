@@ -33,6 +33,9 @@ public class Product {
 
     private boolean delFlag;
 
+
+
+
     // JH
     @ElementCollection
     @CollectionTable(
@@ -84,5 +87,6 @@ public class Product {
         }
         this.attachFiles.add(attachFile);
     }
+
 
 }

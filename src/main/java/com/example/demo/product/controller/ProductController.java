@@ -12,6 +12,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,9 +23,9 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.Optional;
 
-@RestController
-@RequestMapping("/api/product")
 @Log4j2
+@RestController
+@RequestMapping("/api/admin/product")
 @RequiredArgsConstructor
 public class ProductController {
 
@@ -38,42 +39,32 @@ public class ProductController {
 
     // 이미지 조회
     @GetMapping("/image/{fileName}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<byte[]> getImage(@PathVariable String fileName) throws IOException {
-        log.info("이미지 파일을 조회합니다: {}", fileName);
-
-        // 동적으로 이미지 경로 생성
         String imagePath = uploadPath + File.separator + productPath + File.separator + fileName;
 
-        // 이미지 파일 읽기
         File imageFile = new File(imagePath);
         if (!imageFile.exists()) {
-            log.warn("이미지 파일이 존재하지 않습니다: {}", fileName);
             return ResponseEntity.notFound().build();
         }
 
-        // 파일 데이터를 바이트 배열로 변환
         byte[] imageBytes = Files.readAllBytes(imageFile.toPath());
-
-        // 파일 MIME 타입 결정
         String mimeType = Files.probeContentType(imageFile.toPath());
 
         return ResponseEntity.ok()
-                .header("Content-Type", mimeType) // MIME 타입 설정
+                .header("Content-Type", mimeType)
                 .body(imageBytes);
     }
 
     // 상품 목록 조회
     @GetMapping("/list")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PageResponseDTO<ProductListDTO>> list(
             @RequestParam(required = false) Long tno,
             @RequestParam(required = false) Long cno,
             @RequestParam(required = false) Long scno,
             @Validated PageRequestDTO pageRequestDTO) {
-        log.info("상품 목록을 조회합니다. tno: {}, cno: {}, scno: {}", tno, cno, scno);
-
         PageResponseDTO<ProductListDTO> response = productService.searchProducts(tno, cno, scno, pageRequestDTO);
-
-        log.info("상품 목록 응답: {}", response);
         return ResponseEntity.ok(response);
     }
 
@@ -98,57 +89,36 @@ public class ProductController {
 
     // 상품 생성
     @PostMapping("/add")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Long> createProduct(
             @RequestPart("productListDTO") String productListDTOJson,
-            @RequestPart(value = "imageFiles", required = false) List<MultipartFile> imageFiles) throws JsonProcessingException, IOException {
-
-        // JSON 문자열을 객체로 변환
+            @RequestPart(value = "imageFiles", required = false) List<MultipartFile> imageFiles
+    ) throws JsonProcessingException, IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         ProductListDTO productListDTO = objectMapper.readValue(productListDTOJson, ProductListDTO.class);
-
-        log.info("Received Product: {}", productListDTO);
-
-        if (imageFiles != null) {
-            log.info("Received {} image files", imageFiles.size());
-        }
-
-        // 서비스 호출
-        Long productId = productService.createProduct(productListDTO, imageFiles);
-
-        // 생성된 상품 ID 반환
-        return ResponseEntity.ok(productId);
+        Long createdProductPno = productService.createProduct(productListDTO, imageFiles);
+        return ResponseEntity.ok(createdProductPno);
     }
 
-
-    // 상품 수정
-    @PutMapping("/update/{pno}")
+    @PutMapping("/update/{pno}/{themeCategoryId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Long> updateProduct(
             @PathVariable Long pno,
+            @PathVariable Long themeCategoryId,
             @RequestPart("productListDTO") String productListDTOJson,
             @RequestPart(value = "imageFiles", required = false) List<MultipartFile> imageFiles) throws JsonProcessingException, IOException {
 
         // JSON 문자열을 객체로 변환
         ObjectMapper objectMapper = new ObjectMapper();
         ProductListDTO productListDTO = objectMapper.readValue(productListDTOJson, ProductListDTO.class);
-
-        log.info("Received product update request for PNO {}: {}", pno, productListDTO);
-
-        if (imageFiles != null) {
-            log.info("Received {} image files", imageFiles.size());
-        }
-
-        // 서비스 호출
-        Long updatedProductPno = productService.updateProduct(pno, productListDTO, imageFiles);
-
-        // 수정된 상품 ID 반환
+        Long updatedProductPno = productService.updateProduct(pno, productListDTO, imageFiles, themeCategoryId);
         return ResponseEntity.ok(updatedProductPno);
     }
 
     // 상품 삭제
     @PutMapping("/delete/{pno}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long pno) {
-
-        log.info("Received product deletion request for PNO {}", pno);
         productService.deleteProduct(pno);
         return ResponseEntity.ok().build();
 
