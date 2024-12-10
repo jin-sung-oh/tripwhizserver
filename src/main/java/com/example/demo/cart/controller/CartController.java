@@ -1,12 +1,10 @@
 package com.example.demo.cart.controller;
 
 import com.example.demo.cart.dto.CartListDTO;
-import com.example.demo.cart.dto.CartProductDTO;
 import com.example.demo.cart.service.CartService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,8 +31,8 @@ public class CartController {
 
     // 장바구니에 물건 추가
     @PostMapping("/add")
-    public ResponseEntity<String> addToCart(@RequestBody CartProductDTO cartProductDTO) {
-        cartService.addToCart(cartProductDTO);
+    public ResponseEntity<String> addToCart(@RequestBody CartListDTO cartListDTO) {
+        cartService.addToCart(cartListDTO);
         return ResponseEntity.ok("Product added to cart successfully");
     }
 
@@ -44,6 +42,15 @@ public class CartController {
 //        List<CartProductDTO> cartItems = cartService.getCartItems();
 //        return ResponseEntity.ok(cartItems);
 //    }
+
+    @PatchMapping("/changeQty")
+    public ResponseEntity<Void> changeQty(
+            @RequestParam Long pno,
+            @RequestParam int qty) {
+
+        cartService.changeQty(pno, qty);
+        return ResponseEntity.noContent().build(); // 204 No Content 반환
+    }
 
     @DeleteMapping("delete/{pno}")
     public ResponseEntity<Void> deleteByProduct(
@@ -63,20 +70,5 @@ public class CartController {
         log.info("Product deleted successfully");
         return ResponseEntity.noContent().build(); // 204 No Content 반환
     }
-
-//    @PostMapping("/save")
-//    @PreAuthorize("hasRole('ANONYMOUS')")
-//    public ResponseEntity<String> createOrder(@RequestHeader String email) {
-//
-//        // 주문 생성 서비스 호출
-//        log.info("Received order creation request for email: {}", email);
-//
-//        cartService.saveCart(email);
-//
-//        log.info("Order successfully created and sent to Admin API for email: {}", email);
-//
-//        // 성공 응답 반환
-//        return ResponseEntity.ok("Order successfully created and sent to Admin API.");
-//    }
 
 }

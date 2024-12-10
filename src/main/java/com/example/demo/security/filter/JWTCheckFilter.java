@@ -39,6 +39,10 @@ public class JWTCheckFilter extends OncePerRequestFilter {
             return true;
         }
 
+        if (uri.startsWith("/api/admin/spot/user/list")) {
+            return true;
+        }
+
         if (uri.startsWith("/api/storeowner/luggagemove/create")) {
             return true;
         }
@@ -47,11 +51,15 @@ public class JWTCheckFilter extends OncePerRequestFilter {
             return true;
         }
 
+        if (uri.startsWith("/api/storeowner/order/receive")) {
+            return true;
+        }
+
         if (uri.startsWith("/api/admin/register")) {
             return true;
         }
 
-        if (uri.startsWith("/api/member/save")) {
+        if (uri.startsWith("/api/admin/member/save")) {
             return true;
         }
 

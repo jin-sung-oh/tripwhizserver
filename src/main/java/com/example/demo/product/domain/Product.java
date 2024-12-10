@@ -26,7 +26,7 @@ public class Product {
     @Column(nullable = false, length = 50)
     private String pname;
 
-    @Lob
+    @Column(length = 1000)
     private String pdesc;
 
     private int price;

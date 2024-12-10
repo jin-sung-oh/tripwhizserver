@@ -50,6 +50,8 @@ public class ProductController {
         }
 
         byte[] imageBytes = Files.readAllBytes(imageFile.toPath());
+
+        // 파일 MIME 타입 결정
         String mimeType = Files.probeContentType(imageFile.toPath());
 
         return ResponseEntity.ok()
@@ -70,7 +72,23 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
+    // 상품 검색
+    @GetMapping("/list/search")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<PageResponseDTO<ProductListDTO>> searchWithFilters(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Integer minPrice,
+            @RequestParam(required = false) Integer maxPrice,
+            @RequestParam(required = false) Long tno,
+            @RequestParam(required = false) Long cno,
+            @RequestParam(required = false) Long scno,
+            PageRequestDTO pageRequestDTO) {
+        log.info("상품 키워드 검색 요청 - keyword: {}, minPrice: {}, maxPrice: {}, tno: {}, cno: {}, scno: {}",
+                keyword, minPrice, maxPrice, tno, cno, scno);
 
+        PageResponseDTO<ProductListDTO> result = productService.searchWithFilters(keyword, minPrice, maxPrice, tno, cno, scno, pageRequestDTO);
+        return ResponseEntity.ok(result);
+    }
 
 
     // 특정 상품 ID로 조회 (Native Query 사용)
@@ -98,9 +116,22 @@ public class ProductController {
             @RequestPart(value = "imageFiles", required = false) List<MultipartFile> imageFiles
     ) throws IOException {
         log.info("Raw JSON received: {}", productListDTOJson);
+            @RequestPart(value = "imageFiles", required = false) List<MultipartFile> imageFiles
+    ) throws JsonProcessingException, IOException {
+        log.info("Start: 상품 생성 요청 수신");
 
+        // JSON 문자열을 객체로 변환
         ObjectMapper objectMapper = new ObjectMapper();
-        ProductListDTO productListDTO = objectMapper.readValue(productListDTOJson, ProductListDTO.class);
+        ProductListDTO productListDTO;
+
+        try {
+            log.info("productListDTO JSON 변환 시작");
+            productListDTO = objectMapper.readValue(productListDTOJson, ProductListDTO.class);
+            log.debug("productListDTO 변환 성공: {}", productListDTO);
+        } catch (JsonProcessingException e) {
+            log.error("JSON 변환 오류 - 입력 데이터: {}", productListDTOJson, e);
+            throw e;
+        }
 
         log.info("Parsed ProductListDTO: {}", productListDTO);
 
@@ -110,6 +141,7 @@ public class ProductController {
 
 
 
+    // 상품 수정
     @PutMapping("/update/{pno}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Long> updateProduct(
@@ -125,8 +157,11 @@ public class ProductController {
 
         // 상품 업데이트
         Long updatedProductPno = productService.updateProduct(pno, productListDTO, imageFiles);
+
+        // 수정된 상품 ID 반환
         return ResponseEntity.ok(updatedProductPno);
     }
+
 
 
 

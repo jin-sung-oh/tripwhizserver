@@ -28,6 +28,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -45,6 +47,8 @@ public class ProductService {
     private final SubCategoryRepository subCategoryRepository;
     private final CustomFileUtil customFileUtil;
     private final RestTemplate restTemplate;
+    private final ThemeCategoryRepository themeCategoryRepository;
+    private final ProductThemeRepository productThemeRepository;
     private final ThemeCategoryRepository themeCategoryRepository;
 
 
@@ -159,6 +163,17 @@ public class ProductService {
     }
 
 
+    // 상품 검색
+    public PageResponseDTO<ProductListDTO> searchWithFilters(
+            String keyword, Integer minPrice, Integer maxPrice,
+            Long tno, Long cno, Long scno, PageRequestDTO pageRequestDTO) {
+        log.info("상품 키워드 검색 및 필터링 실행 - keyword: {}, minPrice: {}, maxPrice: {}, tno: {}, cno: {}, scno: {}",
+                keyword, minPrice, maxPrice, tno, cno, scno);
+
+        return productRepository.searchWithKeywordAndFilters(keyword, minPrice, maxPrice, tno, cno, scno, pageRequestDTO);
+    }
+
+
     // 상품 생성
     public Long createProduct(ProductListDTO productListDTO, List<MultipartFile> imageFiles) throws IOException {
         log.info("Start creating product with ProductListDTO: {}", productListDTO);
@@ -269,8 +284,6 @@ public class ProductService {
         try {
             // MultiValueMap으로 요청 데이터 구성
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-
-            // JSON 데이터를 문자열로 변환하여 추가
             ObjectMapper objectMapper = new ObjectMapper();
             String jsonProduct = objectMapper.writeValueAsString(productListDTO);
             body.add("productListDTO", jsonProduct);
@@ -284,20 +297,24 @@ public class ProductService {
                             return file.getOriginalFilename();
                         }
                     });
+                    log.debug("Attached File: {}, Size: {} bytes", file.getOriginalFilename(), file.getSize());
                 }
             }
 
             // HTTP 헤더 설정
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+            log.debug("Request Headers: {}", headers);
 
             // HttpEntity 생성
             HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(body, headers);
+            log.debug("HttpEntity Body: {}", body);
 
             // User API Endpoint 설정
             String userApiEndpoint = userApiUrl + endpoint;
+            log.info("Sending request to User API: {}", userApiEndpoint);
 
-            // User API로 POST 요청을 보내고 응답 받기
+            // API 호출
             ResponseEntity<Long> response = restTemplate.exchange(userApiEndpoint, httpMethod, request, Long.class);
 
             // 요청 성공 여부 확인
@@ -311,6 +328,7 @@ public class ProductService {
             log.error("Error sending product to User API", e);
         }
     }
+
 
     // User API에 상품 정보를 전송하는 메서드(삭제)
     private void sendProductDelete(String endpoint, HttpMethod httpMethod) {
