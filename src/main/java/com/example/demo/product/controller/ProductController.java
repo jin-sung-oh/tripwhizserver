@@ -116,10 +116,6 @@ public class ProductController {
             @RequestPart(value = "imageFiles", required = false) List<MultipartFile> imageFiles
     ) throws IOException {
         log.info("Raw JSON received: {}", productListDTOJson);
-            @RequestPart(value = "imageFiles", required = false) List<MultipartFile> imageFiles
-    ) throws JsonProcessingException, IOException {
-        log.info("Start: 상품 생성 요청 수신");
-
         // JSON 문자열을 객체로 변환
         ObjectMapper objectMapper = new ObjectMapper();
         ProductListDTO productListDTO;

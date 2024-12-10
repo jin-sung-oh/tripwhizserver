@@ -11,7 +11,9 @@ import com.example.demo.product.domain.ThemeCategory;
 import com.example.demo.product.dto.ProductListDTO;
 import com.example.demo.product.dto.ProductReadDTO;
 import com.example.demo.product.repository.ProductRepository;
+import com.example.demo.product.repository.ProductThemeRepository;
 import com.example.demo.product.repository.ThemeCategoryRepository;
+import com.example.demo.product.repository.search.ProductSearch;
 import com.example.demo.util.CustomFileUtil;
 import com.example.demo.util.file.domain.AttachFile;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -48,8 +50,9 @@ public class ProductService {
     private final CustomFileUtil customFileUtil;
     private final RestTemplate restTemplate;
     private final ThemeCategoryRepository themeCategoryRepository;
-    private final ProductThemeRepository productThemeRepository;
-    private final ThemeCategoryRepository themeCategoryRepository;
+
+
+
 
 
     // application.yml 파일에서 User API URL을 불러와 변수에 저장
@@ -164,14 +167,14 @@ public class ProductService {
 
 
     // 상품 검색
-    public PageResponseDTO<ProductListDTO> searchWithFilters(
-            String keyword, Integer minPrice, Integer maxPrice,
-            Long tno, Long cno, Long scno, PageRequestDTO pageRequestDTO) {
-        log.info("상품 키워드 검색 및 필터링 실행 - keyword: {}, minPrice: {}, maxPrice: {}, tno: {}, cno: {}, scno: {}",
-                keyword, minPrice, maxPrice, tno, cno, scno);
-
-        return productRepository.searchWithKeywordAndFilters(keyword, minPrice, maxPrice, tno, cno, scno, pageRequestDTO);
-    }
+//    public PageResponseDTO<ProductListDTO> searchWithFilters(
+//            String keyword, Integer minPrice, Integer maxPrice,
+//            Long tno, Long cno, Long scno, PageRequestDTO pageRequestDTO) {
+//        log.info("상품 키워드 검색 및 필터링 실행 - keyword: {}, minPrice: {}, maxPrice: {}, tno: {}, cno: {}, scno: {}",
+//                keyword, minPrice, maxPrice, tno, cno, scno);
+//
+//        return productRepository.searchWithKeywordAndFilters(keyword, minPrice, maxPrice, tno, cno, scno, pageRequestDTO);
+//    }
 
 
     // 상품 생성
