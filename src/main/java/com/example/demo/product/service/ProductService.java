@@ -7,13 +7,13 @@ import com.example.demo.category.repository.SubCategoryRepository;
 import com.example.demo.common.dto.PageRequestDTO;
 import com.example.demo.common.dto.PageResponseDTO;
 import com.example.demo.product.domain.Product;
-import com.example.demo.product.domain.ProductTheme;
 import com.example.demo.product.domain.ThemeCategory;
 import com.example.demo.product.dto.ProductListDTO;
 import com.example.demo.product.dto.ProductReadDTO;
 import com.example.demo.product.repository.ProductRepository;
 import com.example.demo.product.repository.ProductThemeRepository;
 import com.example.demo.product.repository.ThemeCategoryRepository;
+import com.example.demo.product.repository.search.ProductSearch;
 import com.example.demo.util.CustomFileUtil;
 import com.example.demo.util.file.domain.AttachFile;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -22,6 +22,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,9 +36,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Log4j2
 @Service
@@ -49,7 +50,10 @@ public class ProductService {
     private final CustomFileUtil customFileUtil;
     private final RestTemplate restTemplate;
     private final ThemeCategoryRepository themeCategoryRepository;
-    private final ProductThemeRepository productThemeRepository;
+
+
+
+
 
     // application.yml 파일에서 User API URL을 불러와 변수에 저장
     @Value("${com.example.user.api.url}")
@@ -58,9 +62,14 @@ public class ProductService {
     @Value("${com.example.upload.productpath}")
     private String productPath;
 
+
     public List<ThemeCategory> getThemes() {
-        return themeCategoryRepository.findAll();
+        log.info("ThemeCategory 목록 조회 중...");
+        List<ThemeCategory> themes = themeCategoryRepository.findAll();
+        log.info("ThemeCategory 조회 완료: {}개 항목", themes.size());
+        return themes;
     }
+
     // 상품 ID로 단일 상품 조회
     public Optional<ProductReadDTO> getProductByIdNative(Long pno) {
         log.info("ID로 상품을 조회합니다 (Native Query): {}", pno);
@@ -104,99 +113,132 @@ public class ProductService {
     }
 
 
-    //상품 필터링
-    public PageResponseDTO<ProductListDTO> searchProducts(Long tno, Long cno, Long scno, PageRequestDTO pageRequestDTO) {
-        log.info("상품 목록을 조회합니다", tno, cno, scno);
+    public List<ProductListDTO> searchProducts(List<Long> tnos, Long cno, Long scno) {
+        log.info("상품 목록을 조회합니다. tnos: {}, cno: {}, scno: {}", tnos, cno, scno);
 
+        if (tnos != null && tnos.isEmpty()) {
+            tnos = null;
+        }
 
-        return productRepository.findByFiltering(tno, cno, scno, pageRequestDTO);
+        List<Map<String, Object>> queryResults = productRepository.findProductsWithThemesAndAttachments(tnos, cno, scno);
+
+        Map<Long, ProductListDTO> productMap = new HashMap<>();
+        for (Map<String, Object> row : queryResults) {
+            Long pno = ((Number) row.get("pno")).longValue();
+
+            ProductListDTO dto = productMap.computeIfAbsent(pno, k -> ProductListDTO.builder()
+                    .pno(pno)
+                    .pname((String) row.get("pname"))
+                    .pdesc((String) row.get("pdesc"))
+                    .price(((Number) row.get("price")).intValue())
+                    .cno(row.get("category_cno") != null ? ((Number) row.get("category_cno")).longValue() : null)
+                    .scno(row.get("sub_category_scno") != null ? ((Number) row.get("sub_category_scno")).longValue() : null)
+                    .tnos(new ArrayList<>())
+                    .attachFiles(new ArrayList<>())
+                    .build());
+
+            // `tnos` 추가
+            String tnosJson = (String) row.get("tnos");
+            if (tnosJson != null && !tnosJson.equals("[]")) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                try {
+                    List<Long> themeIds = objectMapper.readValue(tnosJson, new TypeReference<>() {});
+                    dto.getTnos().addAll(themeIds);
+                } catch (Exception e) {
+                    log.error("Tnos 변환 오류: ", e);
+                }
+            }
+
+            // `attachFiles` 추가
+            String attachFilesJson = (String) row.get("attachFiles");
+            if (attachFilesJson != null && !attachFilesJson.equals("[]")) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                try {
+                    List<AttachFile> attachFiles = objectMapper.readValue(attachFilesJson, new TypeReference<>() {});
+                    dto.getAttachFiles().addAll(attachFiles);
+                } catch (Exception e) {
+                    log.error("AttachFile 변환 오류: ", e);
+                }
+            }
+        }
+
+        return new ArrayList<>(productMap.values());
     }
+
 
     // 상품 검색
-    public PageResponseDTO<ProductListDTO> searchWithFilters(
-            String keyword, Integer minPrice, Integer maxPrice,
-            Long tno, Long cno, Long scno, PageRequestDTO pageRequestDTO) {
-        log.info("상품 키워드 검색 및 필터링 실행 - keyword: {}, minPrice: {}, maxPrice: {}, tno: {}, cno: {}, scno: {}",
-                keyword, minPrice, maxPrice, tno, cno, scno);
-
-        return productRepository.searchWithKeywordAndFilters(keyword, minPrice, maxPrice, tno, cno, scno, pageRequestDTO);
-    }
+//    public PageResponseDTO<ProductListDTO> searchWithFilters(
+//            String keyword, Integer minPrice, Integer maxPrice,
+//            Long tno, Long cno, Long scno, PageRequestDTO pageRequestDTO) {
+//        log.info("상품 키워드 검색 및 필터링 실행 - keyword: {}, minPrice: {}, maxPrice: {}, tno: {}, cno: {}, scno: {}",
+//                keyword, minPrice, maxPrice, tno, cno, scno);
+//
+//        return productRepository.searchWithKeywordAndFilters(keyword, minPrice, maxPrice, tno, cno, scno, pageRequestDTO);
+//    }
 
 
     // 상품 생성
     public Long createProduct(ProductListDTO productListDTO, List<MultipartFile> imageFiles) throws IOException {
-        log.info("Start: 상품 생성 요청 - 데이터: {}", productListDTO);
+        log.info("Start creating product with ProductListDTO: {}", productListDTO);
 
-        // Category와 SubCategory를 조회
-        log.info("카테고리 조회 - cno: {}", productListDTO.getCno());
+        // Validate cno and scno
+        if (productListDTO.getCno() == null) {
+            log.error("Category ID (cno) is null!");
+            throw new IllegalArgumentException("Category ID (cno) must not be null");
+        }
+        if (productListDTO.getScno() == null) {
+            log.error("SubCategory ID (scno) is null!");
+            throw new IllegalArgumentException("SubCategory ID (scno) must not be null");
+        }
+
+        // Fetch Category
+        log.debug("Fetching Category with ID: {}", productListDTO.getCno());
         Category category = categoryRepository.findById(productListDTO.getCno())
-                .orElseThrow(() -> {
-                    log.error("Category not found with ID: {}", productListDTO.getCno());
-                    return new RuntimeException("Category not found with ID: " + productListDTO.getCno());
-                });
+                .orElseThrow(() -> new RuntimeException("Category not found with ID: " + productListDTO.getCno()));
 
-        log.info("서브 카테고리 조회 - scno: {}", productListDTO.getScno());
+        // Fetch SubCategory
+        log.debug("Fetching SubCategory with ID: {}", productListDTO.getScno());
         SubCategory subCategory = subCategoryRepository.findById(productListDTO.getScno())
-                .orElseThrow(() -> {
-                    log.error("SubCategory not found with ID: {}", productListDTO.getScno());
-                    return new RuntimeException("SubCategory not found with ID: " + productListDTO.getScno());
-                });
+                .orElseThrow(() -> new RuntimeException("SubCategory not found with ID: " + productListDTO.getScno()));
 
         // toEntity 호출 시 Category와 SubCategory 전달
-        log.debug("Product 엔티티 생성 시작");
         Product product = productListDTO.toEntity(category, subCategory);
-        log.debug("Product 엔티티 생성 완료 - 데이터: {}", product);
 
-        // 이미지 파일 처리
-        if (imageFiles != null && !imageFiles.isEmpty()) {
-            log.info("이미지 파일 처리 시작 - 파일 개수: {}", imageFiles.size());
-            for (int i = 0; i < imageFiles.size(); i++) {
-                MultipartFile imageFile = imageFiles.get(i);
-                String savedImageName = customFileUtil.uploadProductImageFile(imageFile);
-                AttachFile attachFile = new AttachFile(i + 1, savedImageName);
-                product.addAttachFile(attachFile);
-                log.debug("첨부 파일 추가 - 파일명: {}, ord: {}", savedImageName, attachFile.getOrd());
-            }
-            log.info("이미지 파일 처리 완료");
+        for (int i = 0; i < imageFiles.size(); i++) {
+            MultipartFile imageFile = imageFiles.get(i);
+            String savedImageName = customFileUtil.uploadProductImageFile(imageFile);
+
+            // AttachFile 생성 (ord는 i + 1로 설정)
+            AttachFile attachFile = new AttachFile(i + 1, savedImageName);
+            product.addAttachFile(attachFile);
         }
 
-        // 상품 저장
-        log.info("Product 저장 시작");
         Product savedProduct = productRepository.save(product);
-        log.info("Product 저장 완료 - pno: {}", savedProduct.getPno());
 
-        // 테마 카테고리 연결
-        log.info("테마 카테고리 연결 시작 - tnos: {}", productListDTO.getTnos());
-        List<ThemeCategory> themeCategories = themeCategoryRepository.findAllById(productListDTO.getTnos());
-        for (ThemeCategory themeCategory : themeCategories) {
-            ProductTheme productTheme = ProductTheme.builder()
-                    .product(savedProduct)
-                    .themeCategory(themeCategory)
-                    .build();
-            productThemeRepository.save(productTheme);
-            log.debug("ProductTheme 저장 완료 - themeCategory: {}", themeCategory.getTno());
-        }
-        log.info("테마 카테고리 연결 완료");
+        // 생성된 상품 정보를 User API로 전송
+        sendProductToUserApi(productListDTO, imageFiles, "/api/product/add", HttpMethod.POST);
 
-        // User API 호출
-        log.info("User API 전송 시작");
-        sendProductToUserApi(productListDTO, imageFiles, "/api/product/add", HttpMethod.POST, null);
-        log.info("User API 전송 완료");
-
-        log.info("End: 상품 생성 완료 - pno: {}", savedProduct.getPno());
+        log.info("Product created with ID: {}", savedProduct.getPno());
         return savedProduct.getPno();
     }
 
     public Long updateProduct(Long pno, ProductListDTO productListDTO, List<MultipartFile> imageFiles) throws IOException {
+        if (pno == null || pno <= 0) {
+            throw new IllegalArgumentException("Product ID (pno) must be a valid non-null value");
+        }
+
+        // Product 조회
         Product product = productRepository.findById(pno)
                 .orElseThrow(() -> new RuntimeException("Product not found with ID: " + pno));
+        log.info("Fetched product: {}", product);
 
+        // Category와 SubCategory를 조회
         Category category = categoryRepository.findById(productListDTO.getCno())
                 .orElseThrow(() -> new RuntimeException("Category not found with ID: " + productListDTO.getCno()));
-
         SubCategory subCategory = subCategoryRepository.findById(productListDTO.getScno())
                 .orElseThrow(() -> new RuntimeException("SubCategory not found with ID: " + productListDTO.getScno()));
 
+        // updateFromDTO 호출
         product.updateFromDTO(productListDTO, category, subCategory);
 
         // 기존 AttachFile 삭제
@@ -212,15 +254,14 @@ public class ProductService {
             product.addAttachFile(attachFile);
         }
 
+        // 상품 정보 업데이트
         Product updatedProduct = productRepository.save(product);
 
-        // User API로 상품 업데이트 요청 전송
-        sendProductToUserApi(productListDTO, imageFiles, "/api/product/update/" + pno, HttpMethod.PUT, null);
-        log.info("User API request sent for updating product - PNO: {}", updatedProduct.getPno());
+        // 업데이트된 상품 정보를 User API로 전송 (필요에 따라 추가)
+        sendProductToUserApi(productListDTO, imageFiles, "/api/product/update/" + pno, HttpMethod.PUT);
 
         return updatedProduct.getPno();
     }
-
 
     // 상품 삭제
     public void deleteProduct(Long pno) {
@@ -241,25 +282,17 @@ public class ProductService {
 
     }
 
-    private void sendProductToUserApi(ProductListDTO productListDTO, List<MultipartFile> imageFiles, String endpoint, HttpMethod httpMethod, ThemeCategory themeCategory) {
+    // User API에 상품 정보를 전송하는 메서드
+    private void sendProductToUserApi(ProductListDTO productListDTO, List<MultipartFile> imageFiles, String endpoint, HttpMethod httpMethod) {
         try {
-            log.info("Starting User API Request");
-            log.debug("Endpoint: {}", endpoint);
-            log.debug("HTTP Method: {}", httpMethod);
-
             // MultiValueMap으로 요청 데이터 구성
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
             ObjectMapper objectMapper = new ObjectMapper();
             String jsonProduct = objectMapper.writeValueAsString(productListDTO);
             body.add("productListDTO", jsonProduct);
-            log.debug("Serialized ProductListDTO: {}", jsonProduct);
 
-            if (themeCategory != null) {
-                body.add("themeCategoryId", themeCategory.getTno());
-                log.debug("ThemeCategoryId: {}", themeCategory.getTno());
-            }
-
-            if (imageFiles != null && !imageFiles.isEmpty()) {
+            // 파일 데이터를 추가
+            if (imageFiles != null) {
                 for (MultipartFile file : imageFiles) {
                     body.add("imageFiles", new ByteArrayResource(file.getBytes()) {
                         @Override
@@ -287,13 +320,15 @@ public class ProductService {
             // API 호출
             ResponseEntity<Long> response = restTemplate.exchange(userApiEndpoint, httpMethod, request, Long.class);
 
-            log.info("User API Response: Status - {}, Body - {}", response.getStatusCode(), response.getBody());
-        } catch (HttpClientErrorException | HttpServerErrorException e) {
-            log.error("User API returned error: Status - {}, Body - {}", e.getStatusCode(), e.getResponseBodyAsString());
-            throw new RuntimeException("User API 전송 중 오류 발생", e);
+            // 요청 성공 여부 확인
+            if (response.getStatusCode().is2xxSuccessful()) {
+                log.info("Product successfully sent to User API, ID: {}", response.getBody());
+            } else {
+                log.error("Failed to send product to User API: {}", response.getStatusCode());
+            }
         } catch (Exception e) {
-            log.error("Unexpected error during User API request", e);
-            throw new RuntimeException("User API 전송 중 예기치 않은 오류 발생", e);
+            // 예외 발생 시 오류 로그 출력
+            log.error("Error sending product to User API", e);
         }
     }
 
@@ -305,12 +340,22 @@ public class ProductService {
             HttpHeaders headers = new HttpHeaders();
             headers.set("Content-Type", "application/json");
 
-            HttpEntity<Void> request = new HttpEntity<>(headers);
-            String userApiEndpoint = userApiUrl + endpoint;
+            // HttpEntity 생성 (DELETE 요청이므로 본문은 비워둠)
+            HttpEntity<Void> request = new HttpEntity<>(headers); // Empty body for DELETE request
+            String userApiEndpoint = userApiUrl + endpoint;  // User API의 상품 삭제 엔드포인트
 
-            restTemplate.exchange(userApiEndpoint, httpMethod, request, Void.class);
+            // User API로 요청을 보내고 응답을 받음
+            ResponseEntity<Void> response = restTemplate.exchange(userApiEndpoint, httpMethod, request, Void.class);
+
+            // 요청이 성공했는지 여부를 확인하여 로그 출력
+            if (response.getStatusCode().is2xxSuccessful()) {
+                log.info("Product soft-deleted successfully in User API.");
+            } else {
+                log.error("Failed to send product delete request to User API: {}", response.getStatusCode());
+            }
         } catch (Exception e) {
-            throw new RuntimeException("User API 삭제 요청 중 오류 발생", e);
+            // 예외 발생 시 오류 로그 출력
+            log.error("Error sending product delete request to User API", e);
         }
     }
 
