@@ -12,7 +12,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -25,22 +24,39 @@ public class AdminController {
 
     // 어드민 회원가입
     @PostMapping("/register")
-    public ResponseEntity<Admin> register(@RequestBody Admin admin) {
+    public ResponseEntity<?> register(@RequestBody Admin admin) {
         if (admin.getId() == null || admin.getPw() == null || admin.getRole() == null) {
-            log.info("Register endpoint hit");
-            log.info("Admin registration payload: {}", admin);
-            return ResponseEntity.badRequest().body(null);
+            log.warn("Admin registration failed: Missing required fields");
+            return ResponseEntity.badRequest().body("필수 값이 누락되었습니다.");
         }
-        Admin savedAdmin = adminService.save(admin); // save에서 비밀번호 암호화 처리
-        return ResponseEntity.ok(savedAdmin);
+
+        try {
+            Admin savedAdmin = adminService.save(admin);
+            log.info("Admin registered successfully: {}", savedAdmin.getId());
+            return ResponseEntity.ok(savedAdmin);
+        } catch (RuntimeException e) {
+            log.error("Admin registration failed: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("ID가 이미 존재합니다.");
+        }
     }
 
     // 점주 계정 생성
     @PostMapping("/createStoreOwner")
-    @PreAuthorize("hasRole('ADMIN')")  // ADMIN 권한만 접근 허용
-    public ResponseEntity<StoreOwner> createStoreOwner(@RequestBody StoreOwner storeOwner) {
-        StoreOwner savedStoreOwner = storeOwnerService.save(storeOwner);
-        return ResponseEntity.ok(savedStoreOwner);
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> createStoreOwner(@RequestBody StoreOwner storeOwner) {
+        if (storeOwner.getId() == null || storeOwner.getPw() == null || storeOwner.getRole() == null) {
+            log.warn("StoreOwner creation failed: Missing required fields");
+            return ResponseEntity.badRequest().body("필수 값이 누락되었습니다.");
+        }
+
+        try {
+            StoreOwner savedStoreOwner = storeOwnerService.save(storeOwner);
+            log.info("StoreOwner created successfully: {}", savedStoreOwner.getId());
+            return ResponseEntity.ok(savedStoreOwner);
+        } catch (RuntimeException e) {
+            log.error("StoreOwner creation failed: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("ID가 이미 존재합니다.");
+        }
     }
 
     // 점주 목록 조회
@@ -48,22 +64,24 @@ public class AdminController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<StoreOwner>> getStoreOwners() {
         List<StoreOwner> storeOwners = storeOwnerService.findAll();
+        log.info("Fetched store owner list: {}", storeOwners.size());
         return ResponseEntity.ok(storeOwners);
     }
 
+    // 점주 삭제
     @DeleteMapping("/storeOwner/{sno}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> deleteStoreOwnerFromList(@PathVariable Long sno) {
-        log.info("Deleting store owner with sno: {}", sno);
+    public ResponseEntity<?> deleteStoreOwner(@PathVariable Long sno) {
+        log.info("Attempting to delete store owner with sno: {}", sno);
+
         try {
             boolean isDeleted = storeOwnerService.delete(sno);
             if (isDeleted) {
-                log.info("Store owner deleted successfully. sno: {}", sno);
+                log.info("Store owner deleted successfully: {}", sno);
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
             } else {
-                log.warn("Store owner not found. sno: {}", sno);
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("점주를 찾을 수 없습니다.");
+                log.warn("Store owner not found: {}", sno);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("점주를 찾을 수 없습니다.");
             }
         } catch (Exception e) {
             log.error("Error occurred while deleting store owner: {}", e.getMessage());
@@ -72,4 +90,3 @@ public class AdminController {
         }
     }
 }
-

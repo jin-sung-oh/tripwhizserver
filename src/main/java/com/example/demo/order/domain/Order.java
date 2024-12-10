@@ -52,12 +52,11 @@ public class Order {
     @Column(nullable = false)
     private boolean delFlag = false;
 
-    // QR 코드 파일명 필드
-    @Column(nullable = true)
-    private String qrCodePath;
-
     @Column(nullable = true)
     private LocalDateTime statusChangeTime;
+
+    @Column(nullable = true)
+    private String userFcmToken; // 유저 FCM 토큰 저장
 
     public void changeStatus(OrderStatus newStatus) {
         validateStatusChange(newStatus);
@@ -65,7 +64,7 @@ public class Order {
         this.statusChangeTime = LocalDateTime.now();
     }
 
-    public void validateStatusChange(OrderStatus newStatus) {
+    private void validateStatusChange(OrderStatus newStatus) {
         if (this.status == OrderStatus.CANCELLED) {
             throw new IllegalStateException("Cancelled orders cannot be modified.");
         }
@@ -74,3 +73,4 @@ public class Order {
         }
     }
 }
+

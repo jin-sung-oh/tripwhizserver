@@ -2,6 +2,7 @@ package com.example.demo.product.controller;
 
 import com.example.demo.common.dto.PageRequestDTO;
 import com.example.demo.common.dto.PageResponseDTO;
+import com.example.demo.product.domain.ThemeCategory;
 import com.example.demo.product.dto.ProductListDTO;
 import com.example.demo.product.dto.ProductReadDTO;
 import com.example.demo.product.service.ProductService;
@@ -25,8 +26,8 @@ import java.util.Optional;
 
 @Log4j2
 @RestController
-@RequestMapping("/api/admin/product")
 @RequiredArgsConstructor
+@RequestMapping("/api/admin/product")
 public class ProductController {
 
     private final ProductService productService;
@@ -68,7 +69,23 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
+    // 상품 검색
+    @GetMapping("/list/search")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<PageResponseDTO<ProductListDTO>> searchWithFilters(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Integer minPrice,
+            @RequestParam(required = false) Integer maxPrice,
+            @RequestParam(required = false) Long tno,
+            @RequestParam(required = false) Long cno,
+            @RequestParam(required = false) Long scno,
+            PageRequestDTO pageRequestDTO) {
+        log.info("상품 키워드 검색 요청 - keyword: {}, minPrice: {}, maxPrice: {}, tno: {}, cno: {}, scno: {}",
+                keyword, minPrice, maxPrice, tno, cno, scno);
 
+        PageResponseDTO<ProductListDTO> result = productService.searchWithFilters(keyword, minPrice, maxPrice, tno, cno, scno, pageRequestDTO);
+        return ResponseEntity.ok(result);
+    }
 
     // 특정 상품 ID로 조회 (Native Query 사용)
     @GetMapping("/read/native/{pno}")
@@ -87,18 +104,48 @@ public class ProductController {
         }
     }
 
-    // 상품 생성
     @PostMapping("/add")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Long> createProduct(
             @RequestPart("productListDTO") String productListDTOJson,
             @RequestPart(value = "imageFiles", required = false) List<MultipartFile> imageFiles
     ) throws JsonProcessingException, IOException {
+        log.info("Start: 상품 생성 요청 수신");
+
         ObjectMapper objectMapper = new ObjectMapper();
-        ProductListDTO productListDTO = objectMapper.readValue(productListDTOJson, ProductListDTO.class);
-        Long createdProductPno = productService.createProduct(productListDTO, imageFiles);
+        ProductListDTO productListDTO;
+
+        try {
+            log.info("productListDTO JSON 변환 시작");
+            productListDTO = objectMapper.readValue(productListDTOJson, ProductListDTO.class);
+            log.debug("productListDTO 변환 성공: {}", productListDTO);
+        } catch (JsonProcessingException e) {
+            log.error("JSON 변환 오류 - 입력 데이터: {}", productListDTOJson, e);
+            throw e;
+        }
+
+        Long createdProductPno;
+
+        try {
+            log.info("ProductService.createProduct 호출 시작");
+            createdProductPno = productService.createProduct(productListDTO, imageFiles);
+            log.info("Product 생성 성공 - pno: {}", createdProductPno);
+        } catch (IOException e) {
+            log.error("Product 생성 중 파일 처리 오류", e);
+            throw e;
+        } catch (Exception e) {
+            log.error("Product 생성 중 예기치 않은 오류 발생", e);
+            throw e;
+        }
+
+        log.info("Received Product Add Request");
+        log.info("ProductListDTO JSON: {}", productListDTOJson);
+
+        log.info("End: 상품 생성 요청 처리 완료 - pno: {}", createdProductPno);
         return ResponseEntity.ok(createdProductPno);
+
     }
+
 
     @PutMapping("/update/{pno}/{themeCategoryId}")
     @PreAuthorize("hasRole('ADMIN')")
@@ -122,6 +169,15 @@ public class ProductController {
         productService.deleteProduct(pno);
         return ResponseEntity.ok().build();
 
+    }
+
+    @GetMapping("/themes")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<ThemeCategory>> getThemes() {
+        log.info("테마 목록 조회 요청 수신");
+        List<ThemeCategory> themes = productService.getThemes();
+        log.info("테마 목록 조회 성공 - 개수: {}", themes.size());
+        return ResponseEntity.ok(themes);
     }
 
 }

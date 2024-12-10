@@ -3,10 +3,11 @@ package com.example.demo.manager.controller;
 import com.example.demo.manager.entity.StoreOwner;
 import com.example.demo.manager.service.StoreOwnerService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
+@Log4j2
 @RestController
 @RequestMapping("/api/admin/manager")
 @RequiredArgsConstructor

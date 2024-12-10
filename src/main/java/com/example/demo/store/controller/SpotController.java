@@ -1,6 +1,6 @@
 package com.example.demo.store.controller;
 
-import com.example.demo.store.dto.SpotDTO.SpotDTO;
+import com.example.demo.store.dto.SpotDTO;
 import com.example.demo.store.service.SpotService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -12,14 +12,14 @@ import java.util.List;
 
 @Log4j2
 @RestController
-@RequestMapping("/api/spot")
+@RequestMapping("/api/admin/spot")
 @RequiredArgsConstructor
 public class SpotController {
 
     private final SpotService spotService;
 
     // 특정 Spot 조회
-    @GetMapping("/{spno}")
+    @GetMapping("/read/{spno}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SpotDTO> read(@PathVariable Long spno) {
         log.info("----- Spot Read Request -----");
@@ -48,9 +48,22 @@ public class SpotController {
         return ResponseEntity.ok(spotList);
     }
 
+    // 사용자 서버 요청 시 Spot 리스트 반환하는 메서드
+    @GetMapping("/user/list")
+    public ResponseEntity<List<SpotDTO>> forUserList() {
+        log.info("----- Spot List Request -----");
+
+        List<SpotDTO> spotList = spotService.list();
+
+        log.info("Successfully retrieved Spot List");
+        log.info("Spot List: {}", spotList);
+        log.info("----- End of Spot List Request -----");
+
+        return ResponseEntity.ok(spotList);
+    }
+
     // Spot 추가
     @PostMapping("/add")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SpotDTO> add(@RequestBody SpotDTO spotDTO) {
         log.info("----- Spot Addition Request -----");
         log.info("Received SpotDTO: {}", spotDTO);

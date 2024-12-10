@@ -44,6 +44,11 @@ com:
       api:
         url: http://localhost:8081
 
+google:
+  maps:
+    api:
+      key: "AIzaSyCAEphgIbIzt3ECeOlAkuKSLpoDs1DZRVY"
+
 firebase:
   config:
     file: /app/firebase/firebase-config.json # Firebase JSON 파일의 위치
@@ -52,6 +57,9 @@ logging:
   level:
     org.springframework.security.web: TRACE
     com.example.demo: TRACE
+    org.springframework.security: DEBUG
+    org.springframework.web.filter: TRACE
+
 
   spring:
   mvc:
