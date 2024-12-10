@@ -13,9 +13,11 @@ import java.util.Optional;
 public interface CartRepository extends JpaRepository<Cart, Long> {
 
     // 멤버별 장바구니 리스트 조회
-    @Query("SELECT new com.example.demo.cart.dto.CartListDTO(c.member.email, c.bno, c.product.pno, c.qty, c.delFlag) " +
+    @Query("SELECT new com.example.demo.cart.dto.CartListDTO(m.email, c.bno, p.pno, p.pname, p.price, c.qty, c.delFlag) " +
             "FROM Cart c " +
-            "WHERE c.member.email = :email AND c.delFlag = false")
+            "JOIN c.member m " +
+            "JOIN c.product p " +
+            "WHERE m.email = :email AND c.delFlag = false")
     List<CartListDTO> findCartItemsByMemberEmail(@Param("email") String email);
 
     // 특정 제품이 장바구니에 있는지 확인 (회원 고려 X)

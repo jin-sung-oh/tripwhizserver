@@ -9,6 +9,11 @@ public interface ProductSearch {
 
     //상품 필터링으로 목록 조회
     PageResponseDTO<ProductListDTO> findByFiltering(Long tno, Long cno, Long scno, PageRequestDTO pageRequestDTO);
+
+    PageResponseDTO<ProductListDTO> searchWithKeywordAndFilters(
+            String keyword, Integer minPrice, Integer maxPrice,
+            Long tno, Long cno, Long scno, PageRequestDTO pageRequestDTO);
+
 }
 
 

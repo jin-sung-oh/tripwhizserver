@@ -1,6 +1,5 @@
 package com.example.demo.order.domain;
 
-import com.example.demo.product.domain.Product;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -10,6 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@Setter
 @ToString
 public class OrderDetails {
 
@@ -19,12 +19,20 @@ public class OrderDetails {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ono", nullable = false)
-    private Order order;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "pno", nullable = false)
-    private Product product;
+    private Order order; // Order와 다대일 관계
 
     @Column(nullable = false)
-    private int amount;
+    private Long pno;     // 상품 번호
+
+    @Column(nullable = false)
+    private String pname;  // 상품명
+
+    @Column(nullable = false)
+    private int price;           // 상품 가격
+
+    @Column(nullable = false)
+    private int amount;          // 상품 수량
+
+    @Column(nullable = true)
+    private String qrCodePath; // QR 코드 파일명 (주문 항목별로 저장)
 }
