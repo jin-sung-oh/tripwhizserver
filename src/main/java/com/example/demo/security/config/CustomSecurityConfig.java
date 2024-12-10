@@ -50,12 +50,13 @@ public class CustomSecurityConfig {
                                 "/api/stock/**",
                                 "/api/storeowner/luggagemove/create",
                                 "/api/storeowner/luggagestorage/create",
-                                "/api/member/**",
+                                "/api/admin/member/save",
                                 "/api/cart/**",
                                 "/error"
                         ).permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("api/admin/spot/**").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/member/list").hasRole("ADMIN")
                         .requestMatchers("/api/storeowner/**").hasRole("STOREOWNER")
                         .requestMatchers("/api/storeowner/luggagemove/**").hasRole("STOREOWNER")
                         .requestMatchers("/api/storeowner/luggagestorage/**").hasRole("STOREOWNER")
