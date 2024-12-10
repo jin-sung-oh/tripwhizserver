@@ -22,7 +22,6 @@ public class ThemeCategory {
 
     private boolean delFlag;
 
-
     // 삭제 상태 변경 메서드
     public void changeDelFlag(boolean newDelFlag) {
         this.delFlag = newDelFlag;
