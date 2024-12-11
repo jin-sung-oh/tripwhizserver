@@ -56,7 +56,8 @@ public class CustomSecurityConfig {
                                 "/api/storeowner/order/receive",
                                 "/api/cart/**",
                                 "/error",
-                                "/api/scraping/spots" // 지점 스크래핑 경로
+                                "/api/scraping/spots", // 지점 스크래핑 경로
+                                "/"
                         ).permitAll()
                         .requestMatchers("/api/admin/spot/**").hasRole("ADMIN")
                         .requestMatchers("/api/admin/product/image/**").permitAll()
@@ -66,7 +67,9 @@ public class CustomSecurityConfig {
                         .requestMatchers("/api/storeowner/**").hasRole("STOREOWNER")
                         .requestMatchers("/api/storeowner/luggagemove/**").hasRole("STOREOWNER")
                         .requestMatchers("/api/storeowner/luggagestorage/**").hasRole("STOREOWNER")
+
                         .anyRequest().authenticated()
+
                 )
                 .anonymous(anonymous -> anonymous
                         .authorities("ROLE_ANONYMOUS")
