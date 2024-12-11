@@ -256,6 +256,8 @@ public class ProductService {
 
         // 상품 정보 업데이트
         Product updatedProduct = productRepository.save(product);
+        log.info("Starting updateProduct with pno: {}", pno);
+
 
         // 업데이트된 상품 정보를 User API로 전송 (필요에 따라 추가)
         sendProductToUserApi(productListDTO, imageFiles, "/api/product/update/" + pno, HttpMethod.PUT);

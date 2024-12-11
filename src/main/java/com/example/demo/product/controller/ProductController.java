@@ -73,22 +73,22 @@ public class ProductController {
     }
 
     // 상품 검색
-    @GetMapping("/list/search")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<PageResponseDTO<ProductListDTO>> searchWithFilters(
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) Integer minPrice,
-            @RequestParam(required = false) Integer maxPrice,
-            @RequestParam(required = false) Long tno,
-            @RequestParam(required = false) Long cno,
-            @RequestParam(required = false) Long scno,
-            PageRequestDTO pageRequestDTO) {
-        log.info("상품 키워드 검색 요청 - keyword: {}, minPrice: {}, maxPrice: {}, tno: {}, cno: {}, scno: {}",
-                keyword, minPrice, maxPrice, tno, cno, scno);
-
-        PageResponseDTO<ProductListDTO> result = productService.searchWithFilters(keyword, minPrice, maxPrice, tno, cno, scno, pageRequestDTO);
-        return ResponseEntity.ok(result);
-    }
+//    @GetMapping("/list/search")
+//    @PreAuthorize("hasRole('ADMIN')")
+//    public ResponseEntity<PageResponseDTO<ProductListDTO>> searchWithFilters(
+//            @RequestParam(required = false) String keyword,
+//            @RequestParam(required = false) Integer minPrice,
+//            @RequestParam(required = false) Integer maxPrice,
+//            @RequestParam(required = false) Long tno,
+//            @RequestParam(required = false) Long cno,
+//            @RequestParam(required = false) Long scno,
+//            PageRequestDTO pageRequestDTO) {
+//        log.info("상품 키워드 검색 요청 - keyword: {}, minPrice: {}, maxPrice: {}, tno: {}, cno: {}, scno: {}",
+//                keyword, minPrice, maxPrice, tno, cno, scno);
+//
+//        PageResponseDTO<ProductListDTO> result = productService.searchWithFilters(keyword, minPrice, maxPrice, tno, cno, scno, pageRequestDTO);
+//        return ResponseEntity.ok(result);
+//    }
 
 
     // 특정 상품 ID로 조회 (Native Query 사용)
@@ -138,25 +138,43 @@ public class ProductController {
 
 
     // 상품 수정
-    @PutMapping("/update/{pno}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Long> updateProduct(
+    @PutMapping("/admin/product/update/{pno}")
+    public ResponseEntity<?> updateProduct(
             @PathVariable Long pno,
             @RequestPart("productListDTO") String productListDTOJson,
-            @RequestPart(value = "imageFiles", required = false) List<MultipartFile> imageFiles) throws JsonProcessingException, IOException {
+            @RequestPart(value = "imageFiles", required = false) List<MultipartFile> imageFiles
+    ) {
+        log.info("===== START updateProduct =====");
+        log.info("Received pno from URL: {}", pno);
+        log.info("Received productListDTOJson: {}", productListDTOJson);
+        log.info("Received imageFiles count: {}", imageFiles != null ? imageFiles.size() : 0);
 
-        log.info("Received pno: {}", pno);  // pno 로깅 추가
+        try {
+            // DTO 파싱
+            ObjectMapper objectMapper = new ObjectMapper();
+            ProductListDTO productListDTO = objectMapper.readValue(productListDTOJson, ProductListDTO.class);
 
-        // JSON 문자열을 객체로 변환
-        ObjectMapper objectMapper = new ObjectMapper();
-        ProductListDTO productListDTO = objectMapper.readValue(productListDTOJson, ProductListDTO.class);
+            // pno 확인
+            log.info("Parsed DTO pno: {}", productListDTO.getPno());
 
-        // 상품 업데이트
-        Long updatedProductPno = productService.updateProduct(pno, productListDTO, imageFiles);
+            // URL의 pno를 JSON DTO에 추가 (JSON에서 누락된 경우 보완)
+            if (productListDTO.getPno() == null) {
+                productListDTO.setPno(pno);
+            }
 
-        // 수정된 상품 ID 반환
-        return ResponseEntity.ok(updatedProductPno);
+            log.info("Final DTO after validation: {}", productListDTO);
+
+            // 서비스 호출
+            productService.updateProduct(pno, productListDTO, imageFiles);
+
+            log.info("===== END updateProduct SUCCESS =====");
+            return ResponseEntity.ok("Product updated successfully");
+        } catch (Exception e) {
+            log.error("===== END updateProduct FAILURE =====", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
     }
+
 
 
 
