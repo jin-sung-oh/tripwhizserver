@@ -37,7 +37,7 @@ public class SpotManagementRepositoryTest {
             Spot spot = new Spot();
             spot.setSpotname("Spot " + i); // 지점 이름
             spot.setAddress("Address " + i); // 지점 주소
-            spot.setTel("123-456-789" + i); // 전화번호
+//            spot.setTel("123-456-789" + i); // 전화번호
             spot.setDelFlag(false); // 삭제 여부
 
             // 무작위 StoreOwner 선택
