@@ -46,7 +46,8 @@ public class CustomSecurityConfig {
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/api/admin/register",
-                                "api/admin/spot/user/list", // 지점 조회 경로(유저)
+                                "/api/admin/spot/user/list", // 지점 조회 경로(유저)
+                                "/api/admin/product/image",
                                 "/api/nationality/**",
                                 "/api/stock/**",
                                 "/api/storeowner/luggagemove/create",
@@ -58,9 +59,10 @@ public class CustomSecurityConfig {
                                 "/api/scraping/spots", // 지점 스크래핑 경로
                                 "/"
                         ).permitAll()
+                        .requestMatchers("/api/admin/spot/**").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/product/image/**").permitAll()
+                        .requestMatchers("/api/admin/product/**").hasRole("ADMIN")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("api/admin/spot/**").hasRole("ADMIN")
-                        .requestMatchers("api/admin/product/**").hasRole("ADMIN")
                         .requestMatchers("/api/admin/member/list").hasRole("ADMIN")
                         .requestMatchers("/api/storeowner/**").hasRole("STOREOWNER")
                         .requestMatchers("/api/storeowner/luggagemove/**").hasRole("STOREOWNER")
