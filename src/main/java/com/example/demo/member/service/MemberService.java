@@ -25,6 +25,7 @@ public class MemberService {
                     .email(memberDTO.getEmail())
                     .name(memberDTO.getName())
                     .pw(memberDTO.getPw())
+                    .provider(memberDTO.getProvider())
                     .delFlag(false)
                     .build();
 
@@ -40,7 +41,8 @@ public class MemberService {
     public List<MemberDTO> getMemberList() {
         List<Member> members = memberRepository.findAll();
         return members.stream()
-                .map(member -> new MemberDTO(member.getEmail(), member.getPw(), member.getName()))
+                .map(member -> new MemberDTO(member.getEmail(), member.getPw(), member.getName(), member.getProvider()))
                 .collect(Collectors.toList());
     }
 }
+

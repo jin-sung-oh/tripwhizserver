@@ -1,3 +1,4 @@
+
 //package com.example.demo.store;
 //
 //import com.example.demo.manager.entity.StoreOwner;
@@ -50,3 +51,4 @@
 //        System.out.println("100개의 Spot 데이터가 무작위 StoreOwner와 연결되어 저장되었습니다.");
 //    }
 //}
+
