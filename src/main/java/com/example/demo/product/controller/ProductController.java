@@ -72,7 +72,7 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
-    // 상품 검색
+//    // 상품 검색
 //    @GetMapping("/list/search")
 //    @PreAuthorize("hasRole('ADMIN')")
 //    public ResponseEntity<PageResponseDTO<ProductListDTO>> searchWithFilters(
