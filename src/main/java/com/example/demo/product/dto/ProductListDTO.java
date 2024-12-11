@@ -52,27 +52,27 @@ public class ProductListDTO {
     private List<Long> tnos = new ArrayList<>();
     private List<AttachFile> attachFiles; // 첨부 파일
 
-//    // JSON 필드에서 category 객체를 cno로 매핑
-//    @JsonProperty("category")
-//    public void setCategoryFromJson(Object category) {
-//        if (category instanceof java.util.Map) {
-//            Object cnoValue = ((java.util.Map<?, ?>) category).get("cno");
-//            if (cnoValue instanceof Number) {
-//                this.cno = ((Number) cnoValue).longValue();
-//            }
-//        }
-//    }
-//
-//    // JSON 필드에서 subCategory 객체를 scno로 매핑
-//    @JsonProperty("subCategory")
-//    public void setSubCategoryFromJson(Object subCategory) {
-//        if (subCategory instanceof java.util.Map) {
-//            Object scnoValue = ((java.util.Map<?, ?>) subCategory).get("scno");
-//            if (scnoValue instanceof Number) {
-//                this.scno = ((Number) scnoValue).longValue();
-//            }
-//        }
-//    }
+    // JSON 필드에서 category 객체를 cno로 매핑
+    @JsonProperty("category")
+    public void setCategoryFromJson(Object category) {
+        if (category instanceof java.util.Map) {
+            Object cnoValue = ((java.util.Map<?, ?>) category).get("cno");
+            if (cnoValue instanceof Number) {
+                this.cno = ((Number) cnoValue).longValue();
+            }
+        }
+    }
+
+    // JSON 필드에서 subCategory 객체를 scno로 매핑
+    @JsonProperty("subCategory")
+    public void setSubCategoryFromJson(Object subCategory) {
+        if (subCategory instanceof java.util.Map) {
+            Object scnoValue = ((java.util.Map<?, ?>) subCategory).get("scno");
+            if (scnoValue instanceof Number) {
+                this.scno = ((Number) scnoValue).longValue();
+            }
+        }
+    }
 
     // 엔티티 변환 메서드
     public Product toEntity(Category category, SubCategory subCategory) {

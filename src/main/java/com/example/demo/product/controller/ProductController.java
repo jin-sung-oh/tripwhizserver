@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,7 +41,11 @@ public class ProductController {
 
     // 이미지 조회
     @GetMapping("/image/{fileName}")
+
+   
+
     //@PreAuthorize("isAnonymous()")
+
     public ResponseEntity<byte[]> getImage(@PathVariable String fileName) throws IOException {
         String imagePath = uploadPath + File.separator + productPath + File.separator + fileName;
 
@@ -72,7 +77,7 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
-//    // 상품 검색
+    // 상품 검색
 //    @GetMapping("/list/search")
 //    @PreAuthorize("hasRole('ADMIN')")
 //    public ResponseEntity<PageResponseDTO<ProductListDTO>> searchWithFilters(
@@ -137,26 +142,51 @@ public class ProductController {
 
 
 
-    // 상품 수정
     @PutMapping("/update/{pno}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Long> updateProduct(
             @PathVariable Long pno,
             @RequestPart("productListDTO") String productListDTOJson,
-            @RequestPart(value = "imageFiles", required = false) List<MultipartFile> imageFiles) throws JsonProcessingException, IOException {
+            @RequestPart(value = "imageFiles", required = false) List<MultipartFile> imageFiles) throws IOException {
 
-        log.info("Received pno: {}", pno);  // pno 로깅 추가
+        log.info("Received pno: {}", pno);
+
+        // pno 검증
+        if (pno == null || pno <= 0) {
+            log.error("Invalid Product ID (pno): {}", pno);
+            return ResponseEntity.badRequest().build();
+        }
 
         // JSON 문자열을 객체로 변환
-        ObjectMapper objectMapper = new ObjectMapper();
-        ProductListDTO productListDTO = objectMapper.readValue(productListDTOJson, ProductListDTO.class);
+        ProductListDTO productListDTO;
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            productListDTO = objectMapper.readValue(productListDTOJson, ProductListDTO.class);
+        } catch (JsonProcessingException e) {
+            log.error("Error parsing productListDTO JSON: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+
+        // imageFiles가 없는 경우 처리
+        if (imageFiles == null || imageFiles.isEmpty()) {
+            log.warn("No image files provided for update. Proceeding without images.");
+            imageFiles = Collections.emptyList();
+        }
 
         // 상품 업데이트
-        Long updatedProductPno = productService.updateProduct(pno, productListDTO, imageFiles);
+        Long updatedProductPno;
+        try {
+            updatedProductPno = productService.updateProduct(pno, productListDTO, imageFiles);
+        } catch (Exception e) {
+            log.error("Error updating product with pno {}: {}", pno, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
 
         // 수정된 상품 ID 반환
+        log.info("Product updated successfully with ID: {}", updatedProductPno);
         return ResponseEntity.ok(updatedProductPno);
     }
+
 
 
 
