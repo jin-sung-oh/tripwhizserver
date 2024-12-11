@@ -12,5 +12,6 @@ public class MemberDTO {
     private String email;
     private String pw;
     private String name;
+    private String provider;
 
 }

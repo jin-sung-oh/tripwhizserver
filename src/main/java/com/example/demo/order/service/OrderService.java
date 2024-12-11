@@ -1,7 +1,5 @@
 package com.example.demo.order.service;
 
-import com.example.demo.cart.dto.CartListDTO;
-import com.example.demo.cart.repository.CartRepository;
 import com.example.demo.common.dto.PageRequestDTO;
 import com.example.demo.common.dto.PageResponseDTO;
 import com.example.demo.fcm.dto.FCMRequestDTO;
