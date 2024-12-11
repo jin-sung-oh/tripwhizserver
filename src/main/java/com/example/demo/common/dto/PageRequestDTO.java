@@ -7,6 +7,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
+import java.util.List;
 
 @Data
 @SuperBuilder
@@ -28,6 +32,13 @@ public class PageRequestDTO {
     // 하위 카테고리 ID (예: scno)
     private Long subCategoryScno;
 
-    // 테마 카테고리 (ThemeCategory enum 값의 문자열 표현)
-    private String themeCategory;
+    private List<Long> tnos; // 테마 카테고리 리스트
+
+    // PageRequestDTO를 Pageable 객체로 변환
+    public Pageable toPageable() {
+        return PageRequest.of(page - 1, size); // page는 0부터 시작하기 때문에 -1을 해줍니다.
+    }
+
+
 }
+
