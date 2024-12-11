@@ -64,7 +64,10 @@ public class CustomSecurityConfig {
                         .requestMatchers("/api/storeowner/**").hasRole("STOREOWNER")
                         .requestMatchers("/api/storeowner/luggagemove/**").hasRole("STOREOWNER")
                         .requestMatchers("/api/storeowner/luggagestorage/**").hasRole("STOREOWNER")
+
                         .anyRequest().authenticated()
+                        .requestMatchers("/").permitAll()
+                        .anyRequest().anonymous()
                 )
                 .anonymous(anonymous -> anonymous
                         .authorities("ROLE_ANONYMOUS")
