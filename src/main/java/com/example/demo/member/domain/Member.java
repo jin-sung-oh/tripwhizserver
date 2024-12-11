@@ -29,3 +29,4 @@ public class Member {
     private boolean delFlag = false;
 
 }
+
