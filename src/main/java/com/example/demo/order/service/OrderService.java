@@ -98,16 +98,11 @@ public class OrderService {
     }
 
     // 특정 주문 상세 조회
-    public OrderReadDTO getOrderDetails(Long ono, String memberEmail) {
+    public OrderReadDTO getOrderDetails(Long ono) {
 
         // 주문 조회
         Order order = orderRepository.findById(ono)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
-
-        // 이메일 검증
-        if (!order.getMember().getEmail().equals(memberEmail)) {
-            throw new RuntimeException("Unauthorized access to order details.");
-        }
 
         // OrderDetails 조회
         List<OrderDetails> orderDetailsList = orderDetailsRepository.findByOrderOno(ono);
