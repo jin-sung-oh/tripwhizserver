@@ -67,6 +67,10 @@ public class JWTCheckFilter extends OncePerRequestFilter {
             return true;
         }
 
+        if (uri.startsWith("/api/admin/product/image")) {
+            return true;
+        }
+
         return false;
 
     }

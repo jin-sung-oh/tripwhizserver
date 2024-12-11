@@ -88,11 +88,19 @@ public class ProductService {
             try {
                 String attachFilesJson = (String) resultMap.get("attachFiles");
                 if (attachFilesJson != null) {
-                    attachFiles = objectMapper.readValue(attachFilesJson, new TypeReference<List<AttachFile>>() {});
+                    attachFiles = objectMapper.readValue(attachFilesJson, new TypeReference<List<AttachFile>>() {
+                    });
                 }
             } catch (Exception e) {
                 log.error("attachFiles 변환 오류: ", e);
             }
+
+            // cname과 sname 로깅 추가
+            String cname = (String) resultMap.get("cname");
+            String sname = (String) resultMap.get("sname");
+
+            log.info("Category Name (cname): {}", cname);
+            log.info("SubCategory Name (sname): {}", sname);
 
             ProductReadDTO dto = new ProductReadDTO(
                     ((Number) resultMap.get("pno")).longValue(),
@@ -101,7 +109,7 @@ public class ProductService {
                     ((Number) resultMap.get("price")).intValue(),
                     ((Number) resultMap.get("cno")) != null ? ((Number) resultMap.get("cno")).longValue() : null,
                     ((Number) resultMap.get("scno")) != null ? ((Number) resultMap.get("scno")).longValue() : null,
-                    attachFiles // 변환된 List<AttachFile> 전달
+                    attachFiles // 변환된 List<AttachFile>
             );
 
             log.info("Mapped ProductReadDTO: {}", dto);
@@ -166,7 +174,7 @@ public class ProductService {
     }
 
 
-    // 상품 검색
+//     상품 검색
 //    public PageResponseDTO<ProductListDTO> searchWithFilters(
 //            String keyword, Integer minPrice, Integer maxPrice,
 //            Long tno, Long cno, Long scno, PageRequestDTO pageRequestDTO) {
@@ -223,6 +231,13 @@ public class ProductService {
     }
 
     public Long updateProduct(Long pno, ProductListDTO productListDTO, List<MultipartFile> imageFiles) throws IOException {
+        log.info("Updating product with pno: {}", pno); // pno 확인
+        log.info("Received ProductListDTO: {}", productListDTO); // DTO 확인
+
+        // Category와 SubCategory 필드 확인
+        log.info("Category ID (cno): {}", productListDTO.getCno());
+        log.info("SubCategory ID (scno): {}", productListDTO.getScno());
+
         if (pno == null || pno <= 0) {
             throw new IllegalArgumentException("Product ID (pno) must be a valid non-null value");
         }
@@ -235,8 +250,11 @@ public class ProductService {
         // Category와 SubCategory를 조회
         Category category = categoryRepository.findById(productListDTO.getCno())
                 .orElseThrow(() -> new RuntimeException("Category not found with ID: " + productListDTO.getCno()));
+        log.info("Fetched category: {}", category);
+
         SubCategory subCategory = subCategoryRepository.findById(productListDTO.getScno())
                 .orElseThrow(() -> new RuntimeException("SubCategory not found with ID: " + productListDTO.getScno()));
+        log.info("Fetched subCategory: {}", subCategory);
 
         // updateFromDTO 호출
         product.updateFromDTO(productListDTO, category, subCategory);
@@ -256,11 +274,11 @@ public class ProductService {
 
         // 상품 정보 업데이트
         Product updatedProduct = productRepository.save(product);
-        log.info("Starting updateProduct with pno: {}", pno);
+        log.info("Product updated with ID: {}", updatedProduct.getPno());
 
+        // 생성된 상품 정보를 User API로 전송
+        sendProductToUserApi(productListDTO, imageFiles, "/api/product/update/" +pno, HttpMethod.POST);
 
-        // 업데이트된 상품 정보를 User API로 전송 (필요에 따라 추가)
-        sendProductToUserApi(productListDTO, imageFiles, "/api/product/update/" + pno, HttpMethod.PUT);
 
         return updatedProduct.getPno();
     }
@@ -291,6 +309,10 @@ public class ProductService {
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
             ObjectMapper objectMapper = new ObjectMapper();
             String jsonProduct = objectMapper.writeValueAsString(productListDTO);
+
+            // 직렬화된 JSON 데이터 로그
+            log.debug("Serialized ProductListDTO JSON: {}", jsonProduct);
+
             body.add("productListDTO", jsonProduct);
 
             // 파일 데이터를 추가
@@ -304,11 +326,16 @@ public class ProductService {
                     });
                     log.debug("Attached File: {}, Size: {} bytes", file.getOriginalFilename(), file.getSize());
                 }
+            } else {
+                log.debug("No image files to attach.");
             }
 
             // HTTP 헤더 설정
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+            // 인증 헤더가 필요한 경우 추가
+            headers.set("Authorization", "Bearer " + "your_access_token"); // Replace with actual token
             log.debug("Request Headers: {}", headers);
 
             // HttpEntity 생성
@@ -324,12 +351,22 @@ public class ProductService {
 
             // 요청 성공 여부 확인
             if (response.getStatusCode().is2xxSuccessful()) {
-                log.info("Product successfully sent to User API, ID: {}", response.getBody());
+                log.info("Product successfully sent to User API, Response Body: {}, Status Code: {}",
+                        response.getBody(), response.getStatusCode());
             } else {
-                log.error("Failed to send product to User API: {}", response.getStatusCode());
+                log.error("Failed to send product to User API: {}, Response Body: {}",
+                        response.getStatusCode(), response.getBody());
             }
+        } catch (HttpClientErrorException e) {
+            // HTTP 4xx 에러 로그
+            log.error("HTTP Error while sending product to User API: {}, Response Body: {}",
+                    e.getStatusCode(), e.getResponseBodyAsString(), e);
+        } catch (HttpServerErrorException e) {
+            // HTTP 5xx 에러 로그
+            log.error("Server Error while sending product to User API: {}, Response Body: {}",
+                    e.getStatusCode(), e.getResponseBodyAsString(), e);
         } catch (Exception e) {
-            // 예외 발생 시 오류 로그 출력
+            // 기타 예외 로그
             log.error("Error sending product to User API", e);
         }
     }
