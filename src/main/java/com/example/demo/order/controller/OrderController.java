@@ -52,19 +52,19 @@ public class OrderController {
     // 특정 주문 상세 조회
     @GetMapping("/details/{ono}")
     @PreAuthorize("hasRole('STOREOWNER')")
-    public ResponseEntity<?> getOrderDetails(
-            @PathVariable Long ono,
-            @RequestParam @NotBlank(message = "Email cannot be blank") String email) {
-        try {
-            OrderReadDTO orderDetails = userOrderService.getOrderDetails(ono, email);
+    public ResponseEntity<?> getOrderDetails(@PathVariable Long ono) {
+
+        OrderReadDTO orderDetails = userOrderService.getOrderDetails(ono);
+
+        if (orderDetails != null) {
             return ResponseEntity.ok(orderDetails);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Order not found or unauthorized access.");
         }
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body("Order not found or unauthorized access.");
     }
 
-    // 주문 취소
+    // 주문 취소 (사용자 측에서 RestTemplate 사용)
     @PutMapping("/cancel/{ono}")
     @PreAuthorize("hasRole('STOREOWNER')")
     public ResponseEntity<?> cancelOrder(
@@ -79,7 +79,7 @@ public class OrderController {
         }
     }
 
-    // 지점 변경
+    // 지점 변경 (사용자 측에서 RestTemplate 사용)
     @PutMapping("/changespot/{ono}")
     public ResponseEntity<?> changeSpot(
             @PathVariable Long ono,
@@ -94,7 +94,7 @@ public class OrderController {
         }
     }
 
-    // 픽업 날짜 변경
+    // 픽업 날짜 변경 (사용자 측에서 RestTemplate 사용)
     @PutMapping("/changedate/{ono}")
     public ResponseEntity<?> changePickUpDate(
             @PathVariable Long ono,
