@@ -84,4 +84,5 @@ logging:
     resources:
       add-mappings: false
 server:
+  url: https://tripwhiz.store
   port: 8082
