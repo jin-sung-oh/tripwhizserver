@@ -78,4 +78,26 @@ public class AuthenticationController {
         String newAccessToken = jwtUtil.createAccessToken(Map.of("id", claims.get("id"), "role", claims.get("role")), 30);
         return ResponseEntity.ok(Map.of("accessToken", newAccessToken));
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestBody Map<String, String> tokenRequest) {
+        String refreshToken = tokenRequest.get("refreshToken");
+
+        if (refreshToken == null || refreshToken.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("msg", "refreshToken은 필수 입력값입니다."));
+        }
+
+        // 검증 단계: 유효한 리프레시 토큰인지 확인
+        try {
+            jwtUtil.validateToken(refreshToken, true);
+
+            // 블랙리스트 저장 또는 데이터베이스에서 삭제 로직 (옵션)
+            log.info("로그아웃 처리된 리프레시 토큰: {}", refreshToken);
+
+            return ResponseEntity.ok(Map.of("msg", "로그아웃되었습니다."));
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(Map.of("msg", "유효하지 않은 리프레시 토큰입니다."));
+        }
+    }
+
 }
