@@ -52,6 +52,10 @@ public class ProductListDTO {
     private List<Long> tnos = new ArrayList<>();
     private List<AttachFile> attachFiles; // 첨부 파일
 
+    // Category 객체로 매핑
+    private Category category;  // 카테고리 객체
+    private SubCategory subCategory;  // 서브 카테고리 객체
+
     // JSON 필드에서 category 객체를 cno로 매핑
     @JsonProperty("category")
     public void setCategoryFromJson(Object category) {

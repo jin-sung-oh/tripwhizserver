@@ -119,8 +119,11 @@ public class ProductController {
     public ResponseEntity<Long> createProduct(
             @RequestPart("productListDTO") String productListDTOJson,
             @RequestPart(value = "imageFiles", required = false) List<MultipartFile> imageFiles
+
+
     ) throws IOException {
         log.info("Raw JSON received: {}", productListDTOJson);
+
         // JSON 문자열을 객체로 변환
         ObjectMapper objectMapper = new ObjectMapper();
         ProductListDTO productListDTO;
@@ -129,6 +132,10 @@ public class ProductController {
             log.info("productListDTO JSON 변환 시작");
             productListDTO = objectMapper.readValue(productListDTOJson, ProductListDTO.class);
             log.debug("productListDTO 변환 성공: {}", productListDTO);
+
+            log.info("Received ProductListDTO: {}", productListDTO);
+            log.info("Received tnos: {}", productListDTO.getTnos());
+
         } catch (JsonProcessingException e) {
             log.error("JSON 변환 오류 - 입력 데이터: {}", productListDTOJson, e);
             throw e;

@@ -15,19 +15,20 @@ import java.util.Optional;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
-    // 첫 번째 Native Query 수정
+    // 기존 상품 조회 Native Query
     @Query(value = "SELECT p.pno AS pno, p.pname AS pname, p.pdesc AS pdesc, p.price AS price, " +
-            "c.cno AS cno, sc.scno AS scno, " +
-            "JSON_ARRAYAGG(JSON_OBJECT('ord', af.ord, 'file_name', af.file_name)) AS attachFiles " + // 수정된 부분
+            "c.cno AS cno, c.cname AS cname, " +
+            "sc.scno AS scno, sc.sname AS sname, " +
+            "JSON_ARRAYAGG(JSON_OBJECT('ord', af.ord, 'file_name', af.file_name)) AS attachFiles " +
             "FROM product p " +
             "LEFT JOIN category c ON p.category_cno = c.cno " +
             "LEFT JOIN sub_category sc ON p.sub_category_scno = sc.scno " +
             "LEFT JOIN product_images af ON af.pno = p.pno " +
             "WHERE p.pno = :pno " +
-            "GROUP BY p.pno", nativeQuery = true)
+            "GROUP BY p.pno, c.cno, c.cname, sc.scno, sc.sname", nativeQuery = true)
     Optional<Map<String, Object>> readNative(@Param("pno") Long pno);
 
-    // 두 번째 Native Query 수정
+    // 상품 조회 쿼리 수정 (tnos 포함)
     @Query(value = """
 SELECT p.pno, 
        p.pname, 
@@ -51,7 +52,6 @@ GROUP BY p.pno
             @Param("cno") Long cno,
             @Param("scno") Long scno
     );
-
 }
 
 

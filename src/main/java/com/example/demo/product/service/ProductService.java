@@ -51,10 +51,6 @@ public class ProductService {
     private final RestTemplate restTemplate;
     private final ThemeCategoryRepository themeCategoryRepository;
 
-
-
-
-
     // application.yml 파일에서 User API URL을 불러와 변수에 저장
     @Value("${com.example.user.api.url}")
     private String userApiUrl;
@@ -101,7 +97,6 @@ public class ProductService {
 
             log.info("Category Name (cname): {}", cname);
             log.info("SubCategory Name (sname): {}", sname);
-
             ProductReadDTO dto = new ProductReadDTO(
                     ((Number) resultMap.get("pno")).longValue(),
                     (String) resultMap.get("pname"),
@@ -111,6 +106,9 @@ public class ProductService {
                     ((Number) resultMap.get("scno")) != null ? ((Number) resultMap.get("scno")).longValue() : null,
                     attachFiles // 변환된 List<AttachFile>
             );
+
+            log.info("Mapped ProductReadDTO with Category and SubCategory: {}", dto);
+
 
             log.info("Mapped ProductReadDTO: {}", dto);
             return Optional.of(dto);
@@ -145,12 +143,26 @@ public class ProductService {
                     .attachFiles(new ArrayList<>())
                     .build());
 
-            // `tnos` 추가
+            // 카테고리 및 서브카테고리 추가
+            Long categoryCno = ((Number) row.get("category_cno")).longValue();
+            Long subCategoryScno = ((Number) row.get("sub_category_scno")).longValue();
+
+            Category category = categoryRepository.findById(categoryCno).orElse(null);
+            SubCategory subCategory = subCategoryRepository.findById(subCategoryScno).orElse(null);
+
+            if (category != null) {
+                dto.setCategory(category); // Category 객체 매핑
+            }
+            if (subCategory != null) {
+                dto.setSubCategory(subCategory); // SubCategory 객체 매핑
+            }
+
+            // `tnos` 추가 (JSON으로 반환된 테마 카테고리 값 변환)
             String tnosJson = (String) row.get("tnos");
             if (tnosJson != null && !tnosJson.equals("[]")) {
                 ObjectMapper objectMapper = new ObjectMapper();
                 try {
-                    List<Long> themeIds = objectMapper.readValue(tnosJson, new TypeReference<>() {});
+                    List<Long> themeIds = objectMapper.readValue(tnosJson, new TypeReference<List<Long>>() {});
                     dto.getTnos().addAll(themeIds);
                 } catch (Exception e) {
                     log.error("Tnos 변환 오류: ", e);
@@ -162,7 +174,7 @@ public class ProductService {
             if (attachFilesJson != null && !attachFilesJson.equals("[]")) {
                 ObjectMapper objectMapper = new ObjectMapper();
                 try {
-                    List<AttachFile> attachFiles = objectMapper.readValue(attachFilesJson, new TypeReference<>() {});
+                    List<AttachFile> attachFiles = objectMapper.readValue(attachFilesJson, new TypeReference<List<AttachFile>>() {});
                     dto.getAttachFiles().addAll(attachFiles);
                 } catch (Exception e) {
                     log.error("AttachFile 변환 오류: ", e);
@@ -188,6 +200,10 @@ public class ProductService {
     // 상품 생성
     public Long createProduct(ProductListDTO productListDTO, List<MultipartFile> imageFiles) throws IOException {
         log.info("Start creating product with ProductListDTO: {}", productListDTO);
+
+        if (productListDTO.getTnos() == null || productListDTO.getTnos().isEmpty()) {
+            throw new IllegalArgumentException("At least one theme category (tno) must be specified.");
+        }
 
         // Validate cno and scno
         if (productListDTO.getCno() == null) {
