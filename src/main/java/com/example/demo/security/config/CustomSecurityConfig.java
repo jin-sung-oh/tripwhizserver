@@ -4,6 +4,7 @@ import com.example.demo.security.filter.JWTCheckFilter;
 import com.example.demo.security.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -29,6 +30,9 @@ import java.util.List;
 public class CustomSecurityConfig {
 
     private final JWTUtil jwtUtil;
+
+    @Value("${server.url}")
+    private String serverUrl;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -94,6 +98,7 @@ public class CustomSecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOriginPatterns(List.of("https://tripwhiz.store", "https://tripwhiz.shop"));
+        configuration.setAllowedOriginPatterns(List.of(serverUrl));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
