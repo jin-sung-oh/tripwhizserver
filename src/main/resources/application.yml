@@ -1,29 +1,29 @@
 spring:
   application:
     name: demo6
-#  datasource:
-#    driver-class-name: org.mariadb.jdbc.Driver
-#    url: jdbc:mariadb://team4db.cv9k7s92hqrr.ap-northeast-2.rds.amazonaws.com:13306/team4db
-##    url: jdbc:mariadb://localhost:13306/demo
-#    username: team4db
-#    password: team4dbuser
-#
-#    hikari:
-#      minimum-idle: 2
-#      maximum-pool-size: 5
-#      connection-timeout: 5000
-
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
-    url: jdbc:mariadb://localhost:13306/demo
-    #    url: jdbc:mariadb://localhost:13306/demo
-    username: demo
-    password: demo
+    url: jdbc:mariadb://team4db.cv9k7s92hqrr.ap-northeast-2.rds.amazonaws.com:13306/team4db
+#    url: jdbc:mariadb://localhost:13306/demo
+    username: team4db
+    password: team4dbuser
 
     hikari:
       minimum-idle: 2
       maximum-pool-size: 5
       connection-timeout: 5000
+
+#  datasource:
+#    driver-class-name: org.mariadb.jdbc.Driver
+#    url: jdbc:mariadb://localhost:13306/demo
+#    #    url: jdbc:mariadb://localhost:13306/demo
+#    username: demo
+#    password: demo
+#
+#    hikari:
+#      minimum-idle: 2
+#      maximum-pool-size: 5
+#      connection-timeout: 5000
 
 
 
