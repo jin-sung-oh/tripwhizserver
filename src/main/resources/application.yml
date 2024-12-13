@@ -57,7 +57,7 @@ com:
       movingpath: moving
     user:
       api:
-        url: http://localhost:8081
+        url: https://tripwhiz.shop
 
 google:
   maps:
