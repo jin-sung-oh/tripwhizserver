@@ -42,7 +42,6 @@ spring:
     multipart:
       max-file-size: 20MB
       max-request-size: 20MB
-      location: /app/upload  # 컨테이너 내부 업로드 경로와 일치
       enabled: true
 
 com:
