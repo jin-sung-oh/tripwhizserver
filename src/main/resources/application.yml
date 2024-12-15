@@ -46,7 +46,7 @@ spring:
       enabled: true
 
 com:
-  example:
+  tripwhiz:
     accessTime: 60
     refreshTime: 10080
     alwaysNew: true
