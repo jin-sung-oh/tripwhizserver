@@ -45,7 +45,7 @@ spring:
       enabled: true
 
 com:
-  example:
+  tripwhiz:
     accessTime: 60
     refreshTime: 10080
     alwaysNew: true
@@ -83,4 +83,5 @@ logging:
     resources:
       add-mappings: false
 server:
+  url: https://tripwhiz.store
   port: 8082
