@@ -7,6 +7,7 @@ import com.example.demo.category.repository.SubCategoryRepository;
 import com.example.demo.common.dto.PageRequestDTO;
 import com.example.demo.common.dto.PageResponseDTO;
 import com.example.demo.product.domain.Product;
+import com.example.demo.product.domain.ProductTheme;
 import com.example.demo.product.domain.ThemeCategory;
 import com.example.demo.product.dto.ProductListDTO;
 import com.example.demo.product.dto.ProductReadDTO;
@@ -50,9 +51,7 @@ public class ProductService {
     private final CustomFileUtil customFileUtil;
     private final RestTemplate restTemplate;
     private final ThemeCategoryRepository themeCategoryRepository;
-
-
-
+    private final ProductThemeRepository productThemeRepository;
 
 
     // application.yml 파일에서 User API URL을 불러와 변수에 저장
@@ -212,6 +211,7 @@ public class ProductService {
         // toEntity 호출 시 Category와 SubCategory 전달
         Product product = productListDTO.toEntity(category, subCategory);
 
+        // 파일 업로드 및 첨부 파일 추가
         for (int i = 0; i < imageFiles.size(); i++) {
             MultipartFile imageFile = imageFiles.get(i);
             String savedImageName = customFileUtil.uploadProductImageFile(imageFile);
@@ -221,7 +221,20 @@ public class ProductService {
             product.addAttachFile(attachFile);
         }
 
+        //Product 저장
         Product savedProduct = productRepository.save(product);
+
+        // 테마 정보 저장 (product_theme 테이블)
+        if (productListDTO.getTnos() != null && !productListDTO.getTnos().isEmpty()) {
+            for (Long tno : productListDTO.getTnos()) {
+                log.debug("Fetching ThemeCategory with ID: {}", tno);
+                ThemeCategory themeCategory = themeCategoryRepository.findById(tno)
+                        .orElseThrow(() -> new RuntimeException("ThemeCategory not found with ID: " + tno));
+
+                ProductTheme productTheme = new ProductTheme(savedProduct, themeCategory);
+                productThemeRepository.save(productTheme);
+            }
+        }
 
         // 생성된 상품 정보를 User API로 전송
         sendProductToUserApi(productListDTO, imageFiles, "/api/product/add", HttpMethod.POST);
