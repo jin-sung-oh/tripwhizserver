@@ -26,4 +26,10 @@ public class ProductTheme {
     @JoinColumn(name = "theme_category_tno", nullable = false)
     private ThemeCategory themeCategory;
 
+    // 매개변수 생성자
+    public ProductTheme(Product product, ThemeCategory themeCategory) {
+        this.product = product;
+        this.themeCategory = themeCategory;
+    }
+
 }
