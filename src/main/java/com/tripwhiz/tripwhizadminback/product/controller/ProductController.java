@@ -38,11 +38,7 @@ public class ProductController {
 
     // 이미지 조회
     @GetMapping("/image/{fileName}")
-
-   
-
-    //@PreAuthorize("isAnonymous()")
-
+    @PreAuthorize("isAnonymous()")
     public ResponseEntity<byte[]> getImage(@PathVariable String fileName) throws IOException {
         String imagePath = uploadPath + File.separator + productPath + File.separator + fileName;
 
