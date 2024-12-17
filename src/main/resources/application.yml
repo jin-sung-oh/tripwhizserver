@@ -57,7 +57,8 @@ com:
       movingpath: moving
     user:
       api:
-        url: https://tripwhiz.shop
+#        url: https://tripwhiz.shop
+        url: http://localhost:8081
 
 google:
   maps:
@@ -83,5 +84,6 @@ logging:
     resources:
       add-mappings: false
 server:
-  url: https://tripwhiz.store
+#  url: https://tripwhiz.store
+  url: http://localhost:8082
   port: 8082
