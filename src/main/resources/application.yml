@@ -63,7 +63,7 @@ com:
 google:
   maps:
     api:
-      key: "AIzaSyBlkNGtKfseUSVKZWSeAwnlR9vTbXxAxk4"
+      key: "AIzaSyCsJtcwK5rTuPAkKkfP_PqP-DzBNeuiAaw"
 
 firebase:
   config:
