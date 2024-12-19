@@ -70,7 +70,7 @@ public class LuggageStorageService {
     }
 
     private void sendLuggageStorageToUserServer(LuggageStorage luggageStorage) {
-        String url = userApiBaseUrl + "/api/user/luggagestorage";
+        String url = userApiBaseUrl + "/api/user/luggagestorage/create";
         try {
             ResponseEntity<String> response = restTemplate.postForEntity(url, luggageStorage, String.class);
             log.info("유저 서버로 데이터 전송 성공: {}", response.getBody());
