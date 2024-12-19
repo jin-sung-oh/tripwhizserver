@@ -19,9 +19,9 @@ public class LuggageStorageController {
     private final LuggageStorageService luggageStorageService;
 
     @PostMapping("/create")
-    public ResponseEntity<LuggageStorageDTO> createLuggageStorage(@RequestBody LuggageStorage luggageStorage) {
-        LuggageStorageDTO luggageStorageDTO = luggageStorageService.createLuggageStorage(luggageStorage);
-        return ResponseEntity.ok(luggageStorageDTO);
+    public ResponseEntity<Void> createLuggageStorage(@RequestBody LuggageStorage luggageStorage) {
+        luggageStorageService.processLuggageStorage(luggageStorage);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{lsno}")
