@@ -16,6 +16,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -122,5 +125,17 @@ public class LuggageStorageService {
     private String getUserToken(String email) {
         // 유저의 FCM 토큰을 데이터베이스에서 조회하거나 로직 구현 필요
         return "USER_FCM_TOKEN"; // 실제 구현 필요
+    }
+
+    public LuggageStorageDTO getLuggageStorageDetails(Long lsno) {
+        LuggageStorage luggageStorage = luggageStorageRepository.findById(lsno)
+                .orElseThrow(() -> new IllegalArgumentException("해당 보관 내역을 찾을 수 없습니다."));
+        return LuggageStorageDTO.toDTO(luggageStorage);
+    }
+
+    public List<LuggageStorageDTO> getAllLuggageStorages() {
+        return luggageStorageRepository.findAll().stream()
+                .map(LuggageStorageDTO::toDTO)
+                .collect(Collectors.toList());
     }
 }
