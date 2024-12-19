@@ -10,11 +10,11 @@ import com.tripwhiz.tripwhizadminback.qrcode.service.QRService;
 import com.tripwhiz.tripwhizadminback.spot.entity.Spot;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.web.client.RestTemplate;
 
 @Service
 @RequiredArgsConstructor
@@ -25,9 +25,12 @@ public class LuggageStorageService {
     private final LuggageStorageRepository luggageStorageRepository;
     private final QRService qrService;
     private final FCMService fcmService;
+    private final RestTemplate restTemplate;
+
+    @Value("${com.tripwhiz.user.api.url}") // 유저 서버의 기본 URL
+    private String userApiBaseUrl;
 
     public LuggageStorageDTO createLuggageStorage(LuggageStorage luggageStorage) {
-
         Spot storageSpot = Spot.builder()
                 .spno(luggageStorage.getStorageSpot().getSpno())
                 .build();
@@ -37,10 +40,7 @@ public class LuggageStorageService {
                 .email(luggageStorage.getEmail())
                 .build();
 
-        log.info("=================================");
         log.info("보관 데이터 저장 시작: {}", targetEntity);
-        log.info("=================================");
-
         luggageStorageRepository.save(targetEntity);
 
         // QR 코드 생성
@@ -56,23 +56,24 @@ public class LuggageStorageService {
             throw new RuntimeException("QR 코드를 생성하지 못했습니다: " + luggageStorage.getLsno(), e);
         }
 
-        // 유저 알림 발송
+        // 유저 서버로 데이터 전송
+        sendLuggageStorageToUserServer(luggageStorage);
+
+        // 유저 알림 전송
         sendUserNotification(luggageStorage.getEmail(), "수화물 보관 신청 완료",
                 "수화물 보관 신청이 성공적으로 접수되었습니다. QR 코드가 준비되었습니다.");
 
         return LuggageStorageDTO.toDTO(luggageStorage);
     }
 
-    public LuggageStorageDTO getLuggageStorageDetails(Long lsno) {
-        LuggageStorage luggageStorage = luggageStorageRepository.findById(lsno)
-                .orElseThrow(() -> new IllegalArgumentException("해당 보관 내역을 찾을 수 없습니다."));
-        return LuggageStorageDTO.toDTO(luggageStorage);
-    }
-
-    public List<LuggageStorageDTO> getAllLuggageStorages() {
-        return luggageStorageRepository.findAll().stream()
-                .map(LuggageStorageDTO::toDTO)
-                .collect(Collectors.toList());
+    private void sendLuggageStorageToUserServer(LuggageStorage luggageStorage) {
+        String url = userApiBaseUrl + "/api/user/luggagestorage";
+        try {
+            ResponseEntity<String> response = restTemplate.postForEntity(url, luggageStorage, String.class);
+            log.info("유저 서버로 데이터 전송 성공: {}", response.getBody());
+        } catch (Exception e) {
+            log.error("유저 서버로 데이터 전송 실패", e);
+        }
     }
 
     public void updateStorageStatus(Long lsno, LuggageStorageStatus newStatus) {
@@ -87,9 +88,23 @@ public class LuggageStorageService {
             default -> "수화물 보관 상태가 업데이트되었습니다.";
         };
 
+        // 유저 서버로 상태 업데이트 요청 전송
+        notifyUserServerOfStatusUpdate(luggageStorage);
+
+        // 유저 알림 전송
         sendUserNotification(luggageStorage.getEmail(), "수화물 보관 상태 업데이트", statusMessage);
 
         luggageStorageRepository.save(luggageStorage);
+    }
+
+    private void notifyUserServerOfStatusUpdate(LuggageStorage luggageStorage) {
+        String url = userApiBaseUrl + "/api/user/luggagestorage/status";
+        try {
+            restTemplate.put(url, luggageStorage);
+            log.info("유저 서버로 상태 업데이트 성공");
+        } catch (Exception e) {
+            log.error("유저 서버로 상태 업데이트 실패", e);
+        }
     }
 
     private void sendUserNotification(String email, String title, String body) {
@@ -105,6 +120,7 @@ public class LuggageStorageService {
     }
 
     private String getUserToken(String email) {
-        return "USER_FCM_TOKEN"; // 실제 토큰 조회 로직으로 대체 필요
+        // 유저의 FCM 토큰을 데이터베이스에서 조회하거나 로직 구현 필요
+        return "USER_FCM_TOKEN"; // 실제 구현 필요
     }
 }
