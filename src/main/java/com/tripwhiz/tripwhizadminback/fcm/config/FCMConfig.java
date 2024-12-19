@@ -16,7 +16,7 @@ public class FCMConfig {
     @Bean
     public FirebaseMessaging firebaseMessaging() throws IOException {
         // JSON 경로를 application.yml에서 관리
-        String firebaseConfigPath = "firebase/jin1107-c14a2-firebase-adminsdk-vvtqr-c688c2c6b4.json";
+        String firebaseConfigPath = "firebase/jin1107-c14a2-firebase-adminsdk-vvtqr-b51f147617.json";
 
         // FirebaseOptions 초기화
         FirebaseOptions options = FirebaseOptions.builder()
