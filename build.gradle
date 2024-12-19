@@ -60,7 +60,7 @@ dependencies {
 
     implementation 'com.google.zxing:core:3.4.1'
     implementation 'com.google.zxing:javase:3.4.1'
-    implementation 'com.google.firebase:firebase-admin:10.3.0'
+    implementation 'com.google.firebase:firebase-admin:9.3.0'
 
     // https://mvnrepository.com/artifact/org.jsoup/jsoup
     implementation 'org.jsoup:jsoup:1.17.2'
