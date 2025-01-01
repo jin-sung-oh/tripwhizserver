@@ -1,9 +1,9 @@
 package com.tripwhiz.tripwhizadminback.faq;
 
-import com.example.demo.faq.domain.FAQEntity;
-import com.example.demo.faq.domain.FaqCategory;
-import com.example.demo.faq.repository.FAQRepository;
-import com.example.demo.faq.service.FAQService;
+import com.tripwhiz.tripwhizadminback.faq.entity.Faq;
+import com.tripwhiz.tripwhizadminback.faq.entity.FaqCategory;
+import com.tripwhiz.tripwhizadminback.faq.repository.FaqRepository;
+import com.tripwhiz.tripwhizadminback.faq.service.FaqService;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,16 +23,16 @@ import java.util.stream.IntStream;
 public class FAQRepositoryTests {
 
     @Autowired
-    private FAQRepository faqRepository;
+    private FaqRepository faqRepository;
 
     @Autowired
-    private FAQService faqService;
+    private FaqService faqService;
 
     // 데이터 삽입
     @Test
     @Commit
     public void testInsert() {
-        FAQEntity faq = FAQEntity.builder()
+        Faq faq = Faq.builder()
                 .question("Test question")
                 .answer("Test answer")
                 .category(FaqCategory.APP)
@@ -47,7 +47,7 @@ public class FAQRepositoryTests {
     @Commit
     public void insertDummies() {
         IntStream.rangeClosed(1, 100).forEach(i -> {
-            FAQEntity faq = FAQEntity.builder()
+            Faq faq = Faq.builder()
                     .question("Question " + i)
                     .answer("Answer " + i)
                     .viewCnt(0)
@@ -81,7 +81,7 @@ public class FAQRepositoryTests {
     public void testAddFaq() {
 
 
-        FAQEntity faq = FAQEntity.builder()
+        Faq faq = Faq.builder()
                 .question("test")
                 .answer("test")
                 .category(FaqCategory.APP)
@@ -94,10 +94,10 @@ public class FAQRepositoryTests {
     @Commit
     public void testModifyExistingFAQ() {
         Long fno = 15L;
-        Optional<FAQEntity> optionalFAQ = faqRepository.findById(fno);
+        Optional<Faq> optionalFAQ = faqRepository.findById(fno);
 
         if (optionalFAQ.isPresent()) {
-            FAQEntity faq = optionalFAQ.get();
+            Faq faq = optionalFAQ.get();
             faq.updateFields(FaqCategory.픽업, "Updated question", "Updated answer");
             faqRepository.save(faq);
             log.info("Updated FAQ: " + faq);
