@@ -11,6 +11,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Log4j2
 @Service
@@ -29,50 +31,56 @@ public class GeocodingService {
             String expandedUrl = UrlExpander.expandShortUrl(shortUrl);
             log.info("Expanded URL: {}", expandedUrl);
 
-            // 2. URL 유형 판단
-            if (expandedUrl.contains("@")) {
-                // 2-1. "@<위도>,<경도>"를 포함한 경우
-                try {
-                    return extractLatLng(expandedUrl);
-                } catch (Exception e) {
-                    log.warn("Failed to extract lat/lng from URL: {}, falling back to Geocoding API", expandedUrl);
-                }
+            // 2. URL에서 위도와 경도 추출 시도
+            try {
+                return extractLatLng(expandedUrl);
+            } catch (Exception e) {
+                log.warn("URL에서 유효한 위도/경도를 찾을 수 없음. URL을 건너뜀: {}", expandedUrl);
+                // NaN 값을 반환하여 유효하지 않은 좌표를 표시하거나 건너뜀
+                return new double[]{Double.NaN, Double.NaN}; // NaN을 통해 유효하지 않은 값을 반환
             }
-
-            // 2-2. Geocoding API로 처리
-            log.info("Using Geocoding API for URL: {}", expandedUrl);
-            String geocodingApiUrl = UriComponentsBuilder
-                    .fromHttpUrl("https://maps.googleapis.com/maps/api/geocode/json")
-                    .queryParam("address", expandedUrl)
-                    .queryParam("key", apiKey)
-                    .toUriString();
-
-            GeocodingResponse response = restTemplate.getForObject(geocodingApiUrl, GeocodingResponse.class);
-
-            if (response != null && response.getStatus().equals("OK")) {
-                double latitude = response.getResults().get(0).getGeometry().getLocation().getLat();
-                double longitude = response.getResults().get(0).getGeometry().getLocation().getLng();
-                return new double[]{latitude, longitude};
-            } else {
-                throw new RuntimeException("Failed to retrieve geolocation from Geocoding API for URL: " + expandedUrl);
-            }
-        } catch (IOException e) {
-            log.error("Error expanding short URL: {}", shortUrl, e);
-            throw new RuntimeException("Failed to expand short URL", e);
+        } catch (Exception e) {
+            log.error("URL 처리 실패: {}", shortUrl, e);
+            throw new RuntimeException("URL 처리 중 오류 발생: " + shortUrl, e);
         }
     }
 
-
+    // URL에서 위도와 경도를 추출하는 메서드
     private double[] extractLatLng(String expandedUrl) {
         try {
-            // "@위도,경도" 부분 추출
-            String latLngPart = expandedUrl.split("@")[1].split(",")[0] + "," + expandedUrl.split("@")[1].split(",")[1];
-            String[] parts = latLngPart.split(",");
-            double latitude = Double.parseDouble(parts[0].trim());
-            double longitude = Double.parseDouble(parts[1].trim());
-            return new double[]{latitude, longitude};
+            Pattern pattern = Pattern.compile("(-?\\d+\\.\\d+),(-?\\d+\\.\\d+)");
+            Matcher matcher = pattern.matcher(expandedUrl);
+
+            if (matcher.find()) {
+                double latitude = Double.parseDouble(matcher.group(1));
+                double longitude = Double.parseDouble(matcher.group(2));
+                log.info("Extracted Latitude: {}, Longitude: {}", latitude, longitude);
+                return new double[]{latitude, longitude};
+            } else {
+                throw new RuntimeException("Failed to match latitude and longitude in URL: " + expandedUrl);
+            }
         } catch (Exception e) {
             throw new RuntimeException("Failed to extract latitude and longitude from URL: " + expandedUrl, e);
         }
     }
+
+    // Geocoding API 호출 메서드
+    private double[] fetchLatLngFromGeocodingApi(String expandedUrl) {
+        String geocodingApiUrl = UriComponentsBuilder
+                .fromHttpUrl("https://maps.googleapis.com/maps/api/geocode/json")
+                .queryParam("address", expandedUrl)
+                .queryParam("key", apiKey)
+                .toUriString();
+
+        GeocodingResponse response = restTemplate.getForObject(geocodingApiUrl, GeocodingResponse.class);
+
+        if (response == null || !"OK".equals(response.getStatus()) || response.getResults().isEmpty()) {
+            throw new RuntimeException("Failed to retrieve geolocation from Geocoding API for URL: " + expandedUrl);
+        }
+
+        double latitude = response.getResults().get(0).getGeometry().getLocation().getLat();
+        double longitude = response.getResults().get(0).getGeometry().getLocation().getLng();
+        return new double[]{latitude, longitude};
+    }
+
 }
