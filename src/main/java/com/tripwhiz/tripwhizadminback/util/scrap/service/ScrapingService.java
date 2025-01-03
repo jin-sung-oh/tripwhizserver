@@ -28,7 +28,7 @@ public class ScrapingService {
     private final StoreOwnerRepository storeOwnerRepository;
     private final GeocodingService geocodingService;
 
-    private static String SpotURL = "https://emart24.com.my/locations/#2";
+    private static final String SpotURL = "https://emart24.com.my/locations/#2";
 
     // Storeowner 레코드에서 랜덤으로 하나 선택하는 메서드
     private StoreOwner getRandomStoreowner() {
@@ -63,54 +63,63 @@ public class ScrapingService {
 
         // 각 지점 처리
         for (Element spotContainer : spotContainers) {
-            // 지점명 추출
-            String spotName = spotContainer.select(".et_pb_module_header span").text().trim();
+            try {
+                // 지점명 추출
+                String spotName = spotContainer.select(".et_pb_module_header span").text().trim();
 
-            // 주소에서 loc-title 제거 후 텍스트만 추출
-            Element addressElement = spotContainer.selectFirst(".loc-address");
-            String address = "";
-            if (addressElement != null) {
-                addressElement.select(".loc-title").remove(); // loc-title 제거
-                address = addressElement.text().trim();
+                // 주소에서 loc-title 제거 후 텍스트만 추출
+                Element addressElement = spotContainer.selectFirst(".loc-address");
+                String address = "";
+                if (addressElement != null) {
+                    addressElement.select(".loc-title").remove(); // loc-title 제거
+                    address = addressElement.text().trim();
+                }
+
+                // URL 추출
+                String url = spotContainer.select(".loc-direction a").attr("abs:href");
+
+                // 데이터 유효성 검증
+                if (spotName.isEmpty() || address.isEmpty() || url.isEmpty()) {
+                    log.warn("Invalid data found - SpotName: {}, Address: {}, URL: {}", spotName, address, url);
+                    continue; // 잘못된 데이터는 건너뜀
+                }
+
+                // Google API를 통해 위도와 경도 추출
+                double[] latLng = geocodingService.getLatLng(url);
+                double latitude = latLng[0];
+                double longitude = latLng[1];
+
+                // 위도와 경도 값 검증
+                if (Double.isNaN(latitude) || Double.isNaN(longitude)) {
+                    log.warn("Invalid latitude/longitude for SpotName: {}, skipping...", spotName);
+                    continue; // 유효하지 않은 좌표는 건너뜀
+                }
+
+                // 랜덤으로 Storeowner 가져오기
+                StoreOwner storeowner = getRandomStoreowner();
+
+                // Spot 객체 생성
+                Spot spot = Spot.builder()
+                        .spotname(spotName)
+                        .address(address)
+                        .url(url)
+                        .latitude(latitude)
+                        .longitude(longitude)
+                        .storeowner(storeowner)
+                        .build();
+
+                spotList.add(spot);
+                log.info("Successfully added Spot: {}", spot);
+
+                // 데이터베이스에 저장
+                spotRepository.save(spot);
+
+            } catch (Exception e) {
+                log.error("Error processing spotContainer: {}", spotContainer, e);
             }
-
-            // URL 추출
-            String url = spotContainer.select(".loc-direction a").attr("abs:href");
-
-            // 데이터 유효성 검증
-            if (spotName.isEmpty() || address.isEmpty() || url.isEmpty()) {
-                log.warn("Invalid data found - SpotName: {}, Address: {}, URL: {}", spotName, address, url);
-                continue; // 잘못된 데이터는 건너뜀
-            }
-
-            // Google API를 통해 위도와 경도 추출
-            double[] latLng = geocodingService.getLatLng(url);
-            double latitude = latLng[0];
-            double longitude = latLng[1];
-
-            // 랜덤으로 Storeowner 가져오기
-            StoreOwner storeowner = getRandomStoreowner();
-
-
-            // TestSpot 객체 생성 및 추가
-            Spot spot = Spot.builder()
-                    .spotname(spotName)
-                    .address(address)
-                    .url(url)
-                    .latitude(latitude)
-                    .longitude(longitude)
-                    .storeowner(storeowner)
-                    .build();
-
-            spotList.add(spot);
-            log.info("Successfully added Spot: {}", spot);
-            spotRepository.save(spot);
         }
 
         return spotList;
     }
-
-
-
-
 }
+
