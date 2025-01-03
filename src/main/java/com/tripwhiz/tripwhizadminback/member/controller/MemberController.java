@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin/member")
@@ -23,19 +25,37 @@ public class MemberController {
     private final MemberService memberService;
 
     @PostMapping("/save")
-    public ResponseEntity<String> saveMember(@RequestBody MemberDTO memberDTO) {
+    public ResponseEntity<Map<String, String>> saveMember(@RequestBody MemberDTO memberDTO) {
+
         log.info("========================================");
         log.info("Saving Member: {}", memberDTO);
         log.info("========================================");
 
         boolean isSaved = memberService.saveMember(memberDTO);
 
-        if (isSaved) {
-            return ResponseEntity.ok("Member successfully saved.");
-        } else {
-            return ResponseEntity.badRequest().body("Failed to save member.");
-        }
+        Map<String, String> response = new HashMap<>();
+        response.put("status", "success");
+        response.put("message", "Member saved successfully");
+        return ResponseEntity.ok(response);
     }
+
+
+//    @PostMapping("/save")
+//    public ResponseEntity<String> saveMember(@RequestBody MemberDTO memberDTO) {
+//        log.info("========================================");
+//        log.info("Saving Member: {}", memberDTO);
+//        log.info("========================================");
+//
+//        boolean isSaved = memberService.saveMember(memberDTO);
+//
+//        if (isSaved) {
+//            return ResponseEntity.ok()
+//                    .contentType(MediaType.TEXT_PLAIN) // 응답을 text/plain으로 명시
+//                    .body("Member saved successfully");
+//        } else {
+//            return ResponseEntity.badRequest().body("Failed to save member.");
+//        }
+//    }
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/list")
