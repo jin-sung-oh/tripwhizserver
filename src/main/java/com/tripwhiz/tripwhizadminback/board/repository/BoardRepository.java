@@ -20,7 +20,7 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
     List<Board> findByWriter(String writer);
 
     // 3. 삭제되지 않은 게시글 찾기
-    List<Board> findByDelFlagFalse();
+    List<Board> findByDelFlagFalseOrderByBnoDesc();
 
     // 4. bno로 게시글 찾기 (존재하지 않는 경우 대비 Optional)
     Optional<Board> findByBno(Long bno);

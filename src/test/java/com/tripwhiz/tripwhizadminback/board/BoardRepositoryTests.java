@@ -31,9 +31,9 @@ public class BoardRepositoryTests {
     public void insertDummies() {
         IntStream.rangeClosed(1, 100).forEach(i -> {
             Board board = Board.builder()
-                    .title("집가고싶다 " + i)
+                    .title("행사 상품 안내")
                     .bcontent("저녁메뉴추천받습니다 " + i)
-                    .writer("최설아 " + i)
+                    .writer("관리자")
                     .viewCount(0)
                     .delFlag(false)
                     .createdDate(LocalDateTime.now())

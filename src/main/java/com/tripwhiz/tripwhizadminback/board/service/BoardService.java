@@ -34,7 +34,7 @@ public class BoardService {
 
     //게시글 목록 조회(삭제되지 않은 게시글)
     public List<BoardDTO> getBoardList(){
-        List<Board> boardEntities = boardRepository.findByDelFlagFalse();
+        List<Board> boardEntities = boardRepository.findByDelFlagFalseOrderByBnoDesc();
         return boardEntities.stream()
                 .map(BoardDTO::fromEntity)
                 .collect(Collectors.toList());
