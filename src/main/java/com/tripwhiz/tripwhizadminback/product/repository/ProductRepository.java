@@ -50,4 +50,3 @@ GROUP BY p.pno
     );
 }
 
-
